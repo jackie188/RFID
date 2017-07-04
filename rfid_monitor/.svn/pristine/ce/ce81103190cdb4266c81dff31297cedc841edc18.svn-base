@@ -1,0 +1,80 @@
+package api_servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import db.DBConnection;
+import db.DbPara;
+
+
+
+public class rfidServlet extends HttpServlet {
+
+	/**
+	 * Constructor of the object.
+	 */
+	public rfidServlet() {
+		super();
+	}
+
+	/**
+	 * Destruction of the servlet. <br>
+	 */
+	public void destroy() {
+		super.destroy(); // Just puts "destroy" string in log
+		// Put your code here
+	}
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		response.setContentType("html/txt");
+		response.setCharacterEncoding("utf-8");
+		response.setHeader("Pragma", "no-cache");
+		response.setHeader("Cache-Control", "no-cache, must-revalidate");
+		response.setHeader("Pragma", "no-cache");
+		DBConnection db=new DBConnection();
+		String dbPara=request.getParameter("DbPara").toString();
+		System.out.println(dbPara+"******************************");
+		try {
+			//db.getCurrentConnection(dbPara.getUrl(),dbPara.getUsername(),dbPara.getPassword());
+			db.getCurrentConnection("jdbc:mysql://localhost:3306/mesdb?useUnicode=true&characterEncoding=UTF-8","root","12345678");
+			//db.executeUpdate("insert into rfid_test values('"+dbPara+"','0')");
+			String[] paraDb=new String[2];
+			paraDb[0]=dbPara;
+			paraDb[1]="0";
+			db.executeUpdate("insert into rfid_test(tagId,id) values(?,?)",paraDb);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		db.closeCurrentConnection();
+		response.getWriter().write("");
+		response.getWriter().flush();
+		response.getWriter().close();
+        
+	}
+
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+            doGet(request, response);
+	}
+
+
+	/**
+	 * Initialization of the servlet. <br>
+	 *
+	 * @throws ServletException if an error occurs
+	 */
+	public void init() throws ServletException {
+		// Put your code here
+	}
+
+}

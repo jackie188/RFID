@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="favicon.ico" />
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/font-awesome.min.css" rel="stylesheet" />
+    <link href="css/default.css" rel="stylesheet" type="text/css" />
+    <link href="./css/docs.css" rel="stylesheet">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <!--[if lt IE 9]>
+    <script src="js/html5shiv.min.js"></script>
+    <script src="js/respond.min.js"></script>
+
+    <![endif]-->
+    <!--页面加载进度条-->
+    <link href="css/pace/dataurl.css" rel="stylesheet" />
+    <script src="js/pace/pace.min.js"></script>
+    <script src="js/jquery.scrolltopcontrol/scrolltopcontrol.js" type="text/javascript"></script>
+    <script src="js/jquery.extend.js" type="text/javascript"></script>
+    <script src="js/default.js" type="text/javascript"></script>
+</head>
+<body>
+    <div class ="container">
+        <div class ="row">
+            <div class="col-xs-12 col-sm-6 col-md-4  col-lg-2">
+                bootstrap格栅系统展示，xs定义手机，sm定义的为pid，md定义的为笔记本，lg定义的为大屏幕
+                class="col-xs-12 col-sm-6 col-md-4  col-lg-2"
+                手机占12列为一行
+                pid占6列 ，2个一行
+                笔记本占4列，3个一行
+                大屏幕占2列，6个一行
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4  col-lg-2">
+                bootstrap格栅系统展示，xs定义手机，sm定义的为pid，md定义的为笔记本，lg定义的为大屏幕
+                class="col-xs-12 col-sm-6 col-md-4  col-lg-2"
+                手机占12列为一行
+                pid占6列 ，2个一行
+                笔记本占4列，3个一行
+                大屏幕占2列，6个一行
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4  col-lg-2">
+                bootstrap格栅系统展示，xs定义手机，sm定义的为pid，md定义的为笔记本，lg定义的为大屏幕
+                class="col-xs-12 col-sm-6 col-md-4  col-lg-2"
+                手机占12列为一行
+                pid占6列 ，2个一行
+                笔记本占4列，3个一行
+                大屏幕占2列，6个一行
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4  col-lg-2">
+                bootstrap格栅系统展示，xs定义手机，sm定义的为pid，md定义的为笔记本，lg定义的为大屏幕
+                class="col-xs-12 col-sm-6 col-md-4  col-lg-2"
+                手机占12列为一行
+                pid占6列 ，2个一行
+                笔记本占4列，3个一行
+                大屏幕占2列，6个一行
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4  col-lg-2">
+                bootstrap格栅系统展示，xs定义手机，sm定义的为pid，md定义的为笔记本，lg定义的为大屏幕
+                class="col-xs-12 col-sm-6 col-md-4  col-lg-2"
+                手机占12列为一行
+                pid占6列 ，2个一行
+                笔记本占4列，3个一行
+                大屏幕占2列，6个一行
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4  col-lg-2">
+                bootstrap格栅系统展示，xs定义手机，sm定义的为pid，md定义的为笔记本，lg定义的为大屏幕
+                class="col-xs-12 col-sm-6 col-md-4  col-lg-2"
+                手机占12列为一行
+                pid占6列 ，2个一行
+                笔记本占4列，3个一行
+                大屏幕占2列，6个一行
+            </div>
+
+        </div>
+
+    </div>
+</body>
+</html>

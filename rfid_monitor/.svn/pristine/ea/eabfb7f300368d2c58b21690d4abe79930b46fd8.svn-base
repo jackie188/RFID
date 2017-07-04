@@ -1,0 +1,1051 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.5" />
+<title>基于RFID的零件工序时序跟踪</title>
+<link rel="stylesheet" href="js_mobile/jquery.mobile-1.3.2.css" type="text/css">
+<!-- 这个css无实际意义，仅仅是对li标签进行修饰而已 -->
+<style type="text/css">
+.test
+{margin-left: 5%;}
+
+
+</style>
+
+ <link rel="stylesheet" href="bootstrap/css/bootstrap.css" type="text/css">
+ <link rel="stylesheet" href="bootstrap/css/bootstrap-responsive.css" type="text/css">
+ <link rel="stylesheet" type="text/css" href="css/default.css" />
+ <link rel="stylesheet" type="text/css" href="css/component.css" /> 
+<!-- <script src="bootstrap/js/bootstrap.js"></script> -->
+<script src="js/jquery-1.7.1.min.js"></script>
+
+
+<script src="js/highcharts.js"></script>
+<script src="js/exporting.js"></script>
+<script src="js/highcharts-3d.js"></script>
+<script src="js_mobile/jquery.mobile-1.3.2.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+ 		$("#machSearch").change(function() {
+			workpieceSearch1();
+	});
+	$("#workpieceSearch").change(function() {
+			getProcessTime();
+	});
+	
+		$("#machSearch2").change(function() {
+			machSearch2();
+	});
+		$("#getworkpieceSearch").click(function() {
+			getworkpieceSearch();
+	});
+		$("#workpieceSearch3").change(function() {
+			getworkpieceProcessInfo();
+	});
+$("#process_table").hide();
+	getMachList();
+});
+
+
+
+//异步获得可监控的机床信息
+	function getMachList() {			
+		$.ajax({
+			type : "POST",
+			url : 'GetMachList',
+			success : function(data) {
+				//更新下拉框
+				document.getElementById("machSearch").innerHTML = "";			
+				document.getElementById("machSearch2").innerHTML = "";			
+				var obj = document.getElementById("machSearch");
+				var obj2 = document.getElementById("machSearch2");
+				obj.add(new Option("--请选择要查询的机床--", ""));				
+				obj2.add(new Option("--请选择要查询的机床--", ""));				
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+ 				for ( var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					obj.add(new Option(json["machname"], json["rfidport"]),
+							undefined);
+					obj2.add(new Option(json["machname"], json["rfidport"]),
+							undefined);
+				} 
+			}
+		});
+		}
+
+
+
+
+
+
+ //异步获得零件名称
+ //缺点，程序没有容错机制了......
+var flag1=1;
+function workpieceSearch1(){	
+	var mach_rfid=$("#machSearch").val();
+	if(mach_rfid==""){
+	console.log("请选择机床");
+	}
+	else{
+		$.ajax({
+			type : "POST",
+			url : 'GetWorkpiece',
+			data : "mach_rfid="+ mach_rfid,
+			success : function(data) {
+				//更新下拉框
+				document.getElementById("workpieceSearch").innerHTML = "";			
+				var obj = document.getElementById("workpieceSearch");
+				obj.add(new Option("--请选择要查询的零件--", ""));				
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+				for ( var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					obj.add(new Option(json["name"], json["tagid"]),
+							undefined);
+				}
+			//	flag1 = 0;
+			}
+		});
+
+}
+}
+
+//获取工件时间信息
+	function getProcessTime(){
+	var tagId=$("#workpieceSearch").val();
+	var mach_rfid=$("#machSearch").val();
+	if(machSearch==""){
+	console.log("请选择机床");
+	}
+	else{
+		$.ajax({
+			type : "POST",
+			url : 'GetOneWorkpieceTime',
+			data : "tagId="+ tagId+ "&mach_rfid="+ mach_rfid,
+			success : function(data) {
+			if(data==""){
+				alert("所选工件还未到达出缓存区！");
+			}	
+			else{	
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+				 var datas = [];  
+				for ( var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					$("#mach_model").val(json["rfidmodel"]);
+					console.log("机床的模式为："+$("#mach_model").val());
+					if(json["rfidmodel"]=="a"){
+					$("#inbufferIntime_a").html(json["inbufferIntime"]);
+					$("#inbufferOuttime_a").html(json["inbufferOuttime"]);
+					$("#machIntime_a").html(json["machIntime"]);
+					$("#machOuttime_a").html(json["machOuttime"]);
+					$("#outbufferIntime_a").html(json["outbufferIntime"]);
+					$("#outbufferOuttime_a").html(json["outbufferOuttime"]);
+					$("#inbufferCost_a").html(json["inbufferCost"]+"s");
+					$("#machCost_a").html(json["machCost"]+"s");
+					$("#outbufferCost_a").html(json["outbufferCost"]+"s");
+					$("#totalCost_a").html(json["totalCost"]+"s");
+					datas.push({
+						name: '所占时间比例',
+						data:[
+				                ['机床加工时间',  json["machCost"]],
+				                ['出缓存等待时间',       json["outbufferCost"]],
+				                ['入缓存等待时间', json["inbufferCost"] ],
+				                ['运输零件所需时间', json["totalCost"]- json["inbufferCost"]-json["outbufferCost"]-json["machCost"]],
+				            ]											
+					});		 				
+					$("#showInfo_b").hide(); 
+					$("#showInfo_c").hide(); 
+					$("#showInfo_a").show("slow"); 
+					}
+					else if(json["rfidmodel"]=="b"){
+					$("#inbufferIntime_b").html(json["inbufferIntime"]);
+					$("#inbufferOuttime_b").html(json["inbufferOuttime"]);
+					$("#machIntime_b").html(json["machIntime"]);
+					$("#machOuttime_b").html(json["machOuttime"]);
+					$("#inbufferCost_b").html(json["inbufferCost"]+"s");
+					$("#machCost_b").html(json["otherCost"]+"s");
+					$("#totalCost_b").html(json["totalCost"]+"s");
+					
+					datas.push({
+						name: '所占时间比例',
+						data:[
+				                ['机床加工时间',  json["otherCost"]],
+				                ['入缓存等待时间', json["inbufferCost"] ],
+				                ['零件加工及运输所需时间', json["totalCost"]- json["inbufferCost"]-json["otherCost"]],
+				            ]											
+					});
+					
+					
+					
+					
+					$("#showInfo_a").hide(); 
+					$("#showInfo_c").hide(); 
+					$("#showInfo_b").show("slow"); 
+					}
+						else if(json["rfidmodel"]=="c"){
+					$("#inbufferIntime_c").html(json["inbufferIntime"]);
+					$("#inbufferOuttime_c").html(json["inbufferOuttime"]);
+					$("#outbufferIntime_c").html(json["machIntime"]);
+					$("#outbufferOuttime_c").html(json["machOuttime"]);
+					$("#inbufferCost_c").html(json["inbufferCost"]+"s");
+					$("#outbufferCost_c").html(json["otherCost"]+"s");
+					$("#totalCost_c").html(json["totalCost"]+"s");	
+					datas.push({
+						name: '所占时间比例',
+						data:[
+				                ['出缓存等待时间',       json["otherCost"]],
+				                ['入缓存等待时间', json["inbufferCost"] ],
+				                ['零件加工及运输所需时间', json["totalCost"]- json["inbufferCost"]-json["otherCost"]],
+				            ]											
+					});		
+						
+					$("#showInfo_a").hide(); 
+					$("#showInfo_b").hide(); 
+					$("#showInfo_c").show("slow"); 
+						
+					}
+					else{
+					alert("有错误产生");
+					}
+
+					graph(datas);
+
+				} 
+				}	
+
+			}
+		});
+
+}
+	
+}
+
+//获得单个机床的加工零件时间信息；
+function machSearch2(){
+	$("#firstInfo").hide();
+	var mach_Id=$("#machSearch2").val();
+	if(machSearch2==""){
+	console.log("请选择机床");
+	}
+	else{
+		$.ajax({
+			type : "POST",
+			url : 'GetOneMachInfo',
+			data : "mach_Id="+ mach_Id,
+			success : function(data) {
+				//更新下拉框	
+				$("#adviceInfo").empty();//消去自动判断的信息			
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+				var data1 = new Array();
+				var data2 = new Array();
+				var data3 = new Array();
+				var data4 = new Array();
+				var name = new Array();
+				var datas = [];
+				var categories;
+				var total1=0;
+				var total2=0;
+				var total3=0;
+				var total4=0;
+
+				for ( var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					$("#mach_model2").val(json["rfidModel"]);
+					console.log("机床的模式为："+$("#mach_model2").val());
+					if(json["rfidModel"]=="a"){				
+						data1[j]=json["totalCost"];	
+						data2[j]=json["inbufferCost"];	
+						data3[j]=json["machCost"];	
+						data4[j]=json["outbufferCost"];
+						name[j]=json["name"];
+					}
+					else{
+						data1[j]=json["totalCost"];	
+						data2[j]=json["inbufferCost"];	
+						data3[j]=json["otherCost"];	
+						name[j]=json["name"];					
+					}
+					
+				}
+			var totalNum=json1.length;
+
+				if($("#mach_model2").val()=="a"){
+					categories=name;
+				datas.push({
+					name: '工序总耗时',
+					data:data1,									
+				},{
+					name: '入缓存等待耗时',
+					data:data2,									
+				},{
+					name: '零件加工耗时',
+					data:data3,									
+				},{
+					name: '出缓存等待耗时',
+					data:data4,									
+				});
+				graph2(datas,categories) ;
+			
+//判断工序异常情况(a模式条件下)；	
+				for(var i=0;i<totalNum;i++)
+				{
+				total1+=data1[i];
+				total2+=data2[i];
+				total3+=data3[i];
+				total4+=data4[i];			
+				}
+				total1=total1/totalNum;
+				total2=total2/totalNum;
+				total3=total3/totalNum;
+				total4=total4/totalNum;
+			//	console.log("总时间为："+total1);
+			//	console.log("总时间为："+total2);
+				for(var k=0;k<totalNum;k++)
+				{
+				if((totalNum>=4)&&((data1[k]>(total1*1.3))||(data1[k]<(total1*0.7))))
+				{
+				$("#firstInfo").show();
+				console.log("工件异常："+name[k]);	
+				var first="<HR style='border:3 double #987cb9' color=#987cb9 SIZE=3>";
+				$("#adviceInfo").append(first);
+				var Name="<center><span>工件 <strong>"+name[k]+"</strong>工序可能存在异常</span></center>";
+				$("#adviceInfo").append(Name);
+				//显示进缓存异常情况
+				var  abnomalInbuffer=((total2-data2[k])/total2)*100;
+				if(abnomalInbuffer>=0)
+				{
+				//console.log("工件时间异常："+abnomalInbuffer.toFixed(2));
+			     abnomalInbuffer=abnomalInbuffer.toFixed(2);
+				var Inbuffer="<span class='test'>&diams; "+name[k]+"在入缓存区耗时比平均耗时少 "+abnomalInbuffer+"%</span><br>";
+				$("#adviceInfo").append(Inbuffer);
+				}
+				else{
+				//console.log("工件时间异常："+abnomalInbuffer.toFixed(2));
+				abnomalInbuffer=-(abnomalInbuffer.toFixed(2));
+				var Inbuffer="<span class='test'>&diams; "+name[k]+"在入缓存区耗时比平均耗时多 "+abnomalInbuffer+"%</span><br>";
+				$("#adviceInfo").append(Inbuffer);			
+				}		
+			//显示加工异常情况
+				var  abnomalMach=((total3-data3[k])/total3)*100;
+				if(abnomalMach>=0)
+				{
+				//console.log("工件时间异常："+abnomalMach.toFixed(2));
+				abnomalMach=abnomalMach.toFixed(2);
+				var Mach="<span class='test'>&diams; "+name[k]+"在机床加工区耗时比平均耗时少 "+abnomalMach+"%</span><br>";
+				$("#adviceInfo").append(Mach);	
+				}
+				else{
+				//console.log("工件时间异常："+abnomalMach.toFixed(2));
+				abnomalMach=-(abnomalMach.toFixed(2));
+				var Mach="<span class='test'>&diams; "+name[k]+"在机床加工区耗时比平均耗时多 "+abnomalMach+"%</span><br>";
+				$("#adviceInfo").append(Mach);
+				}	
+			//显示出缓存异常情况
+				var  abnomalOutbuffer=((total4-data4[k])/total4)*100;
+				if(abnomalOutbuffer>=0)
+				{
+				//console.log("工件时间异常："+abnomalOutbuffer.toFixed(2));
+				abnomalOutbuffer=abnomalOutbuffer.toFixed(2);
+				var Outbuffer="<span class='test'>&diams; "+name[k]+"在出缓存区耗时比平均耗时少 "+abnomalOutbuffer+"%</span><br>";
+				$("#adviceInfo").append(Outbuffer);
+				}
+				else{
+				console.log("工件时间异常："+abnomalOutbuffer.toFixed(2));
+				abnomalOutbuffer=-(abnomalOutbuffer.toFixed(2));
+				var Outbuffer="<span class='test'>&diams; "+name[k]+"在出缓存区耗时比平均耗时多 "+abnomalOutbuffer+"%</span><br><br><br>";
+				$("#adviceInfo").append(Outbuffer);
+				}			
+				}				
+				}
+
+	}	
+				else if($("#mach_model2").val()=="b"){
+				console.log("机床模式："+$("#mach_model2").val()+"数组长度"+totalNum);	
+					categories=name;
+					datas.push({
+						name: '工序总耗时',
+						data:data1,									
+					},{
+						name: '入缓存等待耗时',
+						data:data2,									
+					},{
+						name: '零件加工耗时',
+						data:data3,									
+					});
+					graph2(datas,categories) ;	
+					
+//这是b的智能判断情况
+for(var i=0;i<totalNum;i++)
+				{
+				total1+=data1[i];
+				total2+=data2[i];
+				total3+=data3[i];		
+				}
+				total1=total1/totalNum;
+				total2=total2/totalNum;
+				total3=total3/totalNum;
+				for(var k=0;k<totalNum;k++)
+				{
+				if((totalNum>=3)&&((data1[k]>(total1*1.3))||(data1[k]<(total1*0.7))))
+				{
+				console.log("工件异常："+name[k]);
+				$("#firstInfo").show();	
+				var first="<HR style='border:3 double #987cb9' color=#987cb9 SIZE=3>";
+				$("#adviceInfo").append(first);
+				var Name="<center><span>工件<strong> "+name[k]+"</strong>工序 可能存在异常</span></center>";
+				$("#adviceInfo").append(Name);
+				//显示进缓存异常情况
+				var  abnomalInbuffer=((total2-data2[k])/total2)*100;
+				if(abnomalInbuffer>=0)
+				{
+				//console.log("工件时间异常："+abnomalInbuffer.toFixed(2));
+			     abnomalInbuffer=abnomalInbuffer.toFixed(2);
+				var Inbuffer="<span class='test'>&diams; "+name[k]+" 在入缓存区耗时比平均耗时少 "+abnomalInbuffer+"%</span><br>";
+				$("#adviceInfo").append(Inbuffer);
+				}
+				else{
+				//console.log("工件时间异常："+abnomalInbuffer.toFixed(2));
+				abnomalInbuffer=-(abnomalInbuffer.toFixed(2));
+				var Inbuffer="<span class='test'>&diams; "+name[k]+"在入缓存区耗时比平均耗时多 "+abnomalInbuffer+"%</span><br>";
+				$("#adviceInfo").append(Inbuffer);			
+				}		
+			//显示加工异常情况
+				var  abnomalMach=((total3-data3[k])/total3)*100;
+				if(abnomalMach>=0)
+				{
+				//console.log("工件时间异常："+abnomalMach.toFixed(2));
+				abnomalMach=abnomalMach.toFixed(2);
+				var Mach="<span class='test'>&diams; "+name[k]+"在机床加工区耗时比平均耗时少 "+abnomalMach+"%</span>";
+				$("#adviceInfo").append(Mach);	
+				}
+				else{
+				//console.log("工件时间异常："+abnomalMach.toFixed(2));
+				abnomalMach=-(abnomalMach.toFixed(2));
+				var Mach="<span class='test'>&diams; "+name[k]+"在机床加工区耗时比平均耗时多 "+abnomalMach+"%</span>";
+				$("#adviceInfo").append(Mach);
+				}	
+			//显示出缓存异常情况，模式B没有缓存异常情况。		
+				}				
+				}
+						
+	}
+				else if($("#mach_model2").val()=="c"){
+					categories=name;
+					datas.push({
+						name: '工序总耗时',
+						data:data1,									
+					},{
+						name: '入缓存等待耗时',
+						data:data2,									
+					},{
+						name: '出缓存等待耗时',
+						data:data3,									
+					});
+					graph2(datas,categories) ;
+					
+//这是模式C的自动判断情况：
+		for(var i=0;i<totalNum;i++)
+				{
+				total1+=data1[i];
+				total2+=data2[i];
+				total3+=data3[i];			
+				}
+				total1=total1/totalNum;
+				total2=total2/totalNum;
+				total3=total3/totalNum;
+				for(var k=0;k<totalNum;k++)
+				{
+				if((totalNum>=3)&&((data1[k]>(total1*1.3))||(data1[k]<(total1*0.7))))
+				{
+				$("#firstInfo").show();
+				console.log("工件异常："+name[k]);	
+				var first="<HR style='border:3 double #987cb9' color=#987cb9 SIZE=3>";
+				$("#adviceInfo").append(first);
+				var Name="<center><span>工件 "+name[k]+"工序可能存在异常</span></center>";
+				$("#adviceInfo").append(Name);
+				//显示进缓存异常情况
+				var  abnomalInbuffer=((total2-data2[k])/total2)*100;
+				if(abnomalInbuffer>=0)
+				{
+				//console.log("工件时间异常："+abnomalInbuffer.toFixed(2));
+			     abnomalInbuffer=abnomalInbuffer.toFixed(2);
+				var Inbuffer="<span class='test'>&diams; "+name[k]+"在入缓存区耗时比平均耗时少 "+abnomalInbuffer+"%</span><br>";
+				$("#adviceInfo").append(Inbuffer);
+				}
+				else{
+				//console.log("工件时间异常："+abnomalInbuffer.toFixed(2));
+				abnomalInbuffer=-(abnomalInbuffer.toFixed(2));
+				var Inbuffer="<span class='test'>&diams; "+name[k]+"在入缓存区耗时比平均耗时多 "+abnomalInbuffer+"%</span><br>";
+				$("#adviceInfo").append(Inbuffer);			
+				}		
+			//显示出缓存异常情况
+				var  abnomalOutbuffer=((total3-data3[k])/total3)*100;
+				if(abnomalOutbuffer>=0)
+				{
+				//console.log("工件时间异常："+abnomalOutbuffer.toFixed(2));
+				abnomalOutbuffer=abnomalOutbuffer.toFixed(2);
+				var Outbuffer="<span class='test'>&diams; "+name[k]+"在出缓存区耗时比平均耗时少 "+abnomalOutbuffer+"%</span><br>";
+				$("#adviceInfo").append(Outbuffer);
+				}
+				else{
+				console.log("工件时间异常："+abnomalOutbuffer.toFixed(2));
+				abnomalOutbuffer=-(abnomalOutbuffer.toFixed(2));
+				var Outbuffer="<span class='test'>&diams; "+name[k]+"在出缓存区耗时比平均耗时多 "+abnomalOutbuffer+"%</span><br><br><br>";
+				$("#adviceInfo").append(Outbuffer);
+				}			
+				}				
+				}					
+					
+					
+					
+					
+					
+					
+					}
+			}
+		});
+
+}
+
+
+
+}
+
+
+
+//异步获得单个零件信息
+function getworkpieceSearch(){	
+		$.ajax({
+			type : "POST",
+			url : 'GetWorkpieceAll',
+			success : function(data) {
+				//更新下拉框
+				document.getElementById("workpieceSearch3").innerHTML = "";			
+				var obj = document.getElementById("workpieceSearch3");
+				obj.add(new Option("--请选择要查询的零件--", ""));				
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+				for ( var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					obj.add(new Option(json["name"], json["tagid"]+","+json["workpieceid"]),
+							undefined);
+				}
+			//	flag1 = 0;
+			}
+		});
+}
+
+
+//获得单个零件的工序信息统计。
+function getworkpieceProcessInfo(){
+var processCount=0;
+$("#process_table tbody").empty();
+	var tagId_info=$("#workpieceSearch3").val();
+	var ids = tagId_info.split(",");
+	var tagId=ids[0];
+	var workpieceId=ids[1];
+	var workpieceName = $("#workpieceSearch3").find("option:selected").text();	
+	if(tagId==""){
+	console.log("请选择零件");
+	}
+	else{	
+		$.ajax({
+			type : "POST",
+			url : 'GetProcessTime',//这里的servlet要改，还未写完
+			data : "tagId="+ tagId+ "&workpieceId="+ workpieceId,
+			success : function(data) {
+			if(data)
+			{
+				var name = new Array();
+				var categories;
+				var datas=[];
+				var data1 = new Array();
+				var data2 = new Array();
+				var data3 = new Array();
+				var data4 = new Array();
+				var data5 = new Array();
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+				for ( var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					name[j]=json["machName"];
+					data1[j]=json["inbufferCost"];
+					data2[j]=json["roadCost1"];
+					data3[j]=json["machCost"];
+					data4[j]=json["roadCost2"];
+					data5[j]=json["outbufferCost"];
+					
+	 		processCount++;
+			var addTr = "<tr><td>"+processCount+"</td><td>"+json["processName"]+"</td><td>"+json["processId"]+"</td><td>"+json["machName"]+"</td><td>"+json["totalCost"]+"s</td></tr>";
+			$("#process_table tbody").append(addTr);  
+	
+			}
+
+		categories=name;
+		datas.push({
+						name: '出缓存等待时间',
+						data:data5,									
+					},{
+						name: '路径2耗时',
+						data:data4,									
+					},{
+						name: '零件加工耗时',
+						data:data3,									
+					},
+					{
+						name: '路径1耗时',
+						data:data2,									
+					},{
+						name: '入缓存等待耗时',
+						data:data1,									
+					});
+			graph3(datas,categories);
+			$("#process_table").show();		
+			
+			}
+				
+				
+				
+				
+			}
+	
+		
+		});
+	
+}
+}
+
+</script>
+<!-- 这是图表的script -->
+<script type="text/javascript">
+//单个零件单个机床时间信息统计
+function  graph(datas) {
+    $('#container').highcharts({
+        chart: {
+            type: 'pie',
+            options3d: {
+                enabled: true,
+                alpha: 45,
+                beta: 0
+            }
+        },
+        
+        
+                  colors:[
+                     '#FF9999',//红
+                    '#6699CC',//黑
+                     '#FFCC33',//紫
+                    ' #9999FF',
+                    '#CCFF66',//蓝
+                    '#FFFFCC',//黄
+                    '#333333',//紫
+                  ],
+        title: {
+            text: '零件单工序时间信息分布图'
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                depth: 35,
+                dataLabels: {
+                //这一个是对饼图的引线设置
+                    enabled: false,
+                   // format: '{point.name}'
+                },
+                showInLegend: true,
+                //这一个是设置说明
+            }
+        },
+		credits:{
+		enabled: false,
+		},
+        series: datas
+    });
+};	
+
+//单个机床零件时序信息统计
+function  graph2(datas,categories) {
+    $('#container2').highcharts({
+    
+        title: {
+            text: '单台机床零件时序信息统计图',
+            x: -20 //center
+        },
+        
+                  colors:[
+                     '#FF9999',//红
+                    '#6699CC',//黑
+                     '#FFCC33',//紫
+                    ' #9999FF',
+                    '#CCFF66',//蓝
+                    '#FFFFCC',//黄
+                    '#333333',//紫
+                  ],
+        
+        xAxis:{
+            title: {
+                text: '零件名称'
+            },
+            categories: categories,
+        },
+        yAxis: {
+            title: {
+                text: '时间(t)'
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        tooltip: {
+            valueSuffix: 's'
+        },
+        
+
+        legend: {
+           // layout: 'vertical',
+            align: 'middle',
+            verticalAlign: 'bottom',
+            borderWidth: 0
+        },
+       credits:{
+		enabled: false,
+		},
+        series: datas
+    });
+};	
+//获得单个零件的工序信息统计
+function graph3(datas,categories){
+    $('#container3').highcharts({
+        chart: {
+            type: 'bar'
+        },
+                  colors:[
+                     '#FF9999',//红
+                    '#6699CC',//黑
+                     '#FFCC33',//紫
+                    ' #9999FF',
+                    '#CCFF66',//蓝
+                    '#FFFFCC',//黄
+                    '#333333',//紫
+                  ],
+        title: {
+            text: '零件工序信息统计'
+        },
+        xAxis: {
+            categories: categories,
+        },
+                tooltip: {
+            valueSuffix: 's'
+        },
+        yAxis: {
+            min: 0,
+           title: {
+                text: '时间(t)'
+            },
+        },
+        legend: {
+            backgroundColor: '#FFFFFF',
+            reversed: true
+        },
+        plotOptions: {
+            series: {
+                stacking: 'normal'
+            }
+        },
+      credits:{
+		enabled: false,
+		},
+            series: datas,
+    });
+};				
+
+</script>
+
+
+<!-- 这一部分是websocket的部分,利用服务器推送技术，以后的改进方向 -->
+  <script type="text/javascript">
+    // var webSocket = new WebSocket('ws://localhost:8080/rfidApp/websocketStatistics');
+    // var webSocket = new WebSocket('ws://115.154.191.228:8080/rfidApp/websocketStatistics');
+     var webSocket = new WebSocket('ws://115.154.191.24:8099/rfidApp/websocketStatistics');
+    webSocket.onerror = function(event) {
+      onError(event);
+    };
+
+    webSocket.onopen = function(event) {
+    	
+      onOpen(event);
+    };
+
+    webSocket.onmessage = function(event) {
+      onMessage(event);
+    };
+    webSocket.onclose = function(event) {
+        onclose(event);
+      };
+
+
+var inflag=0;
+var outflag=0;
+var state_flag=0;
+var state_count=0;
+    function onMessage(event) {
+      document.getElementById('messages').innerHTML 
+        += '<br />' + event.data;         
+     
+    }
+
+    
+    //这样就达到了ajax的效果，用了json的格式
+    function onOpen(event) {
+	console.log("websocket连接开始");
+    }
+
+    function onError(event) {
+     // alert(event.data);
+    	console.log("连接出错");
+    }
+    function onclose(event){
+    	webSocket.send("stopSocket");
+    //	alert("连接关闭");
+    	
+    }       
+    
+
+/* 这是修正前的结果 */
+/* function connectTest(){
+    $("#isConnected").html('成功连通');
+    //显示零件
+    getworkpiece();
+
+} */
+
+function stopConnect(){
+      webSocket.send("stopSocket");
+     // return false;
+}
+
+  </script>
+
+</head>
+<body style="font-family:微软雅黑">
+
+<div data-role="page" id="main" data-theme="c">
+
+  <div data-role="header" data-theme="b">
+      <div data-role="navbar">
+    <ul>
+<li>  <a href="config.jsp" data-role="button" data-inline="true" data-mini="true"  rel="external" style="background:#006699;font-family:微软雅黑">跟踪布局</a>
+ <li> <a href="trackWorkpiece.jsp" data-role="button" data-inline="true" data-mini="true" rel="external"  style="background:#006699;font-family:微软雅黑">实时跟踪</a>
+ <li > <a href="manage.jsp" data-role="button" data-inline="true" data-mini="true" data-theme="d" rel="external"  style="background:#1A8298;color:white;font-family:微软雅黑" >统计管理</a> </li>
+    </ul>
+  </div>
+  </div>
+  <div data-role="content">
+
+  
+  
+  <div data-role="collapsible" data-collapsed="false" data-inset="false" data-collapsed-icon="arrow-d" data-expanded-icon="arrow-u" data-theme="b">
+    <h1>零件单工序时序信息查询</h1>
+<!-- 这里要加上选机床和零件 --><!-- 这里的机床都是已经绑定好rfid系统的机床，机床对应的value是机床和RFID绑定的端口号（rfid区分号码）
+在数据库中用来选择不同的表 -->
+<input type=hidden name="mach_model" id="mach_model" type="text" disabled="true" readOnly="true" value="" />
+	<select name="machSearch" id="machSearch" >
+<option value="">--请选择要查询的机床--</option>
+<option value="9992">--YX-龙门铣床--</option>
+<option value="9458">--SI-数控车床--</option>
+<option value="9457">--YN-镗床--</option>
+</select>
+	<select name="workpieceSearch" id="workpieceSearch" >
+<option value="">--请选择要查询的零件--</option>
+</select>
+<!-- 模式a的表 -->
+<div id="showInfo_a" style="display:none;">
+ <center><table  class="table table-striped">
+   <tr>
+     <td >进入入缓存区时刻：</td>
+     <td ><span id="inbufferIntime_a"></span></td>
+   </tr>
+   <tr>
+     <td>离开入缓存区时刻：</td>
+     <td><span id="inbufferOuttime_a"></span></td>
+   </tr>
+   <tr>
+     <td>进入机床加工区时刻：</td>
+     <td><span id="machIntime_a"></span></td>
+   </tr>
+   <tr>
+     <td>离开机床加工区时刻</td>
+     <td><span id="machOuttime_a"></span></td>
+   </tr>
+   <tr>
+     <td>进入出缓存区时刻：</td>
+     <td><span id="outbufferIntime_a"></span></td>
+   </tr>
+   <tr>
+     <td>离开出缓存区时刻：</td>
+     <td><span id="outbufferOuttime_a"></span></td>
+   </tr>
+   <tr>
+     <td>零件在机床上加工耗时：</td>
+     <td><span id="machCost_a"></span></td>
+   </tr>
+   <tr>
+     <td>零件在入缓存区等待耗时：</td>
+     <td><span id="inbufferCost_a"></span></td>
+   </tr>
+   <tr>
+     <td>零件在出缓存区等待耗时：</td>
+     <td><span id="outbufferCost_a"></span></td>
+   </tr>
+   <tr>
+     <td>零件该工序总耗时：</td>
+     <td><span id="totalCost_a"></span></td>
+   </tr>
+ </table> </center>
+</div>
+
+
+<!-- 模式b的表 -->
+<div id="showInfo_b" style="display:none;">
+ <center><table  class="table table-striped">
+   <tr>
+     <td >进入入缓存区时刻：</td>
+     <td ><span id="inbufferIntime_b"></span></td>
+   </tr>
+   <tr>
+     <td>离开入缓存区时刻：</td>
+     <td><span id="inbufferOuttime_b"></span></td>
+   </tr>
+   <tr>
+     <td>进入机床加工区时刻：</td>
+     <td><span id="machIntime_b"></span></td>
+   </tr>
+   <tr>
+     <td>离开机床加工区时刻</td>
+     <td><span id="machOuttime_b"></span></td>
+   </tr>
+   <tr>
+     <td>零件在机床上加工耗时：</td>
+     <td><span id="machCost_b"></span></td>
+   </tr>
+   <tr>
+     <td>零件在入缓存区等待耗时：</td>
+     <td><span id="inbufferCost_b"></span></td>
+   </tr>
+   <tr>
+     <td>零件该工序总耗时：</td>
+     <td><span id="totalCost_b"></span></td>
+   </tr>
+ </table> </center>
+</div>
+
+
+
+<!-- 模式c的表 -->
+<div id="showInfo_c" style="display:none;">
+ <center><table  class="table table-striped">
+   <tr>
+     <td >进入入缓存区时刻：</td>
+     <td ><span id="inbufferIntime_c"></span></td>
+   </tr>
+   <tr>
+     <td>离开入缓存区时刻：</td>
+     <td><span id="inbufferOuttime_c"></span></td>
+   </tr>
+   <tr>
+     <td>进入出缓存区时刻：</td>
+     <td><span id="outbufferIntime_c"></span></td>
+   </tr>
+   <tr>
+     <td>离开出缓存区时刻：</td>
+     <td><span id="outbufferOuttime_c"></span></td>
+   </tr>
+   <tr>
+     <td>零件在入缓存区等待耗时：</td>
+     <td><span id="inbufferCost_c"></span></td>
+   </tr>
+   <tr>
+     <td>零件在出缓存区等待耗时：</td>
+     <td><span id="outbufferCost_c"></span></td>
+   </tr>
+   <tr>
+     <td>零件该工序总耗时：</td>
+     <td><span id="totalCost_c"></span></td>
+   </tr>
+ </table> </center>
+</div>
+  <div id="container" style="min-width:200px;height:300px"></div>
+  </div>
+  
+
+  
+  <div data-role="collapsible" data-inset="false" data-collapsed-icon="arrow-d" data-expanded-icon="arrow-u" data-theme="b">
+    <h1>单个机床零件时序信息统计</h1>
+  	<select name="machSearch2" id="machSearch2" >
+<option value="">--请选择要查询的机床--</option>
+</select>
+<input type=hidden name="mach_model2" id="mach_model2" type="text" disabled="true" readOnly="true" value="" />
+
+ <div id="container2" style="min-width:200px;height:400px"></div><br>
+<center><span id="firstInfo" class="conState" style="display:none">工序异常提示</span></center>
+<div id="adviceInfo">
+
+
+
+</div>
+
+  </div>  
+  
+    <div data-role="collapsible"  data-inset="false" data-collapsed-icon="arrow-d" data-expanded-icon="arrow-u" data-theme="b">
+    <h1 id="getworkpieceSearch">单个零件工序时序信息统计</h1>
+  	<select name="workpieceSearch3" id="workpieceSearch3" >
+<option value="">--请选择要查询的零件--</option>
+</select>
+
+ <div id="container3" style="min-width:200px;height:300px"></div>
+		<center>	<table id = "process_table" class="table table-striped">
+				<thead>
+					<tr>
+						<th>序号</th>
+						<th>工序名称</th>
+						<th>工序号</th>
+						<th>加工机床</th>
+						<th>工序耗时</th>
+					</tr>
+				</thead>
+				<tbody>
+<!-- 				<tr>
+						<td class="tag_count"></td>
+						<td class="tag_id"></td>
+						<td class="tag_name"></td>
+						<td class="apikey"></td>
+					</tr>
+-->
+				</tbody>
+			</table></center>
+
+  </div> 
+  
+  
+  
+
+  </div>
+
+</div>
+
+
+</body>
+</html>

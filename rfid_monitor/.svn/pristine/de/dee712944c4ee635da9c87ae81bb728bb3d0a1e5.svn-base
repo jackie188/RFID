@@ -1,0 +1,138 @@
+package RFID_java;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
+
+import dbconn.BaseDao;
+
+public class RFID_serve {
+	/**
+	 * @param args
+	 * @throws IOException 
+	 */
+	static ArrayList<String>  taglist=new ArrayList<String>();//加这个是用来清除多余的数据
+//	WebSocketTest send=new WebSocketTest();
+	public static void main(String[] args) {
+		RFID_serve manager = new RFID_serve();
+		manager.doListen();
+	}
+	ServerSocket server;	
+	
+	public void creat(String message){
+		//int Port=Integer.parseInt(message);
+		int Port=9992;
+		System.out.println("开始socket");
+		try {
+			server = new ServerSocket(Port);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+	}
+	public void close(){
+		
+		try {
+			server.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void start() throws IOException{
+		while (true) {
+			System.out.println("开始socket");
+			Socket client = server.accept();
+			new Thread(new SSocket(client)).start();
+		}		
+	}
+	
+	public void doListen() {
+		ServerSocket server;
+		try {
+			server = new ServerSocket(9992);
+			while (true) {
+				System.out.println("进行监听");
+				Socket client = server.accept();
+				new Thread(new SSocket(client)).start();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	//鏈嶅姟鍣ㄨ繘绋�
+	class SSocket implements Runnable {
+
+		Socket client;
+
+		public SSocket(Socket client) {
+			this.client = client;
+		}
+/*int count=0;*/
+		public void run() {
+			DataInputStream input;
+			try {
+				input = new DataInputStream(client.getInputStream());
+				String listMsg = input.readUTF();
+/*				if (!taglist.contains(listMsg)) {
+					taglist.add(listMsg);*/
+					
+/*		             TimerTask task1 = new TimerTask() {
+		                 public void run() {
+								taglist.clear();
+								System.out.println("10s后，清除读到的数据");
+								//这里如果长时间放置id的话，会在页面上读第二次的
+		                 }
+		               };
+		          Timer timer1 = new Timer();
+		          timer1.schedule(task1,10000);*/	
+
+				System.out.println("Recive:------" + listMsg);
+/*				count++;
+				System.out.println("count的数值"+count);
+				这里的count自加运算没有运行.....为什么？*/
+				String apiKey=listMsg.substring(0, 4);
+				String deviceId=listMsg.substring(4, 8);
+				String tagId=listMsg.substring(8);
+				System.out.println("Recive:------" + apiKey+":------"+ deviceId+":------"+ tagId+":------");
+/*				DBConnection db=new DBConnection();
+				db.getCurrentConnection("jdbc:mysql://localhost:3306/mesiot?useUnicode=true&characterEncoding=UTF-8","root","1234");
+				//db.getCurrentConnection("jdbc:mysql://115.154.191.24:3306/mesiot?useUnicode=true&characterEncoding=UTF-8","root","xjtucad");
+*/				BaseDao baseDao = new BaseDao();
+				String[] paraDb=new String[5];
+				paraDb[0]="0";
+				paraDb[1]=deviceId;
+				paraDb[2]=tagId;
+				paraDb[3]=apiKey;
+				SimpleDateFormat df = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");//璁剧疆鏃ユ湡鏍煎紡
+				paraDb[4]=df.format(new Date());	
+				System.out.println("时间为："+df.format(new Date()));
+				String sql1 = ("insert into RFID_tag_trig(Id,deviceId,tagId,apiKey,time) values(?,?,?,?,?)");
+				baseDao.executeSql(sql1, paraDb, 0);
+				//获取不重复的数据后，就可以插入数据库了，相当于经过的数据每一个都会被纪录,这个数据就是RFID-tag-trig
+				//db.executeUpdate("update RFID_tag set stateId=(select stateId from rfid_event where deviceId='"+deviceId+"') , time='"+df.format(new Date())+"' where Id='"+tagId+"'");
+				String sql2 = ("update RFID_tag set stateId=(select stateId from rfid_event where deviceId='"+deviceId+"') , time='"+df.format(new Date())+"' where Id='"+tagId+"'");
+				//rfid-tag即为RFID的状态标签，师兄这里用这个语句做状态更新的用法，但是每次只能传过来一次
+				baseDao.executeUpdate(sql2);
+			//	send.broadcast(tagId);
+				/*}*/
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+}
+

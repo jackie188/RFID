@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Testing websockets</title>
+</head>
+<body>
+  <div>
+    <input type="submit" value="Start" onclick="start()" />
+  </div>
+  <div id="messages"></div>
+<script src="js/jquery-1.7.1.min.js"></script>
+   <script type="text/javascript">
+   
+   
+	
+	$(document).ready(function() {
+		$("#staffShop").change(function() {
+			var id = $(this).val();
+			if (id != "")
+				staffTeam_change();
+		});
+		
+		
+		function staffTeam_change() {
+			var shop_info = $("#staffShop").val();
+
+			$.ajax({
+				type : "POST",
+				url : 'json_test',
+				data : "shop_info=" + shop_info,
+				success : function(msg) {
+					document.getElementById("staffteam").innerHTML = "";
+					var obj = document.getElementById("staffteam");
+					obj.add(new Option("--请选择所在班组--", ""));
+					var result = eval("(" + msg + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					for ( var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						//$("#staffteam").append("<option value="+json["staffTeamNum"]+">"+json["staffteam"]+"</option>");
+						obj
+								.add(new Option(json["staffTeam"],
+										json["staffTeamNum"]), undefined);
+					}
+				}
+			});
+
+		}
+		
+		
+		
+		
+		
+			
+		});
+
+   
+   </script> 
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    var webSocket = 
+      new WebSocket('ws://localhost:8080/workpieceApp/websocket');
+
+    webSocket.onerror = function(event) {
+      onError(event);
+    };
+
+    webSocket.onopen = function(event) {
+    	
+      onOpen(event);
+    };
+
+    webSocket.onmessage = function(event) {
+      onMessage(event);
+    };
+    webSocket.onclose = function(event) {
+        onclose(event);
+      };
+
+    function onMessage(event) {
+      document.getElementById('messages').innerHTML 
+        += '<br />' + event.data;
+    }
+
+    function onOpen(event) {
+      document.getElementById('messages').innerHTML 
+        = 'Connection estabsdfsdff';
+    }
+
+    function onError(event) {
+      alert(event.data);
+    }
+    function onclose(event){
+    	
+    	alert("关闭");
+    	
+    }
+
+    function start() {
+      webSocket.send('hello');
+      return false;
+    } 
+  </script>
+
+  
+  
+  <div id="test">
+  
+  
+  <table>
+  			<tr><td width="20%">所属车间:</td>
+			<td><select name="staffShop" id="staffShop">
+				<option value="">--请选择所在车间--</option>
+				<option value="机加工车间">机加工车间</option>
+				<option value="铸造车间">铸造车间</option>
+				<option value="焊接车间">焊接车间</option>
+			</select> </td></tr> 
+			<tr >
+			<td width="20%">所属班组:</td>
+			<td><select name="staffteam" id="staffteam">
+				<option value="">--请选择所在班组--</option>
+			</select></td></tr>
+  </table>
+  </div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</body>
+</html>

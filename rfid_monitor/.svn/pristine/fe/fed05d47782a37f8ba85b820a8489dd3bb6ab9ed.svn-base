@@ -1,0 +1,59 @@
+package config;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import dbconn.BaseDao;
+
+/**
+ * Servlet implementation class RfidStateConfig
+ */
+public class RfidStateConfig extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public RfidStateConfig() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		System.out.println("开始进行状态配置");
+		String statename = request.getParameter("statename");	//״获取状态名称
+		String apikey = request.getParameter("apikey");			//APIKEY
+		String data[] = new String[2];
+		System.out.println("状态名称："+statename);
+		System.out.println("api的值："+apikey);
+	//	data[0] = stateid;
+		//这里的state，只是加入state状态，为天线提供参考而已
+		data[0] = statename;
+		data[1] = apikey;
+		String sql = "insert into rfid_tag_state(stateName,apiKey) values(?,?)";
+		BaseDao dao = new BaseDao();
+		int result = dao.executeSql(sql, data, 1);
+		response.getWriter().print(result);
+		System.out.println("结果为："+result);
+		System.out.println("添加标签状态信息成功");
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request,response);
+	}
+
+}

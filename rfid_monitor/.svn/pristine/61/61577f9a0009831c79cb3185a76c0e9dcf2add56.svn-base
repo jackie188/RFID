@@ -1,0 +1,482 @@
+package api_servlet;
+
+import java.util.Arrays;
+
+import java.util.Random;
+
+public class Gacode {
+
+/*	int Max = 101;
+	int Num = 10; // 种群个体数量
+	int Sum = 100;
+	int N, M; // N为工件数，M为机器数
+	int tm; // 记录所需最大时间
+	int s[][] = new int[Max][Max]; // 工件i的第j个工序在s[i][j]的机器上运行；
+	int cost[][] = new int[Max][Max]; // 时间耗费矩阵
+	int group[][] = new int[Num + 1][Max * Max];
+	int F[] = new int[Num + 1];
+	int Index[] = new int[Num + 1];
+	int temp0[][] = new int[Num + 1][Max * Max];*/
+
+	public static void main(String args[]) {
+		int xunhuan = 0;
+		int time1[] = new int[10];
+		int time[] = new int[10];
+		int GA1[][] = new int[30][9];
+		int tempg1[][] = new int[3][9];// 用于取用最优解
+		int GAboss[][] = {{31,21,11,32,22,12,13,23,33},{2,3,1,1,2,2,3,1,3},{1,3,2,3,1,2,3,4,2}}; // 初始染色体
+		int GA0[][] = new int[30][9];// 定义初始数组
+		for (int I = 0; I< 10; I++) {
+			int Ba1[] = new int[3];
+			int Ba2[] = new int[3];
+			int Ba3[] = new int[3];
+			if (Ba1[0] != 0 | Ba1[1] != 0 | Ba1[2] != 0 | Ba2[0] != 0
+					| Ba2[1] != 0 | Ba2[2] != 0 | Ba3[0] != 0 | Ba3[1] != 0
+					| Ba3[2] != 0) {
+				int ba1 = 0;
+				int ba2 = 0;
+				int ba3 = 0;
+
+				Random rand = new Random(); // 生成随机数
+
+				int a = rand.nextInt(9);
+				int b = rand.nextInt(9);
+
+				for (int l = 0; l < 3; l++) {
+					int temp1 = GAboss[l][a];
+					GAboss[l][a] = GA1[l][b];
+					GAboss[l][b] = temp1;
+				}
+
+				for (int i = 0; i < 9; i++) // 判断是否有工序超出
+				{
+					int num = GAboss[0][i] / 10;
+
+					if (num == 1) {
+
+						Ba1[ba1] =GAboss[0][i];
+						ba1++;
+
+					}
+					if (num == 2) {
+
+						Ba2[ba2] = GAboss[0][i];
+						ba2++;
+
+					}
+					if (num == 3) {
+						Ba3[ba3] = GAboss[0][i];
+						ba3++;
+
+					}
+
+				}
+
+		}
+			for(int J=0;J<9;J++)
+			{
+				GA0[3*I][J]=GAboss[0][J];
+				GA0[3*I+1][J]=GAboss[1][J];
+				GA0[3*I+2][J]=GAboss[2][J];
+			}
+		}
+		// int
+		// GA01[][]={{31,21,11,32,22,12,13,23,33},{2,3,1,1,2,2,3,1,3},{1,3,2,3,1,2,3,4,2}};
+
+		while (xunhuan < 500) {
+			for (int i = 0; i < 30; i++) // 染色体复制
+			{
+				for (int j = 0; j < 9; j++) {
+					GA1[i][j] = GA0[i][j];
+				}
+			}
+
+			int n = 0;
+			while (n < 27) {
+
+				int Ba1[] = new int[3];
+				int Ba2[] = new int[3];
+				int Ba3[] = new int[3];
+				if (Ba1[0] != 0 | Ba1[1] != 0 | Ba1[2] != 0 | Ba2[0] != 0
+						| Ba2[1] != 0 | Ba2[2] != 0 | Ba3[0] != 0 | Ba3[1] != 0
+						| Ba3[2] != 0) {
+					int ba1 = 0;
+					int ba2 = 0;
+					int ba3 = 0;
+
+					Random rand = new Random(); // 生成随机数
+
+					int a = rand.nextInt(9);
+					int b = rand.nextInt(9);
+
+					for (int l = 0; l < 3; l++) {
+						int temp1 = GA0[n + l][a];
+						GA0[n + l][a] = GA1[n + l][b];
+						GA0[n + l][b] = temp1;
+
+					}
+
+					for (int i = 0; i < 9; i++) // 判断是否有工序超出
+					{
+						int num = GA0[n][i] / 10;
+
+						if (num == 1) {
+
+							Ba1[ba1] = GA0[n][i];
+							ba1++;
+
+						}
+						if (num == 2) {
+
+							Ba2[ba2] = GA0[n][i];
+							ba2++;
+
+						}
+						if (num == 3) {
+							Ba3[ba3] = GA0[n][i];
+							ba3++;
+
+						}
+
+					}
+
+				}
+				n = n + 3;
+			}
+
+			 
+			  // for (int i = 0; i < 30; i++) { 
+			   
+			   //for (int j = 0; j < 9; j++) {
+			   
+			//  System.out.print(GA0[i][j] + " ");
+			 //  } 
+			  //System.out.println(" "); 
+			 // }
+			 
+
+			// 目标函数
+			int ia = 0;
+			int ic = 0;
+			int timety[] = new int[10];
+			while (ia < 28) {
+				int tempg[][] = new int[3][9];
+				for (int ib = 0; ib < 9; ib++) {
+					tempg[0][ib] = GA0[ia][ib];
+					tempg[1][ib] = GA0[ia + 1][ib];
+					tempg[2][ib] = GA0[ia + 2][ib];
+				}
+				ia = ia + 3;
+				int J[] = new int[9];
+				int JM[] = new int[9];
+				int JMT[] = new int[9];
+				for (int k = 0; k < 9; k++) {
+					J[k] = tempg[0][k];
+					JM[k] = tempg[1][k];
+					JMT[k] = tempg[2][k];
+				}
+				int tm1 = 0;
+				int tm2 = 0;
+				int tm3 = 0;
+				int st[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+				int et[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+				for (int i = 0; i < 9; i++) {
+					int number = J[i];
+					int j = 0;
+					if (number == 11) {
+						j = 0;
+					}
+					if (number == 21) {
+						j = 1;
+					}
+					if (number == 31) {
+						j = 2;
+					}
+					if (number == 12) {
+						j = 3;
+					}
+					if (number == 22) {
+						j = 4;
+					}
+					if (number == 32) {
+						j = 5;
+					}
+					if (number == 13) {
+						j = 6;
+					}
+					if (number == 23) {
+						j = 7;
+					}
+					if (number == 33) {
+						j = 8;
+					}
+					int number1 = JM[i];
+					if (number1 == 1) {
+						st[j] = tm1;
+						tm1 = tm1 + JMT[i];
+						et[j] = tm1;
+
+					}
+
+					if (number1 == 2) {
+						st[j] = tm2;
+						tm2 = tm2 + JMT[i];
+						et[j] = tm2;
+
+					}
+					int num[] = new int[] { tm1, tm2, tm3 };
+					Arrays.sort(num);
+					// 把20个基因中的num[2]存储，排序取前十位
+					time[ic] = num[2];
+					timety[ic] = num[2];
+
+				}
+				ic++;
+			}
+			Arrays.sort(time);
+
+			int ia1 = 0;
+			int ic1 = 0;
+			int timety1[] = new int[10];
+			while (ia < 28) {
+				int tempg[][] = new int[3][9];
+				for (int ib = 0; ib < 9; ib++) {
+					tempg[0][ib] = GA1[ia1][ib];
+					tempg[1][ib] = GA1[ia1 + 1][ib];
+					tempg[2][ib] = GA1[ia1 + 2][ib];
+				}
+				ia = ia + 3;
+				int J[] = new int[9];
+				int JM[] = new int[9];
+				int JMT[] = new int[9];
+				for (int k = 0; k < 9; k++) {
+					J[k] = tempg[0][k];
+					JM[k] = tempg[1][k];
+					JMT[k] = tempg[2][k];
+				}
+				int tm1 = 0;
+				int tm2 = 0;
+				int tm3 = 0;
+				int st[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+				int et[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+				for (int i = 0; i < 9; i++) {
+					int number = J[i];
+					int j = 0;
+					if (number == 11) {
+						j = 0;
+					}
+					if (number == 21) {
+						j = 1;
+					}
+					if (number == 31) {
+						j = 2;
+					}
+					if (number == 12) {
+						j = 3;
+					}
+					if (number == 22) {
+						j = 4;
+					}
+					if (number == 32) {
+						j = 5;
+					}
+					if (number == 13) {
+						j = 6;
+					}
+					if (number == 23) {
+						j = 7;
+					}
+					if (number == 33) {
+						j = 8;
+					}
+					int number1 = JM[i];
+					if (number1 == 1) {
+						st[j] = tm1;
+						tm1 = tm1 + JMT[i];
+						et[j] = tm1;
+
+					}
+
+					if (number1 == 2) {
+						st[j] = tm2;
+						tm2 = tm2 + JMT[i];
+						et[j] = tm2;
+
+					}
+
+					if (number1 == 3) {
+						st[j] = tm3;
+						tm3 = tm3 + JMT[i];
+						et[j] = tm3;
+
+					}
+
+					int num[] = new int[] { tm1, tm2, tm3 };
+					Arrays.sort(num);
+					// 把20个基因中的num[2]存储，排序取前十位
+					time1[ic1] = num[2];
+					timety1[ic1] = num[2];
+				}
+				ic1++;
+			}
+			Arrays.sort(time1);
+
+			// 开始选取前十个优良基因
+			int timepp[] = new int[20]; // 定义用于判断的排序数组和原始数组
+			int timetppy[] = new int[20];
+			for (int i = 0; i < 10; i++) // 把GA0和GA1中的时间解放到timepp和timetppy中
+			{
+				timepp[i] = time[i];
+				timetppy[i] = timety[i];
+			}
+			for (int i = 0; i < 10; i++) {
+				timepp[i + 10] = time1[i];
+				timetppy[i + 10] = timety1[i];
+			}
+			Arrays.sort(timepp);
+
+			int tempga[][] = new int[60][9];// 定义60行数组存放20个基因
+			for (int i = 0; i < 30; i++) {
+				for (int j = 0; j < 9; j++) {
+					tempga[i][j] = GA0[i][j];
+				}
+
+			}
+			for (int i = 0; i < 30; i++) {
+				for (int j = 0; j < 9; j++) {
+					tempga[i + 30][j] = GA1[i][j];
+				}
+
+			}
+			int gaxuhao = 0;
+			int gatop10 = 0;
+			while (gatop10 < 10) // 在20个基因中保留时间最小的前十个
+			{
+				for (int j = 0; j < 20; j++) {
+					int baoliu = timetppy[j] - timepp[gatop10];
+					if (baoliu == 0) {
+						gaxuhao = j;
+					}
+				}
+				for (int i = 0; i < 9; i++) {
+					GA0[3 * gatop10][i] = tempga[3 * gaxuhao][i];
+					GA0[3 * gatop10 + 1][i] = tempga[3 * gaxuhao + 1][i];
+					GA0[3 * gatop10 + 2][i] = tempga[3 * gaxuhao + 2][i];
+				}
+				gatop10++;
+			}
+			// 优良基因选取结束；
+			// 把最优解解码
+			xunhuan++;
+			for (int ib = 0; ib < 9; ib++) {
+				tempg1[0][ib] = GA0[0][ib];
+				tempg1[1][ib] = GA0[1][ib];
+				tempg1[2][ib] = GA0[2][ib];
+			}
+
+		}
+		System.out.println("最优解基于工序的编码为： " );
+		for (int j = 0; j < 9; j++) {
+			System.out.print( GA0[0][j] / 10 + " ");
+		}
+		System.out.println(" ");
+		int J[] = new int[9];
+		int JM[] = new int[9];
+		int JMT[] = new int[9];
+		for (int k = 0; k < 9; k++) {
+			J[k] = tempg1[0][k];
+			JM[k] = tempg1[1][k];
+			JMT[k] = tempg1[2][k];
+		}
+		int tm1 = 0;
+		int tm2 = 0;
+		int tm3 = 0;
+		int tmax = 0;
+		int st[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		int et[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		int Jm[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		for (int i = 0; i < 9; i++) {
+			int number = J[i];
+			// System.out.println(J[i]);
+			int j = 0;
+
+			if (number == 11) {
+				j = 0;
+			}
+			if (number == 21) {
+				j = 1;
+			}
+			if (number == 31) {
+				j = 2;
+			}
+			if (number == 12) {
+				j = 3;
+			}
+			if (number == 22) {
+				j = 4;
+			}
+			if (number == 32) {
+				j = 5;
+			}
+			if (number == 13) {
+				j = 6;
+			}
+			if (number == 23) {
+				j = 7;
+			}
+			if (number == 33) {
+				j = 8;
+			}
+			// System.out.println(j);
+			int number1 = JM[i];
+
+			if (number1 == 1) {
+				st[j] = tm1;
+				tm1 = tm1 + JMT[i];
+				et[j] = tm1;
+				Jm[i] = 1;
+			}
+
+			if (number1 == 2) {
+				st[j] = tm2;
+				tm2 = tm2 + JMT[i];
+				et[j] = tm2;
+				Jm[i] = 2;
+			}
+
+			if (number1 == 3) {
+				st[j] = tm3;
+				tm3 = tm3 + JMT[i];
+				et[j] = tm3;
+				Jm[i] = 3;
+			}
+
+			int num[] = new int[] { tm1, tm2, tm3 };
+			Arrays.sort(num);
+			tmax = num[2];
+
+		}
+
+		System.out.println("工件1的第一道工序起始时间为" + st[0] + "结束时间为" + et[0] + "对应机床为"
+				+ Jm[0]);
+		System.out.println("工件1的第二道工序起始时间为" + st[3] + "结束时间为" + et[3] + "对应机床为"
+				+ Jm[3]);
+		System.out.println("工件1的第三道工序起始时间为" + st[6] + "结束时间为" + et[6] + "对应机床为"
+				+ Jm[6]);
+		System.out.println("工件2的第一道工序起始时间为" + st[1] + "结束时间为" + et[1] + "对应机床为"
+				+ Jm[1]);
+		System.out.println("工件2的第二道工序起始时间为" + st[4] + "结束时间为" + et[4] + "对应机床为"
+				+ Jm[4]);
+		System.out.println("工件2的第三道工序起始时间为" + st[7] + "结束时间为" + et[7] + "对应机床为"
+				+ Jm[7]);
+		System.out.println("工件3的第一道工序起始时间为" + st[2] + "结束时间为" + et[2] + "对应机床为"
+				+ Jm[2]);
+		System.out.println("工件3的第二道工序起始时间为" + st[5] + "结束时间为" + et[5] + "对应机床为"
+				+ Jm[5]);
+		System.out.println("工件3的第三道工序起始时间为" + st[8] + "结束时间为" + et[8] + "对应机床为"
+				+ Jm[8]);
+		System.out.println("总加工时间为" + tmax);
+
+	}
+
+}

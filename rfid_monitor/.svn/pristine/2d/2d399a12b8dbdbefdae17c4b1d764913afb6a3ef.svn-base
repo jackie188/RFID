@@ -1,0 +1,43 @@
+package config;
+
+import java.io.IOException;
+import java.sql.ResultSet;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import dbconn.BaseDao;
+
+public class DeleteInfo extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	
+	public void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		resp.setContentType("text/html");
+		req.setCharacterEncoding("utf-8");
+		resp.setCharacterEncoding("utf-8");
+
+		String deleteid = req.getParameter("deleteid");	
+		System.out.println("传递删除信息成功"+deleteid);
+		BaseDao baseDao = new BaseDao();
+		//String sql = "select rfidsystem.rfidPort,mach_rfid.machName from rfidsystem,mach_rfid where rfidsystem.rfidSysId=mach_rfid.rfidSysId";
+/*		String sql1 = "delete from rfid_tag where workpieceId= '"+deleteid+"'";		
+		String sql2 = "delete from workpieceproecess where workpieceId= '"+deleteid+"'";		
+		String sql3 = "delete from workpiece_process where workpieceId= '"+deleteid+"'";		
+		baseDao.executeUpdate(sql1);
+		baseDao.executeUpdate(sql2);
+		baseDao.executeUpdate(sql3);*/
+		System.out.println("删除信息成功");
+
+	}
+	
+	public void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		doGet(req,resp);
+	}
+	
+}

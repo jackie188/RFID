@@ -1,0 +1,82 @@
+package config;
+
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import dbconn.BaseDao;
+
+/**
+ * Servlet implementation class WorkpieceConfig
+ */
+public class ProcessConfig extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public ProcessConfig() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		System.out.println("进行零件配置");
+		String workpieceName = URLDecoder.decode(request.getParameter("workpieceName"),"utf-8");	//获得机床名称	
+		String workpieceRfId = request.getParameter("workpieceRfId");			//获得工件RFID号
+		String workpieceId = request.getParameter("workpieceId");		//获得工件号
+		String machName = request.getParameter("machName");		//获得工件号
+		String processName = URLDecoder.decode(request.getParameter("processName"),"utf-8");		//获得工件号
+		String machId = request.getParameter("machId");		//获得工件号
+		String processId = request.getParameter("processId");		//获得工件号
+		String apikey = request.getParameter("apikey");			//APIKEY
+		String tagInitialState = "0";	//设定零件的初始状态
+		String data[] = new String[6];
+		String data2[] = new String[5];
+		
+		System.out.println("输出的姓名："+machName+processName+machId+processId);
+		data[0] = workpieceRfId;
+		data[1] = workpieceName;
+		data[2] = tagInitialState;
+		data[3] = apikey;
+		SimpleDateFormat df = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");//获取时间并转化为相应的格式
+		data[4] = df.format(new Date());
+		data[5] = workpieceId;
+		System.out.println("输出的工序："+workpieceName+machName+processName+machId+processId);
+		data2[0]=workpieceId;
+		data2[1]=workpieceName;
+		data2[2]=processName;
+		data2[3]=processId;
+		data2[4]=machId;
+		
+		//String sql1 = "insert into rfid_tag(Id,name,stateId,apiKey,time,workpieceId) values(?,?,?,?,?,?)";
+		String sql2 = "insert into workpiece_process(workpieceId,name,processName,processId,machId) values(?,?,?,?,?)";
+		BaseDao dao = new BaseDao();
+		//int result = dao.executeSql(sql1, data, 0);//插入零件
+		int result2 = dao.executeSql(sql2, data2, 0);//插入工件表
+		response.getWriter().print(result2);
+		//System.out.println("rfid绑定配置结果"+result);
+		System.out.println("工件机床绑定配置结果"+result2);
+		System.out.println("添加零件信息成功");
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request,response);
+	}
+
+}

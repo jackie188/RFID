@@ -1,0 +1,110 @@
+package db;
+
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import api_servlet.SecurityHelper;
+
+
+
+public class db extends HttpServlet {
+
+	/**
+	 * Constructor of the object.
+	 */
+	public db() {
+		super();
+	}
+
+	/**
+	 * Destruction of the servlet. <br>
+	 */
+	public void destroy() {
+		super.destroy(); // Just puts "destroy" string in log
+	}
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		response.setContentType("text/html");	//	返回类型
+		String type=request.getParameter("t");//参数类型
+		//1、获取团体信息
+		if(type.equals("1")){
+			String uid=request.getParameter("uid");//获取企业id（唯一标示符）
+	        String pwd=request.getParameter("pwd");//获取企业密码（MD5加密）
+	        String pid=request.getParameter("pid");//获取企业对应的系统id
+	        String sourceURL=request.getRequestURL().toString();//	获取原始url
+	        //转向so-MES平台的接口 请求数据库参数信息
+			response.sendRedirect("http://localhost:8080/mesTest1/servlet/db?&&uid="+uid+"&&pwd="+pwd+"&&pid="+pid+"&&url="+sourceURL);
+		}
+		//2、 从so-MES平台接口获取数据库参数信息
+		else if (type.equals("2")) {	    
+			String dbType=request.getParameter("dbType");//数据库类型  mySQL SQLServer Oracle等
+	        String dbUrl=request.getParameter("dbUrl");//数据库url
+	        String dbPort=request.getParameter("dbPort");//数据库端口
+	        String dbName=request.getParameter("dbName");//数据库名
+	        String dbUser=request.getParameter("dbUser");//数据库用户名
+	        String dbPwd=request.getParameter("dbPwd");//数据库密码
+	        if(request.getSession().getAttribute("DbPara")!=null)
+                request.getSession().removeAttribute("DbPara");//清空session
+			DbPara dbPara=new DbPara();//新建数据库参数模型
+			dbPara.setUrl("jdbc:mysql://"+dbUrl+":"+dbPort+"/"+dbName);//url
+			dbPara.setPassword(dbPwd);//password
+			dbPara.setUsername(dbUser);//username
+			request.getSession().setAttribute("DbPara", dbPara);//将该企业数据库参数添加到session  目的完成!!!!!
+	        System.out.println("\n dbType="+dbType+"&&dbUrl"+dbUrl+"&&dbPort"+dbPort+"&&dbName"+dbName+"&&dbUser"+dbUser+"&&dbPwd"+dbPwd);
+	        //转向app主界面
+	        response.sendRedirect("http://localhost:8080/mesTest/index.html");
+		}
+		else if (type.equals("0")) {	    
+		/*	String dbType=request.getParameter("type");//数据库类型  mySQL SQLServer Oracle等
+	        String dbUrl=request.getParameter("url");//数据库url
+	        String dbPort=request.getParameter("port");//数据库端口
+	        String dbName=request.getParameter("name");//数据库名
+	        String dbUser=request.getParameter("user");//数据库用户名
+	        String dbPwd=request.getParameter("pwd");//数据库密码
+        */	
+			//1、获取从so-MES平台的加密过的数据库信息**********************************************************
+			String para=request.getParameter("para").replace(' ','+');
+			try {
+				para=SecurityHelper.decrypt("xjtucad@1", para);//解密数据库参数 ;“xjtucad@1”为解密秘钥
+				System.out.println("\n para="+para);//打印解密过的数据库信息
+			} catch (Exception e) {
+				e.printStackTrace();//异常处理
+			}
+			//2、解析数据库信息  获取真正的各个数据库参数**********************************************************
+			String dbType=para.substring(0, para.indexOf("^^"));//数据库类型  mySQL SQLServer Oracle等
+			para=para.substring(para.indexOf("^^")+2);//字符串操作
+			String dbUrl=para.substring(0, para.indexOf("^^"));//数据库url（包括数据库名和端口号）
+			para=para.substring(para.indexOf("^^")+2);//字符串操作
+			String dbUser=para.substring(0, para.indexOf("^^"));//数据库用户名
+			String dbPwd=para.substring(para.indexOf("^^")+2);//数据库密码
+			//3、将数据库参数存入session 供该企业使用**********************************************************
+	        if(request.getSession().getAttribute("DbPara")!=null)
+                request.getSession().removeAttribute("DbPara");//清空session
+			DbPara dbPara=new DbPara();//新建数据库参数模型
+			dbPara.setUrl("jdbc:mysql://"+dbUrl);//赋值url
+			dbPara.setPassword(dbPwd);//赋值password
+			dbPara.setUsername(dbUser);//赋值username
+			request.getSession().setAttribute("DbPara", dbPara);//将该企业数据库参数添加到session  目的完成!!!!!
+	        System.out.println("\n dbType="+dbType+"&&dbUrl="+dbUrl+"&&dbUser="+dbUser+"&&dbPwd="+dbPwd);
+	        //4、转向app主界面****************************************************************************
+	        String sourceURL=request.getRequestURL().toString();//	获取当前url
+	        sourceURL=sourceURL.substring(0, sourceURL.indexOf("/db"));//	获取app的url
+	        response.sendRedirect(sourceURL);//转向app主界面
+		}
+        
+	}
+
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+            doGet(request, response);
+	}
+
+	public void init() throws ServletException {
+		// Put your code here
+	}
+
+}

@@ -1,0 +1,1210 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ page language="java" import="dbconn.BaseDao"%>
+<%@ page language="java" import="java.sql.ResultSet"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport"
+	content="width=device-width, minimum-scale=1.0, maximum-scale=1.5" />
+<title>基于RFID的零件工序时序跟踪</title>
+<link rel="stylesheet" href="js_mobile/jquery.mobile-1.3.2.css"
+	type="text/css">
+<link rel="stylesheet" href="bootstrap/css/bootstrap.css"
+	type="text/css">
+<link rel="stylesheet" href="bootstrap/css/bootstrap-responsive.css"
+	type="text/css">
+<script src="js/jquery-1.7.1.min.js"></script>
+<script src="js/jquery.lightbox_me.js"></script>
+<script src="js_mobile/jquery.mobile-1.3.2.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#mach_rfid").click(function() {
+			mach_rfidsubmit();
+		});
+		$("#mach_rfidshow").click(function() {
+			mach_rfidshow();
+		});
+		$("#ProcessWriteShow").click(function() {
+			ProcessWriteShow();
+		});
+		$("#workpiece_rfid").click(function() {
+			workpiece_rfid();
+		});
+		$("#workpiece_process").click(function() {
+			workpiece_process();
+		});
+
+		$("#workpiece_rfidshow").click(function() {
+			workpiece_rfidshow();
+		});
+		$("#workpiece_processShow").click(function() {
+			workpiece_processShow();
+		});
+		$("#workpieceState").click(function() {
+			workpieceState();
+		});
+		$("#deviceConfig_show").click(function() {
+			deviceConfig_show();
+		});
+
+		$("#deviceConfig").click(function() {
+			deviceConfig();
+		});
+
+		$("#getWorkpieceName").click(function() {
+			getworkpiece();
+		});
+		$("#getWorkpieceName2").click(function() {
+			getworkpieceName2();
+		});
+		$("#ProcessWrite").click(function() {
+			ProcessWrite();
+		});
+		//这个很特殊，是对数据库进行清除，一遍进行反复测试
+		$("#clearDatebase").click(function() {
+			clearDatebase();
+		});
+		//这个也很特殊，是默认信息的配置
+		$("#Default1").click(function() {
+			Default1();
+		});
+		$("#Default2").click(function() {
+			Default2();
+		});
+		$("#Default3").click(function() {
+			Default3();
+		});
+
+		/* 	$("#workpieceName").change(function() {
+		 flag6=1;
+		 getmach_p();
+		 getprocess();
+
+		 }); */
+		$("#workpieceName2").change(function() {
+			flag6 = 1;
+			getmach_p();
+			getprocess();
+
+		});
+
+		//切换图片程序	
+		$("#rfidModel").change(function() {
+			var id = $(this).val();
+			$("img[name='model']").hide();
+			$("#" + id).show();
+		});
+
+		//这个是删除的管理程序
+		$("a[name='delete']").click(function(e) {
+
+			var v_id = $(e.target).attr('id');
+			deleteInfo(v_id);
+
+		});
+
+		//这个是获取选中零件工序信息的页面
+		$("a[name='wokpiece_process']").click(function(e) {
+
+			var v_id = $(e.target).attr('id');
+			showInfo(v_id);
+
+		});
+	});
+
+	//提交rfid系统配置信息
+	var tagcount1 = 0;
+	function mach_rfidsubmit() {
+		if ($("#mach_Name").val() == "" || $("#mach_Id").val() == ""
+				|| $("#rfidName").val() == "" || $("#rfidSysId").val() == ""
+				|| $("#rfidModel").val() == "") {
+			alert("请输入全部数据信息！");
+		} else {
+			//alert(ids[0]);
+			//	alert(ids[1]);		
+			$.ajax({
+				type : "POST",
+				url : 'Mach_rfidConnet',
+				data : "machName=" + $("#mach_Name").val() + "&machId="
+						+ $("#mach_Id").val() + "&rfidName="
+						+ $("#rfidName").val() + "&apikey="
+						+ $("#apikey").val() + "&rfidSysId="
+						+ $("#rfidSysId").val() + "&rfidModel="
+						+ $("#rfidModel").val(),
+				success : function(msg) {
+					if (msg != 0) {
+						//msg表示传递过来几个数据																	
+						//在表格中显示	
+						//配置成功后，这会扩充点击已配置信息的table表
+						alert("配置rfid系统成功");//这里最好创建一个对话框，更加好一点
+
+						tagcount1++;
+						var addTr = "<tr><td>" + tagcount1 + "</td><td>"
+								+ $("#mach_Id").val() + "</td><td>"
+								+ $("#mach_Name").val() + "</td><td>"
+								+ $("#rfidName").val() + "</td><td>"
+								+ $("#rfidModel").val() + "</td></tr>";
+						$("#tag_table tbody").append(addTr);
+					} else {
+						alert("配置rfid系统失败");
+					}
+					flag1 = 1;
+				}
+			});
+		}
+	}
+
+	var tagcount2 = 0;
+	//提交配置零件RFID信息
+	function workpiece_rfid() {
+		var workpieceRfId = $("#workpieceRfId").val();
+		var workpieceName = $("#workpieceName").val();
+		var workpieceId = $("#workpieceId").val();
+		var apikey = $("#apikey").val();
+		if (workpieceRfId.length < 24 || workpieceId == ""
+				|| workpieceName == "") {
+			alert("请输入完整数据！");
+		} else {
+
+			/* 			alert("工件名称"+workpieceName);
+			 alert("工件rfid"+workpieceRfId);
+			 alert("工件标志号"+workpieceId); */
+			$.ajax({
+				type : "POST",
+				url : 'WorkpieceConfig',
+				data : "workpieceRfId=" + workpieceRfId + "&workpieceName="
+						+ workpieceName + "&apikey=" + apikey + "&workpieceId="
+						+ workpieceId,//+"&machName="+machName+"&processName="+processName+"&machId="+machId+"&processId="+processId
+				success : function(msg) {
+					if (msg != 0) {
+						alert("配置零件RFID信息成功");
+						//								$(".inputtag").append(
+						//										"标签ID：" + $("#tagid").val() + "<br>"
+						//												+ "标签名称：" + $("#tagname").val()
+						//												+ "<br>" + "APIKEY:"
+						//												+ $("#apikey").val());
+
+						//实现多次添加
+						tagcount2++;
+						var addTr = "<tr><td>" + tagcount2 + "</td><td>"
+								+ workpieceName + "</td><td>" + workpieceRfId
+								+ "</td></tr>";
+						$("#tag_table_workpiece tbody").append(addTr);
+						getworkpieceName();
+					} else {
+						alert("配置工件信息失败");
+					}
+
+				}
+			});
+		}
+
+	}
+
+	//提交配置零件工序信息
+	var process_mach = 0;
+	function workpiece_process() {
+		//@jiang 总共6个信息，名字和id
+		var workpieceName = $("#workpieceName2").find("option:selected").text();
+		var workpieceId = $("#workpieceName2").val();
+		var machName = $("#machName_p").find("option:selected").text();
+		var machId = $("#machName_p").val();
+		var process_Name = $("#processName").find("option:selected").text();
+		var processId = $("#processName").val();
+		console.log("工序号码为：" + processId);
+		console.log("工序名称为：" + process_Name);
+		var apikey = $("#apikey").val();
+		if (process_Name == "" || workpieceId == "" || machId == "") {
+			alert("请输入完整数据！");
+		} else {
+			$.ajax({
+				type : "POST",
+				url : 'ProcessConfig',
+				data : "&apikey=" + apikey + "&workpieceId=" + workpieceId
+						+ "&machName=" + machName + "&processName="
+						+ process_Name + "&machId=" + machId + "&processId="
+						+ processId + "&workpieceName=" + workpieceName,
+				success : function(msg) {
+					if (msg != 0) {
+						alert("配置工序信息成功");
+						//								$(".inputtag").append(
+						//										"标签ID：" + $("#tagid").val() + "<br>"
+						//												+ "标签名称：" + $("#tagname").val()
+						//												+ "<br>" + "APIKEY:"
+						//												+ $("#apikey").val());
+
+						//实现多次添加							
+						process_mach++;
+						var addTr = "<tr><td>" + process_mach + "</td><td>"
+								+ workpieceName + "</td><td>" + process_Name
+								+ "</td><td>" + machName + "</td></tr>";
+						$("#tag_table_process tbody").append(addTr);
+					} else {
+						alert("配置工件信息失败");
+					}
+
+				}
+			});
+		}
+
+	}
+
+	//异步提交状态信息	
+	function workpieceState() {
+		var stateName = $("#statename").val();
+		if (stateName == "") {
+			alert("请输入数据！");
+		} else {
+			$.ajax({
+				type : "POST",
+				url : 'RfidStateConfig',
+				data : "statename=" + stateName + "&apikey="
+						+ $("#apikey").val(),
+				success : function(msg) {
+					if (msg != 0) {
+						alert("状态配置成功");
+						$("#statename").val('');
+					} else {
+						alert("配置失败");
+					}
+					flag4 = 1;
+				}
+			});
+		}
+	}
+
+	//异步提交天线信息
+	var devicecount = 0;
+	function deviceConfig() {
+		var rfidSystem = $("#rfidSystem").val();
+		var deviceName = $("#deviceName").val();
+		var eventname = $("#eventname").val();
+		var eventstate = $("#eventstate").val();
+		if (rfidSystem == "" || deviceName == "" || eventname == ""
+				|| eventstate == "") {
+			alert("请输入完整数据！");
+		} else {
+			$.ajax({
+				type : "POST",
+				url : 'Device_config',
+				data : "rfidSystem=" + rfidSystem + "&deviceName=" + deviceName
+						+ "&eventname=" + eventname + "&eventstate="
+						+ eventstate + "&apikey=" + $("#apikey").val(),
+				success : function(msg) {
+					if (msg != 0) {
+						alert("状态配置成功");
+						devicecount++;
+						var addTr_device = "<tr><td>"
+								+ devicecount
+								+ "</td><td>"
+								+ msg
+								+ "</td><td>"
+								+ deviceName
+								+ "</td><td>"
+								+ $("#eventstate").find("option:selected")
+										.text() + "</td></tr>";
+						$("#device_table tbody").append(addTr_device);
+
+					} else {
+						alert("配置失败");
+					}
+
+				}
+			});
+		}
+	}
+
+	/* 提交输入的工序信息 */
+	var ProcessWriteCount = 0;
+	function ProcessWrite() {
+		var workpieceName_process = $("#workpieceName_process").val();
+		var workpieceName = $("#workpieceName_process").find("option:selected")
+				.text();
+		//上面两个其实是同一个东西，第一个是value值（数字代码），第二个是选项的内容值
+		alert(workpieceName_process + workpieceName);
+		var workpieceProcessId = $("#workpieceProcessId").val();
+		var workpieceProcessName = $("#workpieceProcessName").val();
+		if (workpieceName_process == "" || workpieceProcessId == ""
+				|| workpieceProcessName == "") {
+			alert("请输入完整工序信息！");
+		} else {
+			$.ajax({
+				type : "POST",
+				url : 'ProcessWrite',
+				data : "workpieceName_process=" + workpieceName_process
+						+ "&workpieceProcessName=" + workpieceProcessName
+						+ "&workpieceProcessId=" + workpieceProcessId,
+				success : function(msg) {
+					if (msg != 0) {
+						alert("工序信息输入成功");
+						ProcessWriteCount++;
+						var addTr_ProcessWrite = "<tr><td>" + ProcessWriteCount
+								+ "</td><td>" + workpieceName + "</td><td>"
+								+ workpieceProcessId + "</td><td>"
+								+ workpieceProcessName + "</td></tr>";
+						$("#ProcessWrite_table tbody").append(
+								addTr_ProcessWrite);
+
+					} else {
+						alert("配置失败");
+					}
+
+				}
+			});
+		}
+	}
+
+	//提示未绑定输入信息
+	function mach_rfidshow() {
+		if (tagcount1 == 0) {
+			alert("还未提交信息");
+		}
+	}
+	function ProcessWriteShow() {
+		if (ProcessWriteCount == 0) {
+			alert("还未提交工序信息");
+		}
+	}
+
+	//提示未绑定工件输入信息
+	function workpiece_rfidshow() {
+		if (tagcount2 == 0) {
+			alert("还未提交信息");
+		}
+
+	}
+	//提示未绑定工件工序输入信息
+	function workpiece_processShow() {
+		if (process_mach == 0) {
+			alert("还未提交信息");
+		}
+
+	}
+
+	function deviceConfig_show() {
+		if (devicecount == 0) {
+			alert("还未提交信息");
+		}
+
+	}
+
+	/* //异步获得机床名称
+	 var flag1=1;
+	 function getmachName() {			
+	 $.ajax({
+	 type : "POST",
+	 url : 'GetMachName',
+	 success : function(data) {
+	 //更新下拉框
+	 document.getElementById("machName").innerHTML = "";			
+	 var obj = document.getElementById("machName");
+	 obj.add(new Option("--请选择机床--", ""));				
+	 var result = eval("(" + data + ")"); //js中解析Json格式到result中
+	 var json1 = result.rows; // rows是数组
+	 for ( var j = 0; j < json1.length; j++) {
+	 var json = json1[j];
+	 obj.add(new Option(json["machname"]+"---"+json["machid"], json["machid"]),
+	 undefined);
+	 }
+	 flag1 = 0;
+	 }
+	 });
+	 } */
+
+	var flag5 = 1;
+	function getmachName_p() {
+		$.ajax({
+			type : "POST",
+			url : 'GetMachName_p',
+			success : function(data) {
+				//更新下拉框
+				document.getElementById("machName_p").innerHTML = "";
+				var obj = document.getElementById("machName_p");
+				obj.add(new Option("--请选择机床--", ""));
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+				for (var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					obj.add(new Option(json["machname"], json["machid"]),
+							undefined);
+				}
+				flag1 = 0;
+			}
+		});
+	}
+
+	//异步获得工件名称,用于与工序相绑定
+	var flag2 = 1;
+	function getworkpieceName() {
+		$
+				.ajax({
+					type : "POST",
+					url : 'GetWorkpieceName',
+					success : function(data) {
+						//更新下拉框
+						document.getElementById("workpieceName_process").innerHTML = "";
+						var obj = document
+								.getElementById("workpieceName_process");
+						obj.add(new Option("--请选择工件--", ""));
+						var result = eval("(" + data + ")"); //js中解析Json格式到result中
+						var json1 = result.rows; // rows是数组
+						for (var j = 0; j < json1.length; j++) {
+							var json = json1[j];
+							obj.add(new Option(json["workpiecename"],
+									json["workpieceid"]), undefined);
+						}
+						flag2 = 0;
+					}
+				});
+	}
+
+	//异步获得工件名称2
+	function getworkpieceName2() {
+		$.ajax({
+			type : "POST",
+			url : 'GetWorkpieceName2',
+			success : function(data) {
+				//更新下拉框
+				document.getElementById("workpieceName2").innerHTML = "";
+				var obj = document.getElementById("workpieceName2");
+				obj.add(new Option("--请选择工件--", ""));
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+				for (var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					obj.add(new Option(json["workpiecename"],
+							json["workpieceid"]), undefined);
+				}
+			}
+		});
+	}
+
+	//异步获得rfid系统的名称
+
+	var flag3 = 1;
+	function getrfidSystem() {
+		$.ajax({
+			type : "POST",
+			url : 'GetrfidSystem',
+			success : function(data) {
+				//更新下拉框
+				document.getElementById("rfidSystem").innerHTML = "";
+				var obj = document.getElementById("rfidSystem");
+				obj.add(new Option("--请选择rfid系统--", ""));
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+				for (var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					obj.add(new Option(json["rfidsysid"] + "---"
+							+ json["rfidname"], json["rfidsysid"]), undefined);
+				}
+				flag3 = 0;
+			}
+		});
+	}
+
+	//异步获得可选用的状态
+	var flag4 = 1;
+	function geteventstate() {
+		$.ajax({
+			type : "POST",
+			url : 'GetTagState',
+			success : function(data) {
+				//更新下拉框
+				document.getElementById("eventstate").innerHTML = "";
+				var obj = document.getElementById("eventstate");
+				obj.add(new Option("--可选工件状态--", ""));
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+				for (var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					obj.add(new Option(json["statename"], json["stateid"]),
+							undefined);
+				}
+				flag4 = 0;
+			}
+		});
+	}
+
+	//异步获得指定零件的工序名称
+	var flag6 = 1;
+	function getprocessName() {
+		var workpieceId = $("#workpieceName2").val();
+
+		if (workpieceId == "") {
+			alert("请先选择工件");
+		} else {
+			$.ajax({
+				type : "POST",
+				url : 'GetProcessName',
+				data : "workpieceId=" + workpieceId,
+				success : function(data) {
+					//更新下拉框
+					console.log("test");
+					document.getElementById("processName").innerHTML = "";
+					var obj = document.getElementById("processName");
+					obj.add(new Option("--可选工序为--", ""));
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						obj.add(new Option(json["processname"],
+								json["processid"]), undefined);
+					}
+					flag6 = 0;
+				}
+			});
+		}
+
+	}
+
+	//这个函数在数据库管理中用来删除信息
+	function deleteInfo(deleteid) {
+		if (confirm("确定删除此零件？")) {
+			var Id = deleteid;
+			//alert(Id);
+			$.ajax({
+				type : "POST",
+				url : 'DeleteInfo',
+				data : "deleteid=" + Id,
+				success : function(data) {
+					//更新下拉框
+					alert("删除信息成功");
+					location.reload();
+				}
+			});
+
+		}
+
+	}
+	//这个是获取工序信息的函数
+	function showInfo(showid) {
+		var ids = showid.split(",");
+		var Id = ids[0];
+		var name = ids[1];
+		//alert(Id);
+		var ProcessShowCount = 0;
+		$("#workpieceShowN").html(name);
+		$("#ProcessTable").empty();
+		$.ajax({
+			type : "POST",
+			url : 'ShowWorkpiece',
+			data : "showid=" + Id,
+			success : function(data) {
+				//更新下拉框
+				document.getElementById("processName").innerHTML = "";
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+				for (var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					ProcessShowCount++;
+					var addTr_ProcessWrite = "<tr><td>" + ProcessShowCount
+							+ "</td><td>" + json["processid"] + "</td><td>"
+							+ json["processname"] + "</td></tr>";
+					$("#table_processshow tbody").append(addTr_ProcessWrite);
+
+				}
+			}
+		});
+
+	}
+
+	//这里只让点击一次传递数据，防止多次点击，每次都要传递数据
+	function getrfid() {
+		if (flag3) {
+			getrfidSystem();
+			flag3 = 0;
+		}
+	}
+
+	function getevent() {
+		if (flag4) {
+			geteventstate();
+			flag4 = 0;
+		}
+	}
+	/* 			function getmach() {
+	 if (flag1) {
+	 getmachName();
+	 flag1 = 0;
+	 }
+	 } */
+
+	function getworkpiece() {
+		flag6 = 1;
+		if (flag2) {
+			getworkpieceName();
+			flag2 = 0;
+		}
+	}
+
+	function getmach_p() {
+		if (flag5) {
+			getmachName_p();
+			flag5 = 0;
+		}
+	}
+
+	function getprocess() {
+		if (flag6) {
+			getprocessName();
+			flag6 = 0;
+		}
+
+	}
+
+	//这是对数据库进行清空的方法；
+	function clearDatebase() {
+
+		$.ajax({
+			type : "POST",
+			url : 'ClearDateBase',
+			success : function(data) {
+				alert("删除成功");
+
+			}
+		});
+
+	}
+	//测试系统的默认输入;
+	function Default1() {
+		$("#mach_Name").val("YX-龙门铣床");
+		$("#mach_Id").val("100256");
+		$("#rfidName").val("ALIEN—9980S");
+	}
+	function Default2() {
+		$("#workpieceName").val("锥齿轮");
+		$("#workpieceId").val("56128");
+		$("#workpieceRfId").val("E200 9002 5310 0094 1700 66AB");
+	}
+	function Default3() {
+		$("#workpieceProcessName").val("铣齿");
+		$("#workpieceProcessId").val("56128-4");
+	}
+</script>
+
+</head>
+<body style="font-family: 微软雅黑">
+
+	<div data-role="page" id="main" data-theme="c">
+
+		<div data-role="header" data-theme="c">
+
+			<div data-role="navbar">
+				<ul>
+					<li><a href="config.jsp" data-role="button" data-inline="true"
+						data-mini="true" rel="external"
+						style="background: #1A8298; color: white; font-family: 微软雅黑">跟踪布局</a>
+					<li><a href="trackWorkpiece.jsp" data-role="button"
+						data-inline="true" data-mini="true" rel="external"
+						style="background: #006699; color: white; font-family: 微软雅黑">实时跟踪</a>
+					<li><a href="manage.jsp" data-role="button"
+						data-inline="true" data-mini="true" data-theme="d" rel="external"
+						style="background: #006699; color: white; font-family: 微软雅黑">统计管理</a>
+					</li>
+				</ul>
+			</div>
+
+		</div>
+		<div data-role="content">
+
+
+
+			<div data-role="collapsible" data-collapsed="false"
+				data-inset="false" data-collapsed-icon="arrow-d"
+				data-expanded-icon="arrow-u" data-theme="b">
+				<h1>机床及在制品缓存布局</h1>
+				<input type="text" name="mach_Name" id="mach_Name"
+					placeholder="请输入机床名称..."> <input type="text"
+					name="mach_Id" id="mach_Id" placeholder="请输入机床标识号...">
+
+
+
+				<!--   选择机床：<select name="machName" id="machName" onclick="getmach()" >
+<option value="">--请选择机床--</option>
+</select><br> -->
+				<!--  机床标识号：<input  type="text" name="machId" id="machId" placeholder="请输入机床标识号..." > -->
+
+
+				<!-- @jiang这里不应该输入rfid系统的东西 -->
+				<!-- <input  type="text" name="rfidName" id="rfidName" placeholder="请输入rfid系统名称..." > -->
+				<select name="rfidSysId" id="rfidSysId">
+					<!-- @jiang 这里应该从数据库读取-->
+					<option value="">--请选择可绑定的RFID系统--</option>
+					<option value="9992">--RFID系统标志号：168--</option>
+					<option value="9458">--RFID系统标志号：150--</option>
+					<option value="9457">--RFID系统标志号：151--</option>
+					<option value="9457">--RFID系统标志号：152--</option>
+					</select>
+				</select> <select name="rfidModel" id="rfidModel">
+				<!-- 	<option value="">--机床及在制品缓存模式--</option> -->
+					<option value="a" selected>--模式1--</option>
+					<!--@jiang 就一种模式 -->
+					<!-- <option value="b">--模式2--</option>
+					<option value="c">--模式3--</option> -->
+				</select>
+				<div id="modelImage">
+					<center>
+						<img src="image/model1.png" id="a" name="model"
+							style="display: none";>
+					</center>
+					<center>
+						<img src="image/model2.png" id="b" name="model"
+							style="display: none">
+					</center>
+					<center>
+						<img src="image/model3.png" id="c" name="model"
+							style="display: none">
+					</center>
+				</div>
+
+				<center>
+					<button id="mach_rfid" data-inline="true" data-mini="true">提交配置信息</button>
+					&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+						id="mach_rfidshow" data-inline="true" data-mini="true"
+						data-rel="dialog" href="#mach_rfidInfo" data-role="button">查看已配置信息</a>
+				</center>
+				<!--@jiang 这里不是很懂，测试为什么是删除数据 -->
+				<button id="clearDatebase" data-inline="true" data-mini="true"
+					data-corners="false" data-theme="c">开始进行测试</button>
+				<button id="Default1" data-inline="true" data-mini="true"
+					data-corners="false" data-theme="c">输入默认信息</button>
+			</div>
+
+
+
+			<div data-role="collapsible" data-inset="false"
+				data-collapsed-icon="arrow-d" data-expanded-icon="arrow-u"
+				data-theme="b">
+				<h1 id="getWorkpieceName">定义跟踪零件信息</h1>
+
+				<div id="workpiece-config">
+					<div class="form-group">
+						<!-- 如果零件较多，要加入搜索功能 -->
+						<!-- 					<select name="workpieceName" id="workpieceName" >
+<option value="">--请选择工件--</option>
+</select> -->
+						零件与RFID标签绑定 <input type="text" name="workpieceName"
+							id="workpieceName" placeholder="请输入跟踪零件名称..."> <input
+							type="text" name="workpieceId" id="workpieceId"
+							placeholder="请输入跟踪零件标志号..."> <input type="text"
+							name="workpieceRfId" id="workpieceRfId"
+							placeholder="请输入RFID标签...">
+						<center>
+							<button id="workpiece_rfid" data-inline="true" data-mini="true">提交零件RFID信息</button>
+							&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+								id="workpiece_rfidshow" data-inline="true" data-mini="true"
+								data-rel="dialog" href="#workpiece_rfidInfo" data-role="button">查看已配置信息</a>
+						</center>
+						<button id="Default2" data-inline="true" data-mini="true"
+							data-corners="false" data-theme="c">输入默认信息</button>
+					</div>
+				</div>
+				<div id="workpiece-config">
+					<div class="form-group">
+						输入零件工序信息 <select name="workpieceName_process"
+							id="workpieceName_process">
+							<option value="">--请选择零件--</option>
+						</select> <input type="text" name="workpieceProcessName"
+							id="workpieceProcessName" placeholder="请输入零件工序名称..."> <input
+							type="text" name="workpieceProcessId" id="workpieceProcessId"
+							placeholder="请输入零件工序标志号...">
+						<center>
+							<button id="ProcessWrite" data-inline="true" data-mini="true">提交零件工序信息</button>
+							&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+								id="ProcessWriteShow" data-inline="true" data-mini="true"
+								data-rel="dialog" href="#ProcessWriteInfo" data-role="button">查看已配置工序</a>
+						</center>
+						<button id="Default3" data-inline="true" data-mini="true"
+							data-corners="false" data-theme="c">输入默认信息</button>
+					</div>
+				</div>
+			</div>
+
+
+			<div data-role="collapsible" data-inset="false"
+				data-collapsed-icon="arrow-d" data-expanded-icon="arrow-u"
+				data-theme="b">
+				<h1 id="getWorkpieceName2">拟被跟踪零件工序定义</h1>
+				<select name="workpieceName2" id="workpieceName2">
+					<option value="">--请选择零件--</option>
+				</select> 请选择要绑定的机床和工序 : <select name="processName" id="processName">
+					<option value="">--请选择工序--</option>
+				</select> <select name="machName_p" id="machName_p">
+					<option value="">--请选择机床--</option>
+				</select>
+
+				<center>
+					<button id="workpiece_process" data-inline="true" data-mini="true">提交工序绑定信息</button>
+					&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+						id="workpiece_processShow" data-inline="true" data-mini="true"
+						data-rel="dialog" href="#workpiece_ProcessInfo" data-role="button">查看已绑定工序</a>
+				</center>
+			</div>
+
+
+
+			<!-- 这是用jsp写的信息分页显示部分 -->
+			<div data-role="collapsible" data-collapsed="false"
+				data-inset="false" data-collapsed-icon="arrow-d"
+				data-expanded-icon="arrow-u" data-theme="b">
+				<h1 id="getWorkpieceName">已定义零件信息管理</h1>
+				<table class="table  table-striped ">
+					<tr>
+						<td><a rel="external"
+							style="font-size: 16px; font-family: 微软雅黑; font-weight: 500; text-shadow: 0 1px 0">零件名称</a>
+						</td>
+						<td><a rel="external"
+							style="font-size: 16px; font-family: 微软雅黑; font-weight: 500; text-shadow: 0 1px 0">添加时间</a>
+						</td>
+						<td><a rel="external"
+							style="font-size: 16px; font-family: 微软雅黑; font-weight: 500; text-shadow: 0 1px 0">零件标志号</a>
+						</td>
+						<td style="text-align: center;"><a rel="external"
+							style="font-size: 16px; font-family: 微软雅黑; font-weight: 500; text-shadow: 0 1px 0">操作</a>
+						</td>
+					</tr>
+					<%
+						//初始化
+						int intPageNum;//一页显示的记录数
+						int intRowCount = 2;//记录的总数
+						int intPageCount;//总页数
+						int curPage;//正在显示的页码
+						int curRow;//待显示页码中第一条记录位置
+						String strPage = request.getParameter("page");
+						if (strPage == null) {
+							strPage = "1";
+						}
+						curPage = Integer.parseInt(strPage);
+					%>
+					<%
+						BaseDao baseDao = new BaseDao();
+						String sql = "select * from rfid_tag";
+
+						ResultSet rs = baseDao.queryData(sql);
+
+						rs.last();
+						intRowCount = rs.getRow();
+						if (intRowCount == -1)
+							intRowCount = 0;
+
+						intPageNum = 4;//一页显示四条
+						intPageCount = intRowCount / intPageNum;
+						if (intRowCount > intPageCount * intPageNum) {
+							intPageCount++;
+						}
+						if (curPage > intPageCount) {
+							curPage = 1;
+						}
+						if (curPage <= 0) {
+							curPage = 1;
+						}
+						curRow = curPage * intPageNum - intPageNum + 1;
+						rs.absolute(curRow);
+
+						if (intPageCount == 0) {
+							curPage = 0;
+						}
+						String prevlink = "";
+						String nextlink = "";
+						String firstlink = "";
+						String lastlink = "";
+						String backlink = "</a>";
+						//set the firstlink
+						if (intPageCount == 0) {
+							firstlink = "<a rel=external href=config.jsp?&page=0>";
+						} else {
+							firstlink = "<a  rel=external  href=config.jsp?&page=1>";
+						}
+
+						//set the prevlink
+						if (curPage - 1 >= 1) {
+							prevlink = "<a  rel=external href=config.jsp?&page=" + (curPage - 1) + ">";
+						} else {
+							prevlink = firstlink;
+						}
+						//set the nextlink
+						if (curPage + 1 <= intPageCount) {
+							nextlink = "<a  rel=external href=config.jsp?&page=" + (curPage + 1) + ">";
+						} else {
+							nextlink = "<a  rel=external href=config.jsp?&page=" + intPageCount + ">";
+						}
+						lastlink = "<a  rel=external href=config.jsp?&page=" + intPageCount + ">";
+						int i = 0;
+						try {
+							do {
+					%>
+					<tr>
+						<td><span rel="external"
+							style="font-size: 14px; font-family: 微软雅黑; font-weight: 500;"><%=rs.getString(3)%></span>
+						</td>
+						<td><span rel="external"
+							style="font-size: 14px; font-family: 微软雅黑; font-weight: 500;"><%=rs.getString(5)%></span>
+						</td>
+						<td><span rel="external"
+							style="font-size: 14px; font-family: 微软雅黑; font-weight: 500;"><%=rs.getString(6)%></span>
+						</td>
+						<td style="text-align: center;"><a
+							style="font-size: 14px; font-family: 微软雅黑; font-weight: 500;"
+							id="<%=rs.getString(6)%>" name="delete" href="#">删除</a>&nbsp;&brvbar;&nbsp;<a
+							data-rel="dialog"
+							style="font-size: 14px; font-family: 微软雅黑; font-weight: 500;"
+							id="<%=rs.getString(6) + "," + rs.getString(3)%>"
+							name="wokpiece_process" href="#processShow">工序信息</a></td>
+
+					</tr>
+					<%
+						i++;
+							} while (rs.next() && i < intPageNum);
+
+						} catch (Exception e) {
+					%>
+					<span>没有对应的信息</span>
+					<%
+						}
+					%>
+				</table>
+
+				<div data-role="navbar" data-theme="e">
+					<ul>
+						<li><%=firstlink%>首页<%=backlink%></li>
+						<li><%=prevlink%>上一页<%=backlink%></li>
+						<li><%=nextlink%>下一页</a></li>
+						<li><%=lastlink%>末页<%=backlink%></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+
+
+	</div>
+
+
+
+	<!-- 这里查看已配置系统签信息 -->
+	<div data-role="page" id="mach_rfidInfo" data-theme="c">
+		<div data-role="header" data-theme="c">
+			<h1>已配置机床-RFID系统绑定信息</h1>
+		</div>
+
+		<div data-role="content">
+			<div id="tag-input">
+				<h3 id="rfid_machForms">已配置标签</h3>
+				<table id="tag_table" class="table  table-bordered">
+					<thead>
+						<tr>
+							<th>序号</th>
+							<th>机床标识号</th>
+							<th>机床名称</th>
+							<th>RFID系统名称</th>
+							<th>RFID模式</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- 这里的内容有139行代码来完成 -->
+						<!-- 				<tr>
+						<td class="tag_count"></td>
+						<td class="tag_id"></td>
+						<td class="tag_name"></td>
+						<td class="apikey"></td>
+					</tr>
+-->
+					</tbody>
+				</table>
+
+			</div>
+			<center>
+				<a id="back_main" data-inline="true" href="#main" data-role="button">确定</a>
+			</center>
+		</div>
+
+		<div data-role="footer" data-theme="c">
+			<h1>页脚文本</h1>
+		</div>
+	</div>
+
+
+
+
+	<!-- 这里查看已配置工件信息 -->
+	<div data-role="page" id="workpiece_rfidInfo" data-theme="c">
+		<div data-role="header" data-theme="c">
+			<h1>查看已配置工件信息</h1>
+		</div>
+
+		<div data-role="content">
+			<div id="tag-workpiece">
+				<h3 id="rfid_workpiece">已绑定RFID标签和工件</h3>
+				<table id="tag_table_workpiece" class="table  table-bordered">
+					<thead>
+						<tr>
+							<th>序号</th>
+							<th>工件名称</th>
+							<th>RFID标签号</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- 				<tr>
+						<td class="tag_count"></td>
+						<td class="tag_id"></td>
+						<td class="tag_name"></td>
+						<td class="apikey"></td>
+					</tr>
+-->
+					</tbody>
+				</table>
+				<br>
+
+			</div>
+			</center>
+			<a id="back_main" data-inline="true" href="#main" data-role="button">确定</a>
+			</center>
+		</div>
+
+		<div data-role="footer" data-theme="c">
+			<h1>页脚文本</h1>
+		</div>
+	</div>
+	<!-- 这里查看工序的配置信息-->
+	<div data-role="page" id="workpiece_ProcessInfo" data-theme="c">
+		<div data-role="header" data-theme="c">
+			<h1>查看已配置工件工序信息</h1>
+		</div>
+
+		<div data-role="content">
+
+			<h3 id="rfid_workpieceProcess">已绑定工序</h3>
+			<table id="tag_table_process" class="table  table-bordered">
+				<thead>
+					<tr>
+						<th>序号</th>
+						<th>工件名称</th>
+						<th>工序名称</th>
+						<th>工序所在机床</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!-- 				<tr>
+						<td class="tag_count"></td>
+						<td class="tag_id"></td>
+						<td class="tag_name"></td>
+						<td class="apikey"></td>
+					</tr>
+-->
+				</tbody>
+			</table>
+
+
+		</div>
+
+
+	</div>
+
+
+
+	<!-- 这里查看工序的输入信息-->
+	<div data-role="page" id="ProcessWriteInfo" data-theme="c">
+		<div data-role="header" data-theme="c">
+			<h1>查看已配置工件工序信息</h1>
+		</div>
+
+		<div data-role="content">
+
+			<h3 id="Process_Write">已配置工序</h3>
+			<table id="ProcessWrite_table" class="table  table-bordered">
+				<thead>
+					<tr>
+						<th>序号</th>
+						<th>工件名称</th>
+						<th>工序标志号</th>
+						<th>工序名称</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!-- 				<tr>
+						<td class="tag_count"></td>
+						<td class="tag_id"></td>
+						<td class="tag_name"></td>
+						<td class="apikey"></td>
+					</tr>
+-->
+				</tbody>
+			</table>
+
+
+		</div>
+
+
+	</div>
+
+
+
+
+	<!-- 这是选择零件后的工件信息 -->
+	<div data-role="page" id="processShow" data-theme="c">
+		<div data-role="header" data-theme="c">
+			<h1>查看工件工序信息</h1>
+		</div>
+
+		<div data-role="content">
+
+			<center>
+				<h3>
+					工件<span id="workpieceShowN"></span>工序信息
+				</h3>
+			</center>
+			<table id="table_processshow" class="table  table-bordered">
+				<thead>
+					<tr>
+						<th>序号</th>
+						<th>工序标志号</th>
+						<th>工序名称</th>
+					</tr>
+				</thead>
+				<tbody id="ProcessTable">
+					<!-- 				<tr>
+						<td class="tag_count"></td>
+						<td class="tag_id"></td>
+						<td class="tag_name"></td>
+						<td class=" 
+						"></td>
+					</tr>
+-->
+				</tbody>
+			</table>
+
+
+		</div>
+
+
+	</div>
+
+
+
+
+
+
+
+
+
+	<!--    一个弹出层的插件
+   <a href="#login" data-rel="popup" data-position-to="window" data-role="button">Login</a> 
+    <div data-role="popup" id="login" data-theme="a"> 
+        <div style="padding:10px 20px;"> 
+            <h3>Please sign in</h3> 
+            <label for="un" class="ui-hidden-accessible">Username:</label> 
+            <input type="js" name="user" id="un" placeholder="username" /> 
+            <label for="pw" class="ui-hidden-accessible">Password:</label> 
+            <input type="password" name="pass" id="pw" placeholder="password" /> 
+            <button type="submit">Sign in</button> 
+        </div> 
+    </div> -->
+
+	<!-- 这个apikey的具体用处真的不懂 -->
+	<input type=hidden name="apikey" id="apikey" type="text"
+		disabled="true" readOnly="true" value="0001" />
+</body>
+</html>

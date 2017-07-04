@@ -1,0 +1,166 @@
+package xjtu.mes.manager;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import xjtu.mes.model.Machine;
+import xjtu.mes.model.Workpiece;
+import xjtu.mes.util.DbUtil;
+
+/**
+* @author 姜文雷
+* @version 创建时间：2016年11月7日 下午7:11:57
+* 类说明
+*/
+public class WorkpieceManager {
+	private static WorkpieceManager instance=null;
+	protected WorkpieceManager(){}
+	public  synchronized static WorkpieceManager getInstance(){
+		if(instance==null){
+			instance= new WorkpieceManager();
+		}
+		return instance;
+	}
+	
+	
+	public  boolean findWorkpieceByworkpieceId(int  workpieceId){
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		ResultSet rs = null;
+		String sql = " select * from workpiece where workpieceId ="+workpieceId;
+		try{
+			rs = stm.executeQuery(sql);
+			if(rs.next()){
+				return true;
+			}else{
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			System.out.println("sql error");
+		}finally{
+			DbUtil.close(rs);
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+	
+		return false;
+	}
+	
+	public  boolean findWorkpieceByworkpieceRfId(int  workpieceRfId){
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		ResultSet rs = null;
+		String sql = " select * from workpiece where workpieceRfId ="+workpieceRfId;
+		try{
+			rs = stm.executeQuery(sql);
+			if(rs.next()){
+				return true;
+			}else{
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			System.out.println("sql error");
+		}finally{
+			DbUtil.close(rs);
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+	
+		return false;
+	}
+	
+	/**
+	 * 获取所有未绑定的机床
+	 * @return
+	 */
+	public  List<Workpiece> getAllWorkpiece(){
+		List<Workpiece> workpieceList = new ArrayList<Workpiece>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select * from workpiece";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				Workpiece workpiece = new Workpiece();
+				
+				workpiece.setWorkpieceId(rs.getInt(1));
+				workpiece.setWorkpieceName(rs.getString(2));
+				workpiece.setWorkpieceRfId(rs.getString(3));
+				workpiece.setTime(rs.getTimestamp(4));
+				workpiece.setFlag(rs.getString(5));
+				
+				workpieceList.add(workpiece);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return workpieceList;
+	}
+	/**
+	 * 获取所有未绑定的机床
+	 * @return
+	 */
+	public  List<Machine> getAvalbMachines(){
+		List<Machine> MachineList = new ArrayList<Machine>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select * from machine where flag ='0' ";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				Machine machine = new Machine();
+				machine.setMachName(rs.getString(1));
+				machine.setMachId(rs.getInt(3));
+				MachineList.add(machine);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return MachineList;
+	}
+	public boolean addWorkpiece(Workpiece workpiece){
+		boolean flag = false;
+		String sql1 = "insert into workpiece  values(?,?,?,now(),null)";
+		Connection conn = DbUtil.getConnection();
+		PreparedStatement pstm = DbUtil.preparedStatement(conn,sql1);
+		try{
+			
+			pstm.setInt(1,workpiece.getWorkpieceId());
+			pstm.setString(2, workpiece.getWorkpieceName());
+			pstm.setString(3, workpiece.getWorkpieceRfId());
+			int rs = pstm.executeUpdate();
+			if(rs!=0){
+				System.out.println("添加零件成功");
+			}
+			flag = true;
+			
+		}catch(Exception e){
+			System.out.println("出现意外");
+			e.printStackTrace();
+			
+		}finally{
+			DbUtil.close(pstm);
+			DbUtil.close(conn);
+		}
+		return flag;
+	}
+	
+	
+	
+}

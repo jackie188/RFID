@@ -1,0 +1,59 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="425.1970" height="141.7320" viewBox="0.0000 0.0000 425.1970 141.7320"  version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" onload='Init(evt)'>
+   <script type='text/ecmascript'><![CDATA[
+          var SVGDocument = null;
+          var SVGRoot = null;
+          function Init(evt)
+          {
+                SVGDocument = evt.target.ownerDocument;
+                 SVGRoot = SVGDocument.documentElement;
+          }
+         function Toggle(evt,targetId)
+          {
+                      var obj = evt.target;
+         if (targetId)
+         {
+            obj = SVGDocument.getElementById(targetId);
+         }
+                id=obj.getAttributeNS(null, 'id');
+                var myobj,i,myid,strs,params,Number,states,state,cur
+                strs=id.split("(");
+                params=strs[1].split(";");
+                Number=strs[0];
+                states=params[1];
+                state=params[2];
+                cur=params[3];
+                states=parseInt(states);
+                state=parseInt(state);
+                if(state+1>=states)
+                        state=0;
+                else
+                        state=state+1;
+                for(i=0;i<states;i++)
+                {
+                        myid=Number+'('+params[0]+';'+states+';'+i+';'+cur+';'+params[4]+';'+params[5]+';'+params[6]+';'+params[7];
+                        myobj=SVGDocument.getElementById(myid);
+                        if(i==state)
+                        {
+                                myobj.setAttributeNS(null, 'visibility', 'visible');
+                        }
+                        else
+                        {
+                                myobj.setAttributeNS(null, 'visibility', 'hidden');
+                        }
+                }
+        }
+   ]]></script>
+<text transform="matrix(1.0000,0.0000,0.0000,1.0000,146.0000,62.0000)" x="0.0000" y="0.0000" >
+<tspan  x="-38.0000" y="18.0000" space="preserve" font-family="FangSong_GB2312" font-size="36.0000" style="fill-opacity:1.0000;fill:#EEEAEA;stroke:none ">RFID</tspan></text>
+<path transform="matrix(1.0000,0.0000,0.0000,1.0000,68.2370,60.8455)" d="M-0.2560,-30.3255L-11.4800,-4.1155L-26.2280,30.3255L8.0640,15.8395L26.2280,8.1675Z" style="fill-opacity:1.0000;fill:#8087E8;stroke:none "/>
+<path transform="matrix(1.0000,0.0000,0.0000,1.0000,84.0830,69.4675)" d="M-10.3830,-7.2175L-7.7810,7.2175L10.3830,-0.4545Z" style="fill-opacity:1.0000;fill:#30426B;stroke:none "/>
+<path transform="matrix(1.0000,0.0000,0.0000,1.0000,81.2230,49.7665)" d="M-13.2420,-19.2465L-7.5230,12.4845L13.2420,19.2465Z" style="fill-opacity:1.0000;fill:#6699A1;stroke:none "/>
+<path transform="matrix(1.0000,0.0000,0.0000,1.0000,68.2375,73.9500)" d="M5.4625,-11.7000L26.2285,-4.9370L-11.4795,-17.2210L-26.2285,17.2210L8.0645,2.7350Z" style="fill-opacity:1.0000;fill:#78758C;stroke:none "/>
+<path transform="matrix(1.0000,0.0000,0.0000,1.0000,41.5995,69.0130)" d="M0.4095,22.1580L15.1575,-12.2830L-15.1575,-22.1580Z" style="fill-opacity:1.0000;fill:#A3EDBA;stroke:none "/>
+<path transform="matrix(1.0000,0.0000,0.0000,1.0000,85.3840,82.0715)" d="M-9.0820,-5.3865L-5.7560,13.0585L9.0820,-13.0585Z" style="fill-opacity:1.0000;fill:#6699A1;stroke:none "/>
+<path transform="matrix(1.0000,0.0000,0.0000,1.0000,65.2285,46.3855)" d="M2.7525,-15.8655L-8.4715,10.3445L8.4715,15.8655Z" style="fill-opacity:1.0000;fill:#8087E8;stroke:none "/>
+
+</svg>

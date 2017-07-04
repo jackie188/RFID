@@ -1,0 +1,152 @@
+package config;
+
+import java.io.IOException;
+import java.sql.ResultSet;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import dbconn.BaseDao;
+
+import java.io.PrintWriter;
+import java.net.URLDecoder;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class Mach_rfidConnet extends HttpServlet {
+
+	private static final long serialVersionUID = 1L;
+	public Mach_rfidConnet() {
+		super();
+	}
+
+	public void destroy() {
+		super.destroy(); // Just puts "destroy" string in log
+		// Put your code here
+	}
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {	
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		String machName = URLDecoder.decode(request.getParameter("machName"),"utf-8");	//获得机床名称	
+		String machId = request.getParameter("machId");		//获得机床标号
+		String rfidName = request.getParameter("rfidName");	//获得rfid系统名称			
+		String rfidPort;
+		String apikey = request.getParameter("apikey");		//获得apikey
+		String rfidSysId = request.getParameter("rfidSysId"); //获得rfid系统标号
+		String rfidModel = request.getParameter("rfidModel"); //获得rfid模式
+		//@jiang 没看懂这两行的用意
+		int Port=Integer.parseInt(rfidSysId);
+		rfidPort=String.valueOf(Port);
+		
+		System.out.println("机床名称："+machName);
+		System.out.println("机床标号："+machId);
+		System.out.println("rfid系统名称："+rfidName);
+		System.out.println("rfid系统标号："+rfidSysId);
+		System.out.println("rfid模式："+rfidModel);
+		System.out.println("rfid系统端口号："+rfidPort);
+		String data1[] = new String[3];
+		String data2[] = new String[4];
+		data1[0]=machId;
+		data1[1]=machName;
+		data1[2]=rfidSysId;
+		
+		data2[0]=rfidSysId;
+		data2[1]=rfidName;
+		data2[2]=rfidModel;
+		data2[3]=rfidPort;
+		String sql1 = "insert into mach_rfId(machId,machName,rfidSysId) values(?,?,?)";
+		BaseDao dao = new BaseDao();
+		int result1 = dao.executeSql(sql1, data1, 0);//插入数据库mach——rfid
+		System.out.println("绑定机器和rfid系统成功");
+		//插入另一个数据库
+		//@jiang 这里因为rfidSysid为主键，因为数据库中表中已经存在此时提交的rfidSysId，无法插入成功的。name也无法修改，感觉这里没用
+		String sql2 = "insert into rfidsystem(rfidSysId,rfidName,rfidModel,rfidPort) values(?,?,?,?)";
+		BaseDao dao2 = new BaseDao();
+		int result2 = dao2.executeSql(sql2, data2, 0);//插入数据库rfidsystem
+		System.out.println("创建rfidsystem成功");
+		
+		/*String data3[] = new String[4];
+		String data4[] = new String[4];
+		String data5[] = new String[4];
+		if(rfidModel.equals("a")){
+			System.out.println("模式A的配置");	
+			data3[0]="1012";
+			data4[0]="1013";
+			data5[0]="1014";
+			data3[2]="天线-1";
+			data4[2]="天线-2";
+			data5[2]="天线-3";	
+			data3[3]=rfidSysId;
+			data4[3]=rfidSysId;
+			data5[3]=rfidSysId;
+			data3[1]=apikey;
+			data4[1]=apikey;
+			data5[1]=apikey;			
+			String sql3 = "insert into device(deviceId,apiKey,deviceName,rfidSysId) values(?,?,?,?)";
+			dao.executeSql(sql3, data3, 0);
+			dao.executeSql(sql3, data4, 0);
+			dao.executeSql(sql3, data5, 0);					
+		}
+		else if(rfidModel.equals("b")){
+			System.out.println("模式B的配置");
+			data3[0]="1015";
+			data4[0]="1016";
+			data3[2]="天线-4";
+			data4[2]="天线-5";
+			data3[3]=rfidSysId;
+			data4[3]=rfidSysId;
+			data3[1]=apikey;
+			data4[1]=apikey;		
+			String sql4 = "insert into device(deviceId,apiKey,deviceName,rfidSysId) values(?,?,?,?)";
+			dao.executeSql(sql4, data3, 0);
+			dao.executeSql(sql4, data4, 0);
+		}
+		else if(rfidModel.equals("c")){
+			System.out.println("模式C的配置");
+			data3[0]="1017";
+			data4[0]="1018";
+			data3[2]="天线-6";
+			data4[2]="天线-7";	
+			data3[3]=rfidSysId;
+			data4[3]=rfidSysId;
+			data3[1]=apikey;
+			data4[1]=apikey;		
+			String sql5 = "insert into device(deviceId,apiKey,deviceName,rfidSysId) values(?,?,?,?)";
+			dao.executeSql(sql5, data3, 0);
+			dao.executeSql(sql5, data4, 0);
+		}*/
+		response.getWriter().print(result1);
+		response.getWriter().print("传过去的数据为："+result1+result2);
+		
+		//@jiang 这里的mechine 表又是干啥的，明明是手动输入的machid ，怎么这么巧会和数据库对应
+		String sql3 = "update machine SET flag=0 where machId= '"+machId+"' ";//这一句语法有问题，要改正
+		dao2.executeUpdate(sql3);
+		System.out.println("更新机床数据库成功");
+		
+	}
+
+	/**
+	 * Initialization of the servlet. <br>
+	 *
+	 * @throws ServletException if an error occurs
+	 */
+	public void init() throws ServletException {
+		// Put your code here
+	}
+
+}

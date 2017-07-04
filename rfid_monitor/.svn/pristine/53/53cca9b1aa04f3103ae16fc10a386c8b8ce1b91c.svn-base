@@ -1,0 +1,145 @@
+package xjtu.mes.manager;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
+/**
+* @author 姜文雷
+* @version 创建时间：2016年11月5日 上午9:57:12
+* 类说明 
+* 此类为管理类，采用单利模式
+* 负责 rfidsystem的相关管理，操作
+*/
+
+
+import java.util.List;
+import com.sun.media.sound.RIFFInvalidDataException;
+
+import xjtu.mes.model.Machine;
+import xjtu.mes.model.RfidSystem;
+import xjtu.mes.util.*;
+
+public class RfidSystemManager {
+	private static RfidSystemManager instance=null;
+	protected RfidSystemManager(){}
+	public  synchronized static RfidSystemManager getInstance(){
+		if(instance==null){
+			instance= new RfidSystemManager();
+		}
+		return instance;
+	}
+	
+	/**
+	 * 获取所有rfid系统
+	 * @return List<RfidSystem>
+	 */
+	public  List<RfidSystem> getRfidSystems(){
+		List<RfidSystem> rfidSystemList = new ArrayList<RfidSystem>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select * from rfidsystem ";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				RfidSystem rfidSystem = new RfidSystem();
+				rfidSystem.setRfidSysId(rs.getInt(1));
+				rfidSystem.setRfidName(rs.getString(2));
+				rfidSystem.setRfidModel(rs.getString(3));
+				rfidSystem.setRfidPort(rs.getInt(4));
+				rfidSystem.setFlag(rs.getString(5));
+				rfidSystemList.add(rfidSystem);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return rfidSystemList;
+	}
+	
+	/**
+	 * 获取还未绑定的rifd系统
+	 * @return
+	 */
+	public  List<RfidSystem> getAvalbSystems(){
+		List<RfidSystem> rfidSystemList = new ArrayList<RfidSystem>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select * from rfidsystem where flag ='0' ";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				RfidSystem rfidSystem = new RfidSystem();
+				rfidSystem.setRfidSysId(rs.getInt(1));
+				rfidSystem.setRfidName(rs.getString(2));
+				rfidSystem.setRfidModel(rs.getString(3));
+				rfidSystem.setRfidPort(rs.getInt(4));
+				rfidSystem.setFlag(rs.getString(5));
+				rfidSystemList.add(rfidSystem);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return rfidSystemList;
+	}
+	
+	public  boolean findRfidByRfidId(String rfidSysId){
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		ResultSet rs = null;
+		String sql = " select * from rfidsystem where rfidSysId = '"+ rfidSysId+"'";
+		try{
+			rs = stm.executeQuery(sql);
+			if(rs.next()){
+				return true;
+			}else{
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			System.out.println("sql error");
+		}finally{
+			DbUtil.close(rs);
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+	
+		return false;
+	}
+	public boolean addRfid(RfidSystem rfid){
+		boolean flag = false;
+		String sql1 = "insert into rfidsystem(rfidSysId,rfidName,rfidIp) values(?,?,?)";
+		Connection conn = DbUtil.getConnection();
+		PreparedStatement pstm = DbUtil.preparedStatement(conn,sql1);
+		try{
+			
+			pstm.setInt(1,rfid.getRfidSysId() );
+			pstm.setString(2, rfid.getRfidName());
+			pstm.setString(3, rfid.getRfidIp());
+			int rs = pstm.executeUpdate();
+			if(rs!=0){
+				System.out.println("添加rfid系统成功");
+			}
+			flag = true;
+			
+		}catch(Exception e){
+			System.out.println("出现意外");
+			e.printStackTrace();
+			
+		}finally{
+			DbUtil.close(pstm);
+			DbUtil.close(conn);
+		}
+		return flag;
+	}
+}

@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+ 
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetMachName</servlet-name>
+    <servlet-class>config.GetMachName</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>Mach_rfidConnet</servlet-name>
+    <servlet-class>config.Mach_rfidConnet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetMachName</servlet-name>
+    <url-pattern>/GetMachName</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>Mach_rfidConnet</servlet-name>
+    <url-pattern>/Mach_rfidConnet</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <description></description>
+    <display-name>GetWorkpieceName</display-name>
+    <servlet-name>GetWorkpieceName</servlet-name>
+    <servlet-class>config.GetWorkpieceName</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetWorkpieceName</servlet-name>
+    <url-pattern>/GetWorkpieceName</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>WorkpieceConfig</display-name>
+    <servlet-name>WorkpieceConfig</servlet-name>
+    <servlet-class>config.WorkpieceConfig</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>WorkpieceConfig</servlet-name>
+    <url-pattern>/WorkpieceConfig</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>RfidStateConfig</display-name>
+    <servlet-name>RfidStateConfig</servlet-name>
+    <servlet-class>config.RfidStateConfig</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetrfidSystem</servlet-name>
+    <servlet-class>config.GetrfidSystem</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetTagState</servlet-name>
+    <servlet-class>config.GetTagState</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>Device_config</servlet-name>
+    <servlet-class>config.Device_config</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetMachPort</servlet-name>
+    <servlet-class>trackWorkpiece.GetMachPort</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetMachName_p</servlet-name>
+    <servlet-class>config.GetMachName_p</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetProcessName</servlet-name>
+    <servlet-class>config.GetProcessName</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetWorkpieceInfo</servlet-name>
+    <servlet-class>trackWorkpiece.GetWorkpieceInfo</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetProcessInfo</servlet-name>
+    <servlet-class>trackWorkpiece.GetProcessInfo</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>TrackWorkpiece</servlet-name>
+    <servlet-class>trackWorkpiece.TrackWorkpiece</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetWorkpiece</servlet-name>
+    <servlet-class>manage.GetWorkpiece</servlet-class>
+  </servlet>
+  
+    <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetWorkpieceAll</servlet-name>
+    <servlet-class>manage.GetWorkpieceAll</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetProcessTime</servlet-name>
+    <servlet-class>manage.GetProcessTime</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>ProcessConfig</servlet-name>
+    <servlet-class>config.ProcessConfig</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetOneMachInfo</servlet-name>
+    <servlet-class>manage.GetOneMachInfo</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetOneWorkpieceTime</servlet-name>
+    <servlet-class>manage.GetOneWorkpieceTime</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetWorkpieceName2</servlet-name>
+    <servlet-class>config.GetWorkpieceName2</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>ProcessWrite</servlet-name>
+    <servlet-class>config.ProcessWrite</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>GetMachList</servlet-name>
+    <servlet-class>manage.GetMachList</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>ClearDateBase</servlet-name>
+    <servlet-class>config.ClearDateBase</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>DeleteInfo</servlet-name>
+    <servlet-class>config.DeleteInfo</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>ShowWorkpiece</servlet-name>
+    <servlet-class>config.ShowWorkpiece</servlet-class>
+  </servlet>
+
+
+
+
+
+
+
+  <servlet-mapping>
+    <servlet-name>RfidStateConfig</servlet-name>
+    <url-pattern>/RfidStateConfig</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetrfidSystem</servlet-name>
+    <url-pattern>/GetrfidSystem</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetTagState</servlet-name>
+    <url-pattern>/GetTagState</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>Device_config</servlet-name>
+    <url-pattern>/Device_config</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetMachPort</servlet-name>
+    <url-pattern>/GetMachPort</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetMachName_p</servlet-name>
+    <url-pattern>/GetMachName_p</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetProcessName</servlet-name>
+    <url-pattern>/GetProcessName</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetWorkpieceInfo</servlet-name>
+    <url-pattern>/GetWorkpieceInfo</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetProcessInfo</servlet-name>
+    <url-pattern>/GetProcessInfo</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>TrackWorkpiece</servlet-name>
+    <url-pattern>/TrackWorkpiece</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetWorkpiece</servlet-name>
+    <url-pattern>/GetWorkpiece</url-pattern>
+  </servlet-mapping>
+    <servlet-mapping>
+    <servlet-name>GetWorkpieceAll</servlet-name>
+    <url-pattern>/GetWorkpieceAll</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetProcessTime</servlet-name>
+    <url-pattern>/GetProcessTime</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ProcessConfig</servlet-name>
+    <url-pattern>/ProcessConfig</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetOneMachInfo</servlet-name>
+    <url-pattern>/GetOneMachInfo</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetOneWorkpieceTime</servlet-name>
+    <url-pattern>/GetOneWorkpieceTime</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetWorkpieceName2</servlet-name>
+    <url-pattern>/GetWorkpieceName2</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ProcessWrite</servlet-name>
+    <url-pattern>/ProcessWrite</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetMachList</servlet-name>
+    <url-pattern>/GetMachList</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ClearDateBase</servlet-name>
+    <url-pattern>/ClearDateBase</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>DeleteInfo</servlet-name>
+    <url-pattern>/DeleteInfo</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ShowWorkpiece</servlet-name>
+    <url-pattern>/ShowWorkpiece</url-pattern>
+  </servlet-mapping>
+  
+  <welcome-file-list>
+    <welcome-file>example.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>login.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+</web-app>

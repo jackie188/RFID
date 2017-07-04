@@ -1,0 +1,235 @@
+package xjtu.mes.manager;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
+/**
+* @author 姜文雷
+* @version 创建时间：2016年11月5日 上午9:57:12
+* 类说明 
+* 此类为管理类，采用单利模式
+* 负责 rfidsystem的相关管理，操作
+*/
+
+
+import java.util.List;
+import com.sun.media.sound.RIFFInvalidDataException;
+
+import xjtu.mes.model.Machine;
+import xjtu.mes.model.RfidSystem;
+import xjtu.mes.util.*;
+
+public class RfidSystemManager {
+	private static RfidSystemManager instance=null;
+	protected RfidSystemManager(){}
+	public  synchronized static RfidSystemManager getInstance(){
+		if(instance==null){
+			instance= new RfidSystemManager();
+		}
+		return instance;
+	}
+	
+	/**
+	 * 获取所有rfid系统
+	 * @return List<RfidSystem>
+	 */
+	public  List<RfidSystem> getRfidSystems(){
+		List<RfidSystem> rfidSystemList = new ArrayList<RfidSystem>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select * from rfidsystem ";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				RfidSystem rfidSystem = new RfidSystem();
+				rfidSystem.setRfidSysId(rs.getString(1));
+				rfidSystem.setRfidName(rs.getString(2));
+				rfidSystem.setRfidModel(rs.getString(3));
+				rfidSystem.setRfidPort(rs.getInt(4));
+				rfidSystem.setRfidIp(rs.getString(5));
+				rfidSystem.setFlag(rs.getString(6));
+				rfidSystemList.add(rfidSystem);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return rfidSystemList;
+	}
+	
+	/**
+	 * 获取还未绑定的rifd系统
+	 * @return
+	 */
+	public  List<RfidSystem> getAvalbSystems(){
+		List<RfidSystem> rfidSystemList = new ArrayList<RfidSystem>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select * from rfidsystem where flag ='0' ";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				RfidSystem rfidSystem = new RfidSystem();
+				rfidSystem.setRfidSysId(rs.getString(1));
+				rfidSystem.setRfidName(rs.getString(2));
+				rfidSystem.setRfidModel(rs.getString(3));
+				rfidSystem.setRfidPort(rs.getInt(4));
+				rfidSystem.setFlag(rs.getString(5));
+				rfidSystemList.add(rfidSystem);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return rfidSystemList;
+	}
+	
+	public  boolean findRfidByRfidId(String rfidSysId){
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		ResultSet rs = null;
+		String sql = " select * from rfidsystem where rfidSysId ='"+rfidSysId+"'";
+		try{
+			rs = stm.executeQuery(sql);
+			if(rs.next()){
+				return true;
+			}else{
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			System.out.println("sql error");
+		}finally{
+			DbUtil.close(rs);
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+	
+		return false;
+	}
+	public boolean addRfid(RfidSystem rfid){
+		boolean flag = false;
+		String sql1 = "insert into rfidsystem(rfidSysId,rfidName,rfidIp) values(?,?,?)";
+		Connection conn = DbUtil.getConnection();
+		PreparedStatement pstm = DbUtil.preparedStatement(conn,sql1);
+		try{
+			
+			pstm.setString(1,rfid.getRfidSysId() );
+			pstm.setString(2, rfid.getRfidName());
+			pstm.setString(3, rfid.getRfidIp());
+			int rs = pstm.executeUpdate();
+			if(rs!=0){
+				System.out.println("添加rfid系统成功");
+			}
+			flag = true;
+			
+		}catch(Exception e){
+			System.out.println("出现意外");
+			e.printStackTrace();
+			
+		}finally{
+			DbUtil.close(pstm);
+			DbUtil.close(conn);
+		}
+		return flag;
+	}
+	
+	public boolean editRfid(RfidSystem rfid){
+		boolean flag = false;
+		String sql1 = "update rfidsystem set  rfidname =? ,rfidIp =? where rfidSysId= ?";
+		Connection conn = DbUtil.getConnection();
+		PreparedStatement pstm = DbUtil.preparedStatement(conn,sql1);
+		try{
+			
+		
+			pstm.setString(1, rfid.getRfidName());
+			pstm.setString(2, rfid.getRfidIp());
+			pstm.setString(3,rfid.getRfidSysId());
+			int rs = pstm.executeUpdate();
+			if(rs!=0){
+				System.out.println("添加rfid系统成功");
+			}
+			flag = true;
+			
+		}catch(Exception e){
+			System.out.println("出现意外");
+			e.printStackTrace();
+			
+		}finally{
+			DbUtil.close(pstm);
+			DbUtil.close(conn);
+		}
+		return flag;
+	}
+	public boolean deleteRfidSystemByRfidId(String rfidId){
+		boolean flag = false;
+		PreparedStatement pstm =null;
+		PreparedStatement pstm1 =null;
+		PreparedStatement pstm2 =null;
+		PreparedStatement pstm3 =null;
+		PreparedStatement pstm4 =null;
+		String sql1 = "delete from rfidsystem where rfidSysId = ? ";
+		Connection conn = DbUtil.getConnection();
+		pstm = DbUtil.preparedStatement(conn,sql1);
+		try{
+			conn.setAutoCommit(false);
+			pstm.setString(1,rfidId );
+			int rs = pstm.executeUpdate();
+			if(rs!=0){
+				System.out.println("删除rfid系统成功");
+			}
+			
+			String sql2 = "select * from mach_rfid where rfidSysId = ? ";
+			pstm2 = DbUtil.preparedStatement(conn,sql2);
+			pstm2.setString(1,rfidId );
+			ResultSet r  = pstm2.executeQuery();
+			if(r.next()){
+				
+				String machId = r.getString("machId");
+				String sql3 = "update machine set flag = '0' where machId = ? ";
+				pstm3 = DbUtil.preparedStatement(conn,sql3);
+				pstm3.setString(1, machId);
+				rs = pstm3.executeUpdate();
+				if(rs != 0){
+					System.out.println("更新机床状态成功");
+				}
+				
+				String sql4 = "delete from mach_rfid where rfidSysId = ? ";
+				pstm4 = DbUtil.preparedStatement(conn,sql4);
+				pstm4.setString(1,rfidId );
+				rs = pstm4.executeUpdate();
+				if(rs!=0){
+					System.out.println("删除绑定关系成功");
+				}
+				
+			}
+			
+			conn.commit();
+			conn.setAutoCommit(true);
+			flag = true;
+			
+		}catch(Exception e){
+			System.out.println("出现意外");
+			e.printStackTrace();
+			
+		}finally{
+			DbUtil.close(pstm);
+			DbUtil.close(pstm1);
+			DbUtil.close(pstm2);
+			DbUtil.close(pstm3);
+			DbUtil.close(pstm4);
+			DbUtil.close(conn);
+		}
+		return flag;
+	}
+}

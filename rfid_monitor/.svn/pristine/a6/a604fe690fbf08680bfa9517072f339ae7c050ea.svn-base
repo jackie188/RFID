@@ -1,0 +1,173 @@
+package com.byteslounge.websockets;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.websocket.OnClose;
+import javax.websocket.OnMessage;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
+import javax.websocket.server.ServerEndpoint;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import RFID_java.RFID_server1;
+/*这是引入的socket相关文件*/
+
+@ServerEndpoint("/websocket")
+public class WebSocketTest {
+
+	private static final Log log = LogFactory.getLog(WebSocketTest.class);
+
+	private static final String GUEST_PREFIX = "Guest";
+	private static final AtomicInteger connectionIds = new AtomicInteger(0);
+	//因为这个是静态的，会被所有客户端拥有，其他客户端的信息。
+	private static final Set<WebSocketTest> connections = new CopyOnWriteArraySet<WebSocketTest>();
+	// �����broadcast�൱��session����
+	private String nickname;
+	private Session session;
+	private String Port;
+	private int number = connectionIds.getAndIncrement();
+
+	public WebSocketTest() {
+		nickname = GUEST_PREFIX + number;
+
+	}
+
+	@OnMessage
+	public void onMessage(String message, Session session) throws IOException, InterruptedException {
+		System.out.println("接收到的数据为: " + message);
+		System.out.println("开始传递数据");
+		/* 这是socket程序 */
+		/* RFID_serve manager = new RFID_serve(); */
+		// manager.doListen();
+
+		// 连接端口号，并开始测试，暂时可以不用
+		
+		//@jiang 这个线程必须先开启，不然没tcp设置端口，找不到rfid系统，这里师兄写可能有问题
+		if (message.length() == 4) {
+			System.out.println("接收到的端口号为: "
+					+ message); /* 这里将message=port，及将所有的如机床都设定为一种。 */
+			Port = message;
+			RFID_server1 tt = new RFID_server1();
+			System.out.println("TCP连接开始了");
+			tt.getPort(message);
+			tt.start();
+			// tt.setDaemon(true);
+							
+		} //接受要监控的零件id
+		else if (message.length() == 5) {
+			// 这一个信息是为了吧demo的workpieceId传送出去
+			System.out.println("接收到的零件工序号为" + message);
+			String str = "E200 3412 DC03 0118 0816 DEMO";// 这里的str有意义，只能通过str向tcp传数据了
+			String deviceId = "1000";
+			String apikey = "0001";
+			String workpieceId = message;
+			String flag = "true";
+			sentData2Api(str, deviceId, apikey, workpieceId, Port, flag);
+			// 这样就可以发送停止命令了，非常好
+		} else if (message.equals("stopSocket")) {
+			System.out.println("结束了");
+			String str = "0000 0000 0000 0000 0000 0000";
+			String deviceId = "1000";
+			String apikey = "0000";
+			String flag = "false";
+			String workpieceId = "00000";
+			sentData2Api(str, deviceId, apikey, workpieceId, Port, flag);
+			// 这样就可以发送停止命令了，非常好
+		} else if (message.equals("testSocket")) {
+			System.out.println("结束了");
+			String str = "0000 0000 0000 0000 0000 0000";
+			String deviceId = "0000";
+			String apikey = "0000";
+			String flag = "true";
+			String workpieceId = "00000";
+			sentData2Api(str, deviceId, apikey, workpieceId, Port, flag);
+			// 这样就可以发送停止命令了，非常好
+		}
+
+	}
+
+	@OnOpen
+	public void onOpen(Session session) {
+
+		this.session = session;
+		connections.add(this);
+		System.out.println("Client connected");
+		System.out.println("Websocket连接成功");
+	}
+
+	@OnClose
+	public void onClose() {
+		connections.remove(this);
+		System.out.println("结束了");
+		String str = "0000 0000 0000 0000 0000 0000";
+		String deviceId = "1000";
+		String apikey = "0000";
+		String flag = "false";
+		String workpieceId = "00000";
+		try {
+			sentData2Api(str, deviceId, apikey, workpieceId, Port, flag);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("连接关闭，Connection closed");
+	}
+
+	public void broadcast(String msg) {
+		for (WebSocketTest client : connections) {
+			try {
+				synchronized (client) {
+					client.session.getBasicRemote().sendText(msg);
+				}
+			} catch (IOException e) {
+				log.debug("Chat Error: Failed to send message to client", e);
+				connections.remove(client);
+				try {
+					client.session.close();
+				} catch (IOException e1) {
+					System.out.println("连接关闭");
+				}
+				String message = String.format("* %s %s", client.nickname, "has been disconnected.");
+				broadcast(message);
+			}
+		}
+	}
+
+	// 如果关闭也要带port的处理方式有两种，1，是所有地方都加sentDate均加上Port，2，是每一个程序都分开加一个判断
+	public static void sentData2Api(String str, String deviceId, String apikey, String workpieceId, String Port,
+			String flag) throws IOException {
+		Socket socket = null;
+		int SocketPort = Integer.valueOf(Port);
+		try {
+			//@jiang 这里地址为啥是本地地址
+			socket = new Socket("127.0.0.1", SocketPort);
+			// 向服务器端第一次发送字符串
+			OutputStream netOut = socket.getOutputStream();
+			DataOutputStream doc = new DataOutputStream(netOut);
+			doc.writeUTF(apikey + deviceId + str + workpieceId + Port + flag);
+			doc.close();
+			// in.close();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (socket != null) {
+				try {
+					socket.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+	}
+
+}

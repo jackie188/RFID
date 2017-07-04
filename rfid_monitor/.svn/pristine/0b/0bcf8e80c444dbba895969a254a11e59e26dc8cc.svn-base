@@ -1,0 +1,318 @@
+package xjtu.mes.manager;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import xjtu.mes.model.Machine;
+import xjtu.mes.model.Workpiece;
+import xjtu.mes.util.DbUtil;
+
+/**
+* @author 姜文雷
+* @version 创建时间：2016年11月7日 下午7:11:57
+* 类说明
+*/
+public class WorkpieceManager {
+	private static WorkpieceManager instance=null;
+	protected WorkpieceManager(){}
+	public  synchronized static WorkpieceManager getInstance(){
+		if(instance==null){
+			instance= new WorkpieceManager();
+		}
+		return instance;
+	}
+	
+	
+	public  boolean findWorkpieceByworkpieceId(String  workpieceId){
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		ResultSet rs = null;
+		String sql = " select * from workpiece where workpieceId ='"+workpieceId+"'";
+		try{
+			rs = stm.executeQuery(sql);
+			if(rs.next()){
+				return true;
+			}else{
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			System.out.println("sql error");
+		}finally{
+			DbUtil.close(rs);
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+	
+		return false;
+	}
+	public  Workpiece getWorkpieceByworkpieceId(String  workpieceId){
+		Workpiece workpiece = null;
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		ResultSet rs = null;
+		String sql = " select * from workpiece where workpieceId ='"+workpieceId+"'";
+		try{
+			rs = stm.executeQuery(sql);
+			if(rs.next()){
+				
+				workpiece = new Workpiece(rs.getString(1),rs.getString(2),rs.getString(3));
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			System.out.println("sql error");
+		}finally{
+			DbUtil.close(rs);
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+	
+		return workpiece;
+	}
+	
+	public  boolean findWorkpieceByworkpieceRfId(String  workpieceRfId){
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		ResultSet rs = null;
+		String sql = " select * from workpiece where workpieceRfId ='"+workpieceRfId+"'";
+		try{
+			rs = stm.executeQuery(sql);
+			if(rs.next()){
+				return true;
+			}else{
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			System.out.println("sql error");
+		}finally{
+			DbUtil.close(rs);
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+	
+		return false;
+	}
+	
+	/**
+	 * 获取所有未
+	 * @return
+	 */
+	public  List<Workpiece> getWorkpiecesByName(String name){
+		List<Workpiece> workpieceList = new ArrayList<Workpiece>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select * from workpiece where workpieceName ='"+name+"'";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				Workpiece workpiece = new Workpiece();
+				
+				workpiece.setWorkpieceId(rs.getString(1));
+				workpiece.setWorkpieceName(rs.getString(2));
+				workpiece.setWorkpieceRfId(rs.getString(3));
+				workpiece.setTime(rs.getTimestamp(4));
+				workpiece.setFlag(rs.getString(5));
+				
+				workpieceList.add(workpiece);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return workpieceList;
+	}
+	/**
+	 * 获取所有未
+	 * @return
+	 */
+	public  List<Workpiece> getWorkpieces(){
+		List<Workpiece> workpieceList = new ArrayList<Workpiece>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select * from workpiece";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				Workpiece workpiece = new Workpiece();
+				
+				workpiece.setWorkpieceId(rs.getString(1));
+				workpiece.setWorkpieceName(rs.getString(2));
+				workpiece.setWorkpieceRfId(rs.getString(3));
+				workpiece.setTime(rs.getTimestamp(4));
+				workpiece.setFlag(rs.getString(5));
+				
+				workpieceList.add(workpiece);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return workpieceList;
+	}
+	/**
+	 * 获取所有不同名字的零件，代表不同类
+	 * @return
+	 */
+	public  List<Workpiece> getWorkpiecesByDifferentName(){
+		List<Workpiece> workpieceList = new ArrayList<Workpiece>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select distinct workpieceName from workpiece";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				Workpiece workpiece = new Workpiece();
+				workpiece.setWorkpieceName(rs.getString("workpieceName"));
+				workpieceList.add(workpiece);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return workpieceList;
+	}
+	
+	
+	public  List<Workpiece> getWorkpiecesByMachId(String machId){
+		List<Workpiece> workpieceList = new ArrayList<Workpiece>();
+		Connection conn =null;
+		Statement stm1 = null;
+		Statement stm2 = null;
+		Statement stm3 = null;
+		conn = DbUtil.getConnection();
+		try{
+			stm1 = DbUtil.createStatemnt(conn);
+			String sql1 = "select distinct workpieceId from workpiece_process where machId ='"+machId+"'";
+			ResultSet rs1 = DbUtil.executeQuery(stm1, sql1);
+			while( rs1.next()){
+				stm2 = DbUtil.createStatemnt(conn);
+				String sql2 = "select * from workpiece where workpieceId ='"+rs1.getString("workpieceId")+"'";
+				ResultSet rs2 = stm2.executeQuery(sql2);
+				if(rs2.next()){
+					Workpiece workpiece = new Workpiece();
+					workpiece.setWorkpieceId(rs2.getString(1));
+					workpiece.setWorkpieceName(rs2.getString(2));
+					workpiece.setWorkpieceRfId(rs2.getString(3));
+					workpiece.setTime(rs2.getTimestamp(4));
+					workpiece.setFlag(rs2.getString(5));
+					workpieceList.add(workpiece);
+				}
+				
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm1);
+			DbUtil.close(stm2);
+			DbUtil.close(stm3);
+			DbUtil.close(conn);
+		}
+		return workpieceList;
+	}
+	/**
+	 * 获取所有未绑定的机床
+	 * @return
+	 *//*
+	public  List<Machine> getAvalbMachines(){
+		List<Machine> MachineList = new ArrayList<Machine>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select * from machine where flag ='0' ";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				Machine machine = new Machine();
+				machine.setMachName(rs.getString(1));
+				machine.setMachId(rs.getString(3));
+				MachineList.add(machine);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return MachineList;
+	}*/
+	
+	public boolean addWorkpiece(Workpiece workpiece){
+		boolean flag = false;
+		String sql1 = "insert into workpiece  values(?,?,?,now(),'0')";
+		Connection conn = DbUtil.getConnection();
+		PreparedStatement pstm = DbUtil.preparedStatement(conn,sql1);
+		try{
+			
+			pstm.setString(1,workpiece.getWorkpieceId());
+			pstm.setString(2, workpiece.getWorkpieceName());
+			pstm.setString(3, workpiece.getWorkpieceRfId());
+			int rs = pstm.executeUpdate();
+			if(rs!=0){
+				System.out.println("添加零件成功");
+			}
+			flag = true;
+			
+		}catch(Exception e){
+			System.out.println("出现意外");
+			e.printStackTrace();
+			
+		}finally{
+			DbUtil.close(pstm);
+			DbUtil.close(conn);
+		}
+		return flag;
+	}
+	
+	public boolean deleteWorkpieceByWorkpieceId(String workpieceId){
+		boolean flag = false;
+		
+		Connection conn = DbUtil.getConnection();
+		PreparedStatement pstm1 = null; 
+		PreparedStatement pstm2 = null;
+		
+		try{
+			conn.setAutoCommit(false);
+			String sql1 = "delete from workpiece where workpieceId = ? ";
+			pstm1 = DbUtil.preparedStatement(conn,sql1);
+			pstm1.setString(1,workpieceId );
+			int rs1 = pstm1.executeUpdate();
+			
+			String sql2 = "delete from workpiece_process where workpieceId = ? ";
+			pstm2 = DbUtil.preparedStatement(conn,sql2);
+			pstm2.setString(1,workpieceId );
+			int rs2 = pstm2.executeUpdate();
+			if(rs2!=0&&rs1!=0){
+				System.out.println("删除零件成功");
+			}
+			flag = true;
+			conn.commit();
+			conn.setAutoCommit(true);
+		}catch(Exception e){
+			System.out.println("出现意外");
+			e.printStackTrace();
+			
+		}finally{
+			DbUtil.close(pstm1);
+			DbUtil.close(pstm2);
+			DbUtil.close(conn);
+		}
+		return flag;
+	}
+}

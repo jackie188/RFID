@@ -1,0 +1,363 @@
+
+/*这段代码是利用websoc实时查询数据库	，更新工序监控*/	
+		var webSocket = new WebSocket('ws://localhost:8080/mes_online/websocket');
+
+		webSocket.onerror = function(event) {
+			onError(event)
+		};
+
+		webSocket.onopen = function(event) {
+			console.log("开启websocket：");
+			onOpen(event)
+		};
+
+		webSocket.onmessage = function(event) {
+			//console.log(event);
+			onMessage(event)
+			
+			
+		};
+
+		function onMessage(event) {
+			//event比servlet获得json数据多了一层，data：{servlet的数据}
+			for(var j=1;j<=7;j++){
+				document.getElementById("process"+j).style.display="none";
+				document.getElementById("processInfo"+j).innerHTML="无数据";
+				document.getElementById("machInfo"+j).innerHTML="无数据";
+				
+				document.getElementById("time"+j).innerHTML="无数据";
+				document.getElementById("startTime"+j).innerHTML="无数据";
+				document.getElementById("machTime"+j).innerHTML="无数据";
+				document.getElementById("inTime"+j).innerHTML="无数据";
+				document.getElementById("outTime"+j).innerHTML="无数据";
+				for (var i = 1; i <=6; i++) {
+					document.getElementById("time"+j+""+i).innerHTML="";
+					var div = document.getElementById(""+j+""+i);
+					div.className = ''; 
+				}
+			}
+			if(event["data"] == "0"){
+				console.log("result['data']="+event["data"] );
+				//document.getElementById("detialWorkpiece").innerHTML = "当前零件还未配置工序";
+			}else{
+				
+				var data = event["data"]; //js中解析Json格式到result中
+				//console.log(data);
+				
+				
+				var result = eval("(" + data + ")");
+				var json1 = result.rows; // rows是数组
+				console.log(json1);
+				for (var j = 0; j < json1.length; ) {
+					var json = json1[j];
+					j++;
+					json["workpieceId"];
+					json["workpieceName"];
+					json["processId"];
+					//alert(json["processId"]);
+					json["processName"];
+					json["machId"];
+					json["machName"];
+					json["state"];
+					json["level"];
+					document.getElementById("process"+j).style.display="";
+					document.getElementById("processInfo"+j).innerHTML=json["processName"]+" --------编号："+json["processId"];
+					document.getElementById("machInfo"+j).innerHTML=json["machName"]+" --------编号："+json["machId"];
+					
+					document.getElementById("time"+j).innerHTML=json["allTime"];
+					document.getElementById("startTime"+j).innerHTML=json["startTime"];
+					document.getElementById("machTime"+j).innerHTML=json["machTime"];
+					document.getElementById("inTime"+j).innerHTML=json["inTime"];
+					document.getElementById("outTime"+j).innerHTML=json["outTime"];
+					
+					var events =json.event;
+							console.log(events);
+						for (var i = 1; i <= json["state"]; i++) {
+							var e =events[i];
+							
+							document.getElementById("time"+j+i).innerHTML=e;
+							var div = document.getElementById(""+j+i); 
+							if(i==6){
+								div.className = 'complete'; 
+							}else{
+								div.className = 'active'; 
+							}
+						}
+				}
+			}
+		}
+
+		function onOpen(event) {
+			//document.getElementById('messages').innerHTML 
+				//= 'Connection established';
+				
+		}
+
+		function onError(event) {
+			alert(event.data);
+		}
+
+		function getInfo(workpieceId) {
+			webSocket.send(workpieceId);
+			
+		}
+function start(){
+	getInfo($("#selectWorkpieceId").val());
+	
+}
+/*这段代码是利用websoc实时查询数据库	，更新工序监控*/	
+
+function updata(){
+//	updataMachList();//更新机床下拉框
+	updataWorkpieceList();
+	setInterval(start,2000);
+
+}
+
+
+/*	 更新下拉框，机床的 ，
+	function updataMachList() {
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/GetMachListServlet',
+			async : false,
+			success : function(data) {
+				
+				//更新下拉框
+				document.getElementById("selectMachId").innerHTML = "";
+				var obj = document.getElementById("selectMachId");
+				if(data == "0"){
+					obj.add(new Option("--无机床--", ""));
+					//设置提交按钮失效
+					//var machRfid = document.getElementById("machRfid");
+				//	machRfid.disabled=true; 
+					
+				}else{
+					//设置提交按钮回复正常
+					//var machRfid = document.getElementById("machRfid");
+					//machRfid.disabled=false; 
+					
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						obj.add(new Option("机床名称:"+json["machName"], json["machId"]),
+								undefined);
+					}
+					
+				}
+				
+			}
+		});
+	}*/
+		
+	
+/*	 更新下拉框，零件的 
+	function updataWorkpieceList() {
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/UpdataWorkpieceListByMachIdServlet',
+			data :  
+				"&machId="+ $("#selectMachId").val() 
+				
+				,
+			async : true,
+			success : function(data) {
+				
+				//更新下拉框
+				document.getElementById("selectWorkpieceId").innerHTML = "";
+				var obj = document.getElementById("selectWorkpieceId");
+				if(data == "0"){
+					obj.add(new Option("--无可用零件--", ""));
+					//设置提交按钮失效
+					//var workpieceProcessSubmit= document.getElementById("workpieceProcessSubmit");
+					//workpieceProcessSubmit.disabled=true; 
+					
+				}else{
+					//obj.add(new Option("--零件列表--", ""));
+					//设置提交按钮回复正常
+					//var workpieceProcessSubmit= document.getElementById("workpieceProcessSubmit");
+					//workpieceProcessSubmit.disabled=false; 
+					
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						obj.add(new Option(json["workpieceName"]+"【唯一标识号："+json["workpieceId"]+"】", json["workpieceId"]),
+								undefined);
+					}
+					
+				}
+				
+			}
+		});
+	}*/
+	/* 更新下拉框，零件的 */
+	function updataWorkpieceList() {
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/UpdataWorkpieceListServlet',
+			
+			async : true,
+			success : function(data) {
+				
+				//更新下拉框
+				document.getElementById("selectWorkpieceId").innerHTML = "";
+				var obj = document.getElementById("selectWorkpieceId");
+				if(data == "0"){
+					obj.add(new Option("--无可用零件--", ""));
+					//设置提交按钮失效
+					//var workpieceProcessSubmit= document.getElementById("workpieceProcessSubmit");
+					//workpieceProcessSubmit.disabled=true; 
+					
+				}else{
+					obj.add(new Option("--零件列表--", ""));
+					//设置提交按钮回复正常
+					//var workpieceProcessSubmit= document.getElementById("workpieceProcessSubmit");
+					//workpieceProcessSubmit.disabled=false; 
+					
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						obj.add(new Option(json["workpieceName"]+"【唯一标识号："+json["workpieceId"]+"】", json["workpieceId"]),
+								undefined);
+					}
+					
+				}
+				
+			}
+		});
+	}
+	
+	function showDetialWorkpiece(){
+		document.getElementById("workpieceId").innerHTML = "请选择零件";
+		document.getElementById("workpieceName").innerHTML = "请选择零件";
+		document.getElementById("workpieceRfId").innerHTML = "请选择零件";
+		document.getElementById("processInfo").innerHTML = "请选择零件";
+		
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/DetialWorkpieceServlet',
+			data :  
+				"&workpieceId="+ $("#selectWorkpieceId").val() 
+				
+				,
+			async : true,
+			success : function(data) {
+				
+				//更新下拉框
+				//document.getElementById("detialWorkpiece").innerHTML = "";
+				//var obj = document.getElementById("detialWorkpiece");
+				if(data == "0"){
+					//document.getElementById("detialWorkpiece").innerHTML = "当前零件还未配置工序";
+					
+				}else{
+					
+					
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						document.getElementById("workpieceId").innerHTML = json["workpieceId"];
+					document.getElementById("workpieceName").innerHTML = json["workpieceName"];
+					document.getElementById("workpieceRfId").innerHTML = json["workpieceRfId"];
+					document.getElementById("processInfo").innerHTML = json["processInfo"];
+						
+					}
+					
+				}
+				
+			}
+		});
+	}
+	
+	function showDetialWorkpieceProcess(){
+			for(var j=1;j<=7;j++){
+				document.getElementById("process"+j).style.display="none";
+				document.getElementById("processInfo"+j).innerHTML="无数据";
+				document.getElementById("machInfo"+j).innerHTML="无数据";
+				
+				document.getElementById("time"+j).innerHTML="无数据";
+				document.getElementById("startTime"+j).innerHTML="无数据";
+				document.getElementById("machTime"+j).innerHTML="无数据";
+				document.getElementById("inTime"+j).innerHTML="无数据";
+				document.getElementById("outTime"+j).innerHTML="无数据";
+				
+				for (var i = 1; i <=6; i++) {
+					document.getElementById("time"+j+i).innerHTML="";
+					var div = document.getElementById(""+j+i);
+					div.className = ''; 
+				}
+			}
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/DetialWorkpieceProcessServlet',
+			data :  
+				"&workpieceId="+ $("#selectWorkpieceId").val() 
+				
+				,
+			async : true,
+			success : function(data) {
+				console.log(data);
+				//更新下拉框
+				//document.getElementById("detialWorkpiece").innerHTML = "";
+				//var obj = document.getElementById("detialWorkpiece");
+				if(data == "0"){
+					//document.getElementById("detialWorkpiece").innerHTML = "当前零件还未配置工序";
+					
+				}else{
+					
+					
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					
+					for (var j = 0; j < json1.length; ) {
+						var json = json1[j];
+						j++;
+						json["workpieceId"];
+						json["workpieceName"];
+						json["processId"];
+						//alert(json["processId"]);
+						json["processName"];
+						json["machId"];
+						json["machName"];
+						json["state"];
+						json["level"];
+						
+						document.getElementById("process"+j).style.display="";
+						document.getElementById("processInfo"+j).innerHTML="(工序："+json["processName"]+" --------编号："+json["processId"]+")";
+						document.getElementById("machInfo"+j).innerHTML="(机床："+json["machName"]+" --------编号："+json["machId"]+")";
+						
+						
+						document.getElementById("time"+j).innerHTML=json["allTime"];
+						document.getElementById("startTime"+j).innerHTML=json["startTime"];
+						document.getElementById("machTime"+j).innerHTML=json["machTime"];
+						document.getElementById("inTime"+j).innerHTML=json["inTime"];
+						document.getElementById("outTime"+j).innerHTML=json["outTime"];
+						var events =json.event;
+								//console.log(events);
+							for (var i = 1; i <= json["state"]; i++) {
+								var e =events[i];
+								document.getElementById("time"+j+i).innerHTML=e;
+								var div = document.getElementById(""+j+i); 
+								if(i==6){
+									div.className = 'complete'; 
+								}else{
+									div.className = 'active'; 
+								}
+								
+								//console.log(e);
+							}
+						
+					//document.getElementById("workpieceRfId").innerHTML = json["workpieceRfId"];
+				//document.getElementById("processInfo").innerHTML = json["processInfo"];
+						
+					}
+					
+				}
+				
+			}
+		});
+	}

@@ -1,0 +1,61 @@
+package manage;
+
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.sql.ResultSet;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import dbconn.BaseDao;
+
+public class GetWorkpieceAll extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		System.out.println("web请求workpiece信息成功!!!");
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");	
+		//����Json����
+		JSONObject jsonObj = new JSONObject();
+		//����Json����
+		JSONArray rows = new JSONArray();
+		BaseDao baseDao = new BaseDao();
+		String sql = "select distinct rfid_tag.name,rfid_tag.Id,rfid_tag.workpieceId from rfid_tag,workpieceprocesscontrol where rfid_tag.Id=workpieceprocesscontrol.tagId";
+		//String sql = "select rfidsystem.rfidPort,mach_rfid.machName from rfidsystem,mach_rfid where rfidsystem.rfidSysId=mach_rfid.rfidSysId";
+
+		ResultSet rs = baseDao.queryData(sql);
+
+		try {
+			while (rs.next()) {
+				JSONObject cell = new JSONObject();
+				cell.put("name", rs.getString("name"));
+				cell.put("tagid", rs.getString("Id"));
+				cell.put("workpieceid", rs.getString("workpieceId"));
+				//cell.put("apikey", rs.getString("rfidSysId"));
+				rows.add(cell);
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		//利用json来输出，看输出情况
+		jsonObj.put("rows", rows);
+		System.out.println(jsonObj.toString());
+		// ������ݿ������ҳ�治һ�£����б���װ��
+		response.setCharacterEncoding("utf-8");
+		//�������
+		response.getWriter().print(jsonObj.toString());
+	}
+	
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doGet(request,response);
+	}
+	
+}

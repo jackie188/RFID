@@ -1,0 +1,38 @@
+package Datebase;
+
+public class Constants {
+
+	// public static String ip="115.154.191.26";	
+	
+	/*Oracle*/
+	/*public static String driver_O="oracle.jdbc.driver.OracleDriver";
+	public static String url_O="jdbc:oracle:thin:@115.154.191.26:1521:orcl";	
+	public static String name_O = "system";
+	public static String password_O = "xjtucad";*/
+	
+	/*MySQL我的数据库*/	
+	public static String driver_Sqlserver="com.mysql.jdbc.Driver";
+	public static String url_Sqlserver="jdbc:mysql://115.154.191.5:3306/mesiot_rfid?createDatabaseIfNotExist=true&amp;useUnicode=true&amp;characterEncoding=utf-8";
+	public static String name_Sqlserver = "root";
+	public static String password_Sqlserver = "xjtucad";//24服务器密码
+	//public static String password_Sqlserver = "123456"; //	我电脑密码：
+   //  public static String password_Sqlserver = "123456"; //	寝室电脑密码：
+    // public static String password_Sqlserver = "1234";// 南楼电脑密码
+	//public static String password = "gzm";
+	/*SQL Server*/
+//	public static String driver_Sqlserver="com.microsoft.sqlserver.jdbc.SQLServerDriver";
+//	public static String url_Sqlserver="jdbc:sqlserver://115.154.191.24:1433;database=tms";
+//	public static String name_Sqlserver = "sa";
+//	public static String password_Sqlserver = "toolmanage@1";
+	
+/*	远程mysql数据库*/
+/*	public static String driver_Sqlserver="com.mysql.jdbc.Driver";
+	public static String url_Sqlserver="jdbc:mysql://115.154.191.24:3306/mesiot";
+	//public static String url="jdbc:mysql://localhost:3306/tms";
+	public static String name_Sqlserver = "root";
+	public static String password_Sqlserver = "xjtucad";*/
+	//public static String password = "gzm";*/
+	
+	
+
+}

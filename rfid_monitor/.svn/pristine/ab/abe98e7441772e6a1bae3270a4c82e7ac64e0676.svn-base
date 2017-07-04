@@ -1,0 +1,189 @@
+package dbconn;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+/**
+ * ��ݿ����Ӵ�����
+ * @author training
+ *
+ */
+public class BaseDao {
+	
+	
+
+	//���������ַ�
+	private final static String DRIVER="com.mysql.jdbc.Driver";
+	//private final static String URL="jdbc:mysql://115.154.191.20:3306/mesiot?createDatabaseIfNotExist=true&amp;useUnicode=true&amp;characterEncoding=utf-8";
+	private final static String URL="jdbc:mysql://localhost:3306/mesiot_rfid?createDatabaseIfNotExist=true&amp;useUnicode=true&amp;characterEncoding=utf-8";
+	//南楼电脑密码
+	private final static String username = "root";
+	//private final static String password = "xjtucad";
+	private final static String password = "xjtucad";
+	//南楼电脑密码
+	//private final static String password = "1234";
+	//private final static String password = "123456";
+	//我的寝室电脑密码
+	
+	protected Connection connection;  //���Ӷ���
+	protected PreparedStatement statement;  //SQLָ��ִ�ж���
+	protected ResultSet rs; //���
+	
+	/**
+	 * ��ݿ����ӷ���
+	 * @return һ���������ݿ����ӵĶ���
+	 */
+	protected Connection getConnection(){
+		try {
+			//��������
+			Class.forName(DRIVER);
+			//�õ����Ӷ���
+			connection = DriverManager.getConnection(URL,username,password);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			System.out.println("�����޷����أ����飡");
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("���Դ�޷��ҵ������飡");
+		}
+		return connection;
+	}
+	
+	/**
+	 * �ر���ݿ�������Դ
+	 * @param rs   ��¼��
+	 * @param statement  SQLָ��ִ�ж���
+	 * @param connection  ���Ӷ���
+	 */
+	protected void closeAll(ResultSet rs,PreparedStatement statement,Connection connection){
+		try {
+			if(rs!=null){  //�ر�RS
+				rs.close();
+			}
+			if(statement!=null){  //�ر�ָ��ִ�ж���
+				statement.close();
+			}
+			//�ر����Ӷ���
+			if(connection!=null && !connection.isClosed()){
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("�ر���ݿ���Դʱ�������");
+		}
+	}
+	
+	/**
+	 * ִ��SQL �� ɾ �� ����
+	 * @param sql �� ɾ �� ���
+	 * @param param ����
+	 * @return  ��Ӱ�������
+	 * flag�����ж��Ƿ񷵻ظղ�����ݵ�ID��1--���أ�0--������
+	 */
+	public int executeSql(String sql,String param[],int flag){
+		int res=0;  //��Ӱ�������
+//		int rsId=0;	//�²�����ݵ�ID
+		try {
+			//�õ���ݿ�����
+			this.getConnection();
+			//����SQL ָ��ִ�����Ӷ���
+			statement = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+			//ѭ�����ò���
+			if(param!=null){
+				for (int i = 0; i < param.length; i++) {
+					statement.setString(i+1, param[i]);
+				}
+			}
+			//ִ���� ɾ  �� ������Ӱ�������
+			res=statement.executeUpdate();
+			
+			//�õ��ղ�����ݵ�ID
+			if(flag == 1){
+				ResultSet rs = statement.getGeneratedKeys();
+				rs.next();
+				res=rs.getInt(1);	//���²�����ݵ�ID����res��Ҫ���ڻ�ȡ��ǩ״̬��ID������������ܻ����
+			}
+		//	System.out.println(num);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("ִ���� ɾ ��ʱ�������");
+		}finally{
+			//�ر�������Դ
+			this.closeAll(null, statement, connection);
+		}
+		//������Ӱ�������
+		return res;
+	}
+	
+	/***��ѯ��ݿ�***/
+	public ResultSet queryData(String sql){
+		Statement stmt=null;
+		try{
+			connection = this.getConnection();
+			stmt = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+										ResultSet.CONCUR_READ_ONLY);
+			rs = stmt.executeQuery(sql);
+		}catch(Exception e){
+			e.printStackTrace();
+			System.out.println("zheli");
+		}
+		return rs;
+	}
+	
+	/*****������ݿ�*****/
+	public int executeUpdate(String sql) {
+		int count = 0;
+		//�õ���ݿ�����
+		this.getConnection();
+		Statement stmt = null;
+		try {
+			stmt = connection.createStatement();
+			count = stmt.executeUpdate(sql);
+		} catch (SQLException ex) {
+
+		} finally {
+			try {
+				if (stmt != null)
+					stmt.close();
+				if (connection != null)
+					connection.close();
+			} catch (SQLException ex) {
+				System.err.print(ex);
+			}
+		}
+		return count;
+	}
+	
+	//��øղ�����ݵ�ID
+	public int queryId(){
+		int result = 0;
+		
+		return result;
+	}
+	
+	public static void main(String[] args){
+		BaseDao baseDao = new BaseDao();
+		String sql = "select * from device";
+		Connection conn = baseDao.getConnection();
+		Statement stm = null;
+		try {
+			stm = conn.createStatement();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ResultSet rs =null;
+		try {
+			rs = stm.executeQuery(sql);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(rs);
+	}
+	
+}

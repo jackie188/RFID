@@ -1,0 +1,791 @@
+function updata(){
+			updataRfidList();//更新机床下拉框
+			updataMachList();//更新系统下拉框
+			updataWorkpieceList();//更新零件下拉框
+			document.getElementById('processName').disabled = true;
+			document.getElementById('processId').disabled = true;
+			
+}
+function addMach(){
+if ( $("#machId").val() == ""||  $("#machName").val() == "") {
+	alert("不能为空！");
+} else {
+	
+	if(checkMachId()==true){
+		alert("唯一编码已存在");
+		return;
+	}else{
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/AddMachServlet',
+			data :  
+					"&machId="+ $("#machId").val() +
+					"&machName="+ $("#machName").val() 
+					,
+			async : true,
+			success : function(msg) {
+				if (msg =="success") {
+					//msg表示传递过来几个数据																	
+					//在表格中显示	
+					//配置成功后，这会扩充点击已配置信息的table表
+					alert("添加机床成功");
+					updataMachList();
+					location.reload();
+				} else {
+					alert("添加机床失败");
+				}
+			}
+		});
+	}
+	}
+	
+}
+
+function deleteMach(machId){
+	
+	$.ajax({
+		type : "POST",
+		url : '/mes_online/DeleteMachServlet',
+		data :  
+				"&machId="+machId
+				,
+		async : true,
+		success : function(msg) {
+			if (msg =="success") {
+				//msg表示传递过来几个数据																	
+				//在表格中显示	
+				//配置成功后，这会扩充点击已配置信息的table表
+				alert("删除机床成功");
+				//重新加载，并显示模态
+				location.reload();
+				$('#machModal').modal('show');
+				
+			} else {
+				alert("删除机床失败");
+			}
+		}
+	});
+	
+}
+//用来检测输入的机床唯一的id是否已存在 ，
+	function checkMachId(){
+		//这里曾经遇见过用 alert（）调用此函数，一直报错说undefined ，不知道为什么，不能再回调函数中进行return，把return 放到最外层
+		var flag = false;
+		var machId = document.getElementById("machId");
+		if(isEmpty(machId.value)){
+			document.getElementById("checkMachId").innerHTML=" 代码不能为空！";
+			//mach_Id.focus();
+			return ;
+		}
+	
+		$.ajax({ 
+			type:"post", 
+			//注意这里直接写ClientIdValidateServlet，默认的url为当前路径加上此字符，使用的是相对路径
+			//http://localhost:8080/DRP1.8/basedata/ClientIdValidateServlet
+			
+			//当加上/=http://localhost:8080/
+			//注解的方式
+			url:"/mes_online/MachIdValidateServlet",
+			
+			//xml配置方式
+			//url:"../servlet/ClientIdValidateServlet",
+		    data:{machId:machId.value}, 
+			async : false,// 设置为同步操作就可以给全局变量赋值成功
+			success:function(data){
+				//alert(data);
+				if(data=="true"){
+					document.getElementById("checkMachId").innerHTML=" 编码已存在!!!!";
+					var machId = document.getElementById("machId");
+					//mach_Id.focus();
+					flag = true;
+				}else{
+					document.getElementById("checkMachId").innerHTML=" 编码可用！";
+					
+				}	
+			}
+		});
+		//放到这解决问题
+		return flag;
+	}
+	
+	/* 更新下拉框，机床的 ，主要是更新新加的机床和剔除已经和rfid系统绑定的机床，为绑定机床和rfid系统服务*/
+	function updataMachList() {
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/UpdataMachListServlet',
+			async : true,
+			success : function(data) {
+				
+				//更新下拉框
+				document.getElementById("selectMachId").innerHTML = "";
+				var obj = document.getElementById("selectMachId");
+				if(data == "0"){
+					obj.add(new Option("--无可用机床--", ""));
+					//设置提交按钮失效
+					//var machRfid = document.getElementById("machRfid");
+				//	machRfid.disabled=true; 
+					
+				}else{
+					//设置提交按钮回复正常
+					//var machRfid = document.getElementById("machRfid");
+					//machRfid.disabled=false; 
+					
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						obj.add(new Option("机床名称:"+json["machName"], json["machId"]),
+								undefined);
+					}
+					
+				}
+				
+			}
+		});
+	}
+	
+	function editMach(machId,machName){
+		document.getElementById("machIdForEdit").value=machId;
+		document.getElementById("machNameForEdit").value=machName;
+		$('#editMachModal').modal('show');
+		
+	}
+	function submitEditMach(){
+		if ( $("#machIdForEdit").val() == ""||  $("#machNameForEdit").val() == "") {
+			alert("不能为空！");
+		} else {
+				$.ajax({
+					type : "POST",
+					url : '/mes_online/EditMachServlet',
+					data :  
+							"&machId="+ $("#machIdForEdit").val() +
+							"&machName="+ $("#machNameForEdit").val() 
+							,
+					async : true,
+					success : function(msg) {
+						if (msg =="success") {
+							//msg表示传递过来几个数据																	
+							//在表格中显示	
+							//配置成功后，这会扩充点击已配置信息的table表
+							alert("修改成功");
+							updataMachList();
+							location.reload();
+						} else {
+							alert("修改失败");
+						}
+					}
+				});
+			
+			
+			
+		}
+		
+	}
+	//用来查看机床，通过ajax实时改变表格内容，不知道为什么出问题，还是模态吧，每次添加新的东西重新刷新界面
+	function viewMach(){
+	
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/ViewMachServlet',
+		
+			async : false,
+			success : function(data) {
+				
+			/*	$("#sample-table-list1 tbody").innerHTML = "";
+				var obj = $("#sample-table-list1 tbody");*/
+				document.getElementById("machList").innerHTML="";
+				//var obj = $("#machList");
+				var show = "";
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+				for (var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					var other =" <a class='btn btn-sm btn-danger' onclick='alert(1)' href='#'> 删除设备</a><a class='btn btn-sm btn-info' href=''> 修改设备</a> "
+					var addTr = "<tr><td>" + json["machId"] + "</td><td>"
+					+ json["machName"]+ "</td><td>" + other
+					+ "</td></tr>";
+					show =show +addTr;
+					
+				}
+				//alert(show);
+				document.getElementById("machList").innerHTML=show;
+				
+			}
+		});
+	}
+	
+	
+	
+	//用来检测输入的rfid唯一的id是否已存在 ，
+	function checkRfidId(){
+		var flag =false;
+		var rfidId = document.getElementById("rfidId");
+		if(isEmpty(rfidId.value)){
+			document.getElementById("checkRfidId").innerHTML=" 代码不能为空！";
+			//rfid_Id.focus();
+			return ;
+		}
+	
+		$.ajax({ 
+			type:"post", 
+			//注意这里直接写ClientIdValidateServlet，默认的url为当前路径加上此字符，使用的是相对路径
+			//http://localhost:8080/DRP1.8/basedata/ClientIdValidateServlet
+			
+			//当加上/=http://localhost:8080/
+			//注解的方式
+			url:"/mes_online/RfidIdValidateServlet",
+			
+			//xml配置方式
+			//url:"../servlet/ClientIdValidateServlet",
+		    data:{rfidId:rfidId.value}, 
+			async : false,// 设置为同步操作就可以给全局变量赋值成功
+			success:function(data){
+				//alert(data);
+				if(data=="true"){
+					document.getElementById("checkRfidId").innerHTML=" 编码已存在!!!!";
+					var rfidId = document.getElementById("rfidId");
+					//mach_Id.focus();
+					flag = true;;
+				}else{
+					document.getElementById("checkRfidId").innerHTML=" 编码可用！";
+					
+				}	
+			}
+		});	
+		return flag;
+	}
+	
+	function addRfid(){
+		if ( $("#rfidId").val() == ""||  $("#rfidName").val() == ""||  $("#rfidIp").val() == "") {
+			alert("不能为空！");
+		} else {
+			if(checkRfidId()==true){
+				alert("唯一编码已存在");
+				return;
+			}else{
+				$.ajax({
+					type : "POST",
+					url : '/mes_online/AddRfidSystemServlet',
+					data :  
+							"&rfidId="+ $("#rfidId").val() +
+							"&rfidName="+ $("#rfidName").val() +
+							"&rfidIp="+ $("#rfidIp").val() 
+							,
+					async : true,
+					success : function(msg) {
+						if (msg =="success") {
+							//msg表示传递过来几个数据																	
+							//在表格中显示	
+							//配置成功后，这会扩充点击已配置信息的table表
+							alert("添加rfid成功");
+							updataRfidList();
+							location.reload();
+						} else {
+							alert("添加rfid失败");
+						}
+					}
+				});
+			}
+		}
+		
+	}
+	
+	function editRfid(rfidId,rfidName,rfidIp){
+		document.getElementById("rfidIdForEdit").value=rfidId;
+		document.getElementById("rfidNameForEdit").value=rfidName;
+		document.getElementById("rfidIpForEdit").value=rfidIp;
+		$('#editRfidModal').modal('show');
+		
+	}
+	function submitEditMach(){
+		if ( $("#rfidIdForEdit").val() == ""||  $("#rfidNameForEdit").val() == ""||  $("#rfidIpForEdit").val() == "") {
+			alert("不能为空！");
+		} else {
+				$.ajax({
+					type : "POST",
+					url : '/mes_online/EditRfidSystemServlet',
+					data :  
+							"&rfidId="+ $("#rfidIdForEdit").val() +
+							"&rfidName="+ $("#rfidNameForEdit").val() +
+							"&rfidIp="+ $("#rfidIpForEdit").val() 
+							,
+					async : true,
+					success : function(msg) {
+						if (msg =="success") {
+							//msg表示传递过来几个数据																	
+							//在表格中显示	
+							//配置成功后，这会扩充点击已配置信息的table表
+							alert("修改成功");
+							updataMachList();
+							location.reload();
+						} else {
+							alert("修改失败");
+						}
+					}
+				});
+			
+			
+			
+		}
+		
+	}
+	function deleteRfidSystem(rfidId){
+		
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/DeleteRfidSystemServlet',
+			data :  
+					"&rfidId="+rfidId
+					,
+			async : true,
+			success : function(msg) {
+				if (msg =="success") {
+					//msg表示传递过来几个数据																	
+					//在表格中显示	
+					//配置成功后，这会扩充点击已配置信息的table表
+					alert("删除rfid系统成功");
+					//重新加载，并显示模态
+					location.reload();
+					
+					
+				} else {
+					alert("删除rfid系统失败");
+				}
+			}
+		});
+		
+	}
+	
+	/* 更新下拉框，rfid系统的 ,主要是剔除已经绑定的rfid系统和更新新加入的系统，为绑定部分服务*/
+	function updataRfidList() {
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/UpdataRfidListServlet',
+			async : true,
+			success : function(data) {
+				
+				//更新下拉框
+				document.getElementById("selectRfidSysId").innerHTML = "";
+				var obj = document.getElementById("selectRfidSysId");
+				if(data == "0"){
+					obj.add(new Option("--无可用rfid系统--", ""));
+					//设置提交按钮失效
+					//var machRfid = document.getElementById("machRfid");
+					//machRfid.disabled=true; 
+					
+				}else{
+					//设置提交按钮回复正常
+					//var machrfid = document.getElementById("machRfid");
+					//machRfid.disabled=false; 
+					
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						obj.add(new Option("系统名称:"+json["rfidName"], json["rfidSysId"]),
+								undefined);
+					}
+					//flag1 = 0;
+				}
+				
+			}
+		});
+	}
+
+	
+//提交rfid系统配置信息
+	
+	function machRfidsubmit() {
+		if ( $("#selectMachId").val() == ""||$("#selectRfidSysId").val() == "") {
+			alert("请选择要绑定的机床和rfid系统！");
+		} else {
+			/*if(checkMachId()==false){
+				console.log("dao zhe ");
+				return;
+			}*/
+			//alert(ids[0]);
+			//	alert(ids[1]);		
+			$.ajax({
+				type : "POST",
+				url : '/mes_online/MachRfidbBangdingServlet',
+				data :  
+						"&machId="+ $("#selectMachId").val() +
+						"&rfidSysId="+ $("#selectRfidSysId").val() 
+						,
+				async : true,
+				success : function(msg) {
+					if (msg =="success") {
+						//msg表示传递过来几个数据																	
+						//在表格中显示	
+						//配置成功后，这会扩充点击已配置信息的table表
+						alert("配置rfid系统成功");
+						updataRfidList();
+						updataMachList();
+						location.reload();
+					} else {
+						alert("配置rfid系统失败");
+					}
+				}
+			});
+		}
+	}
+	
+	function deleteMachRfid(rfidId,machId){
+		console.log(rfidId+machId);
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/DeleteMachRfidServlet',
+			data :  
+					"&rfidId="+rfidId+
+					"&machId="+machId
+					,
+			async : true,
+			success : function(msg) {
+				if (msg =="success") {
+					//msg表示传递过来几个数据																	
+					//在表格中显示	
+					//配置成功后，这会扩充点击已配置信息的table表
+					alert("删除成功");
+					//重新加载，并显示模态
+					location.reload();
+					
+					
+				} else {
+					alert("删除失败");
+				}
+			}
+		});
+		
+	}
+	
+	//用来检测输入的零件唯一的id是否已存在 ，
+	function checkWorkpieceId(){
+		var flag = false;
+		var workpieceId= document.getElementById("workpieceId");
+		if(isEmpty(workpieceId.value)){
+			document.getElementById("checkWorkpieceId").innerHTML=" 代码不能为空！";
+			//mach_Id.focus();
+			return ;
+		}
+	
+		$.ajax({ 
+			type:"post", 
+			//注意这里直接写ClientIdValidateServlet，默认的url为当前路径加上此字符，使用的是相对路径
+			//http://localhost:8080/DRP1.8/basedata/ClientIdValidateServlet
+			
+			//当加上/=http://localhost:8080/
+			//注解的方式
+			url:"/mes_online/WorkpieceIdIdValidateServlet",
+			
+			//xml配置方式
+			//url:"../servlet/ClientIdValidateServlet",
+		    data:{workpieceId:workpieceId.value}, 
+			async : false,// 设置为同步操作就可以给全局变量赋值成功
+			success:function(data){
+				//alert(data);
+				if(data=="true"){
+					document.getElementById("checkWorkpieceId").innerHTML=" 编码已存在!!!!";
+					var WorkpieceId = document.getElementById("WorkpieceId");
+					//WorkpieceId.focus();
+					flag = true;
+				}else{
+					document.getElementById("checkWorkpieceId").innerHTML=" 编码可用！";
+					
+				}	
+			}
+		});
+		return flag;
+	}
+	
+	//用来检测输入的零件唯一的id是否已存在 ，
+	function checkWorkpieceRfId(){
+		var flag = false;
+		var workpieceRfId= document.getElementById("workpieceRfId");
+		if(isEmpty(workpieceRfId.value)){
+			document.getElementById("checkWorkpieceRfId").innerHTML=" 代码不能为空！";
+			//mach_Id.focus();
+			return ;
+		}
+	
+		$.ajax({ 
+			type:"post", 
+			//注意这里直接写ClientIdValidateServlet，默认的url为当前路径加上此字符，使用的是相对路径
+			//http://localhost:8080/DRP1.8/basedata/ClientIdValidateServlet
+			
+			//当加上/=http://localhost:8080/
+			//注解的方式
+			url:"/mes_online/WorkpieceRfIdIdValidateServlet",
+			
+			//xml配置方式
+			//url:"../servlet/ClientIdValidateServlet",
+		    data:{workpieceRfId:workpieceRfId.value}, 
+			async : false,// 设置为同步操作就可以给全局变量赋值成功
+			success:function(data){
+				//alert(data);
+				if(data=="true"){
+					document.getElementById("checkWorkpieceRfId").innerHTML=" 编码已存在!!!!";
+					var WorkpieceRfId = document.getElementById("WorkpieceRfId");
+					//WorkpieceId.focus();
+					flag = true;
+				}else{
+					document.getElementById("checkWorkpieceRfId").innerHTML=" 编码可用！";
+					
+				}	
+			}
+		});
+		return flag;
+	}
+	//添加零件
+	function addWorkpiece(){
+		if ( $("#workpieceName").val() == ""||  $("#workpieceId").val() == ""||  $("#workpieceRfId").val() == "") {
+			alert("不能为空！");
+		} else {
+			if(checkWorkpieceRfId()==true||checkWorkpieceId()==true){
+				alert("唯一编码已存在");
+				return;
+			}else{
+				$.ajax({
+					type : "POST",
+					url : '/mes_online/AddWorkpieceServlet',
+					data :  
+							"&workpieceName="+ $("#workpieceName").val() +
+							"&workpieceId="+ $("#workpieceId").val() +
+							"&workpieceRfId="+ $("#workpieceRfId").val() 
+							,
+					async : true,
+					success : function(msg) {
+						if (msg =="success") {
+							//msg表示传递过来几个数据																	
+							//在表格中显示	
+							//配置成功后，这会扩充点击已配置信息的table表
+							alert("添加零件成功");
+							
+							location.reload();
+						} else {
+							alert("添加零件失败");
+						}
+					}
+				});
+			}
+		}
+		
+	}
+	
+	function deleteWorkpiece(workpieceId){
+		
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/DeleteWorkpieceServlet',
+			data :  
+					"&workpieceId="+workpieceId
+					,
+			async : true,
+			success : function(msg) {
+				if (msg =="success") {
+					//msg表示传递过来几个数据																	
+					//在表格中显示	
+					//配置成功后，这会扩充点击已配置信息的table表
+					alert("删除成功");
+					//重新加载，并显示模态
+					location.reload();
+					
+					
+				} else {
+					alert("删除失败");
+				}
+			}
+		});
+		
+	}
+	function showWorkpieceDetial(workpieceId){
+		var flag =false;
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/ShowWorkpieceDetialServlet',
+			data :  
+					"&workpieceId="+workpieceId
+					,
+			async : false,
+			success : function(data) {
+				if (data =="0") {
+					flag =false;
+					//alert("当前没有工序录入到该零件");
+				} else {
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					var show="";
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						var title = "零件："+json["workpieceName"]+"————————编号："+json["workpieceId"];
+						var addTr = "<tr>" +
+								"<td>" + (j+1) + "</td>" +
+								"<td>"+ json["processName"]+ "</td>" +
+								"<td>" + json["processId"]+ "</td>" +
+								"<td>" + json["machName"]+ "</td>" +
+								"<td>" + json["state"]+ "</td>" +
+								"</tr>";
+						show =show +addTr;
+						
+					}
+					
+					document.getElementById("processList").innerHTML=show;	
+					document.getElementById("workpieceDetialTitle").innerHTML=title;	
+					flag=true;
+				}
+			}
+		});
+		if(flag){
+			$('#workpieceDetialModal').modal('show');
+		}else{
+			alert("当前没有工序录入到该零件");
+		}
+		
+		
+		
+	}
+	/* 更新下拉框，零件的 */
+	function updataWorkpieceList() {
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/UpdataWorkpieceListServlet',
+			async : true,
+			success : function(data) {
+				
+				//更新下拉框
+				document.getElementById("selectWorkpieceId").innerHTML = "";
+				var obj = document.getElementById("selectWorkpieceId");
+				if(data == "0"){
+					obj.add(new Option("--无可用零件--", ""));
+					//设置提交按钮失效
+					var workpieceProcessSubmit= document.getElementById("workpieceProcessSubmit");
+					workpieceProcessSubmit.disabled=true; 
+					
+				}else{
+					obj.add(new Option("--零件列表--", ""));
+					//设置提交按钮回复正常
+					var workpieceProcessSubmit= document.getElementById("workpieceProcessSubmit");
+					workpieceProcessSubmit.disabled=false; 
+					
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						obj.add(new Option(json["workpieceName"]+"【唯一标识号："+json["workpieceId"]+"】", json["workpieceId"]),
+								undefined);
+					}
+					
+				}
+				
+			}
+		});
+	}
+	
+	//当选择的零件发生变化时，实时更新提示工序消息
+	function getProcessCountByWorkpieceId(){
+		if ( $("#selectWorkpieceId").val() == "") {
+			document.getElementById("processConutOfWorkpiece").innerHTML = "选择零件并按工序优先级录入录入工序";
+			document.getElementById('processName').disabled = true;
+			document.getElementById('processId').disabled = true;
+		} else {
+					
+			$.ajax({
+				type : "POST",
+				url : '/mes_online/GetProcessCountByWorkpieceIdServlet',
+				data :  
+						"&selectWorkpieceId="+ $("#selectWorkpieceId").val() 
+						,
+				async : true,
+				success : function(msg) {
+					document.getElementById('processName').disabled = false;
+					document.getElementById('processId').disabled = false;
+					document.getElementById("processConutOfWorkpiece").innerHTML = "";
+					if (msg =="0") {
+						document.getElementById("processConutOfWorkpiece").innerHTML = 
+						"当前零件还未配置工序，请输入第一道工序";
+					} else {
+						document.getElementById("processConutOfWorkpiece").innerHTML = 
+							"当前零件已配置第"+msg+
+							"道工序，请输入下一道工序";
+					}
+				}
+			});
+		}
+	}
+	
+	//用来检测输入的零件唯一的id是否已存在 ，
+	function checkProcessId(){
+		var flag = false;
+		var processId= document.getElementById("processId");
+		if(isEmpty(processId.value)){
+			document.getElementById("checkProcessId").innerHTML=" 代码不能为空！";
+			//mach_Id.focus();
+			return ;
+		}
+	
+		$.ajax({ 
+			type:"post", 
+			
+			url:"/mes_online/ProcessIdValidateServlet",
+			
+			//xml配置方式
+			//url:"../servlet/ClientIdValidateServlet",
+		    data:
+	
+		    	"&workpieceId="+ $("#selectWorkpieceId").val() +
+		    	"&processId="+ $("#processId").val()
+			, 
+			async : false,// 设置为同步操作就可以给全局变量赋值成功
+			success:function(data){
+				//alert(data);
+				if(data=="true"){
+					document.getElementById("checkProcessId").innerHTML=" 编码已存在!!!!";
+					//var processId= document.getElementById("processId");
+					//processIdfocus();
+					flag = true;
+				}else{
+					document.getElementById("checkProcessId").innerHTML=" 编码可用！";
+					
+				}	
+			}
+		});
+		return flag;
+	}
+	
+	function addWorkpieceProcess(){
+		if ( $("#selectWorkpieceId").val() == ""||  $("#processName").val() == ""||  $("#processId").val() == ""||  $("#selectMachId2").val() == "") {
+			alert("信息不完整，请输入！");
+		} else {
+			if(checkProcessId()==true){
+				alert("工序唯一编码已存在");
+				return;
+			}else{
+				$.ajax({
+					type : "POST",
+					url : '/mes_online/AddWorkpieceProcessServlet',
+					data :  
+							"&processName="+ $("#processName").val() +
+							"&workpieceId="+ $("#selectWorkpieceId").val() +
+							"&processId="+ $("#processId").val() +
+							"&machId="+ $("#selectMachId2").val()
+							,
+					async : true,
+					success : function(msg) {
+						if (msg =="success") {
+							//msg表示传递过来几个数据																	
+							//在表格中显示	
+							//配置成功后，这会扩充点击已配置信息的table表
+							alert("添加工序成功");
+							
+							location.reload();
+						} else {
+							alert("添加工序失败");
+						}
+					}
+				});
+			}
+		}
+		
+		
+	}
+	
+	

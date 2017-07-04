@@ -1,0 +1,60 @@
+package config;
+
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import dbconn.BaseDao;
+public class ShowWorkpiece extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+    public ShowWorkpiece() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		String showid = URLDecoder.decode(request.getParameter("showid"),"utf-8");	//获得天线名称	
+		System.out.println("工件号"+showid);
+
+
+		JSONObject jsonObj = new JSONObject();
+		JSONArray rows = new JSONArray();
+		BaseDao baseDao = new BaseDao();
+		String sql = "select * from workpieceProecess where workpieceId= '"+showid+"'";
+		ResultSet rs = baseDao.queryData(sql);
+		try {
+			while (rs.next()) {
+				JSONObject cell = new JSONObject();
+				cell.put("processname", rs.getString("processName"));
+				cell.put("processid", rs.getString("processId"));
+				//cell.put("apikey", rs.getString("rfidSysId"));
+				rows.add(cell);
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		//利用json来输出，看输出情况
+		jsonObj.put("rows", rows);
+		System.out.println(jsonObj.toString());
+		response.getWriter().print(jsonObj.toString());
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request,response);
+	}
+
+}

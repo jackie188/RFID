@@ -1,0 +1,143 @@
+package RFID_java;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.*;
+
+import javax.servlet.http.HttpServletResponse;
+
+public class RFID_client1_9040 {
+	/**
+	 * @param args
+	 */
+	//能够读取RFID数据
+	//此为模式C模板
+	public static int portNo = 9040; // 与 tagstreamAddress 配置端口一致 //重点要该的地方
+	static ServerSocket s;
+	static Socket socket;
+	static ArrayList<String>  taglist=new ArrayList<String>();
+	private Timer time;
+	static String flag="true";
+	static String apiKey="0001";
+	static String workpieceId="10000";//用workpieceId来判断数据是从前台还是从后台传来的数据
+	static String Port="9457";//重点要该的地方这里的port是一个有意义的数值，不同的RFID系统,Port值不同
+	static String deviceId1="1015";//天线1//重点要该的地方
+	static String deviceId2="1016";//天线2//重点要该的地方
+	static String deviceId4="0000";//天线4
+
+	/// boolean flag=true; 
+	
+	
+	public static void main(String[] args)  throws IOException{		
+		 try {
+			s = new ServerSocket(portNo);
+			System.out.print("\n绑定端口"+portNo+"成功！" );
+			System.out.println("The Server is start: " + s);        
+        	 socket = s.accept();            
+        	 System.out.println("answer:"+socket.getInetAddress().toString().substring(1)+ ","+socket.getPort());
+             System.out.println("Accept the Client: " + socket);                   
+             final BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);  
+             while(true){
+            	 TimerTask task= new TimerTask() {					
+					@Override
+					public void run() {
+						String str="";						
+							try {
+								str = in.readLine();
+								//解析并对数据进行预处理
+								if(str == null || str == ""||str ==" "||str =="  "||str.length()<20){
+									//System.out.println("天线视野中没有rfid的情况");		
+									str=" Tag:0000 0000 0000 0000 0000 0000,,Ant:3";//测试用,其实没用，进程还是死掉了
+								};
+								System.out.println("收到的数据为："+str); 
+								String strTag=(str.substring(str.indexOf("Tag:"))).substring(4, 33);
+								String deviceId=(str.substring(str.indexOf("Ant:"))).substring(4, 5);
+								
+								
+								
+/*									if (!taglist.contains(str)) {
+										taglist.add(str);*/
+								
+										if(deviceId.equals("0"))
+										  sentData2Api(strTag,deviceId1,apiKey,workpieceId,Port,flag);
+										else if(deviceId.equals("1"))
+										   sentData2Api(strTag,deviceId2,apiKey,workpieceId,Port,flag);
+										else if(deviceId.equals("3"))
+											//这是没有读到的情况
+											sentData2Api(strTag,deviceId4,apiKey,workpieceId,Port,flag);
+											System.out.println("没有读到数据");
+									/*}	*/					
+							} catch (IOException e) {
+								e.printStackTrace();
+								System.out.println("错误1");
+							}   
+					}
+				};
+				Timer timer=new Timer();
+				timer.schedule(task,100,1000);
+            	try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					System.out.println("错误2");
+				}
+             }                   
+         }catch(IOException e){
+        	 e.printStackTrace();
+        	 System.out.println("错误处");
+         }finally 
+ 		{
+             System.out.println("close the Server socket and the io.");
+             socket.close();
+             s.close();
+      }		
+        
+	} 
+	public void closed() throws IOException {
+		 socket.close();
+         try {
+			s.close();
+			System.out.println("关闭socket");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	//socket进行通信
+	 public static void sentData2Api(String str,String deviceId,String apikey,String workpieceId,String Port,String flag) throws IOException { 
+		 Socket socket = null;
+		 int SocketPort=Integer.valueOf(Port);
+			try {
+				socket = new Socket("127.0.0.1", SocketPort);
+				//向服务器端第一次发送字符串   
+				OutputStream netOut = socket.getOutputStream();
+				DataOutputStream doc = new DataOutputStream(netOut);
+				doc.writeUTF(apikey+deviceId+str+workpieceId+Port+flag);
+				doc.close();
+			//	in.close();
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (socket != null) {
+					try {
+						socket.close();
+					} catch (IOException e) {
+					}
+				}
+			}
+	    }
+}

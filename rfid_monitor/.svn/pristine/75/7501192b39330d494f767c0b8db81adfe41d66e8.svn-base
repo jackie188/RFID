@@ -1,0 +1,31 @@
+package xjtu.mes.model;
+/**
+* @author 姜文雷
+* @version 创建时间：2016年11月5日 下午4:58:38
+* 类说明
+* 机床和rfid系统绑定实体类
+*/
+public class MachRfid {
+	private int machId;
+	private String machName;
+	private int rfidSysId;
+	public int getMachId() {
+		return machId;
+	}
+	public void setMachId(int machId) {
+		this.machId = machId;
+	}
+	public String getMachName() {
+		return machName;
+	}
+	public void setMachName(String machName) {
+		this.machName = machName;
+	}
+	public int getRfidSysId() {
+		return rfidSysId;
+	}
+	public void setRfidSysId(int rfidSysId) {
+		this.rfidSysId = rfidSysId;
+	}
+	
+}

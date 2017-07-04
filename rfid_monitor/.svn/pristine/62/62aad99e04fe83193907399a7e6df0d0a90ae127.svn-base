@@ -1,0 +1,152 @@
+package api_servlet;
+
+import json.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+
+//import com.sun.org.apache.bcel.internal.generic.NEW;
+//不知道这个有没有用......
+import db.DBConnection;
+import db.DbPara;
+
+
+public class testServlet extends HttpServlet {
+
+	/**
+	 * Constructor of the object.
+	 */
+	public testServlet() {
+		super();
+	}
+
+	/**
+	 * Destruction of the servlet. <br>
+	 */
+	public void destroy() {
+		super.destroy(); // Just puts "destroy" string in log
+	}
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		response.setContentType("html/txt");
+		response.setCharacterEncoding("utf-8");
+		response.setHeader("Pragma", "no-cache");
+		response.setHeader("Cache-Control", "no-cache, must-revalidate");
+		response.setHeader("Pragma", "no-cache");
+		DBConnection db=new DBConnection();
+		DbPara dbPara=(DbPara)request.getSession().getAttribute("DbPara");
+		try {
+			db.getCurrentConnection(dbPara.getUrl(),dbPara.getUsername(),dbPara.getPassword());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		List list=db.executeQueryList("select * from tb_toolUse ");
+		String data=getData(list);
+		db.closeCurrentConnection();
+		response.getWriter().write(data);
+		response.getWriter().flush();
+		response.getWriter().close();
+        
+	}
+
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+            doGet(request, response);
+	}
+
+	/**
+	 * Initialization of the servlet. <br>
+	 *
+	 * @throws ServletException if an error occurs
+	 */
+	public void init() throws ServletException {
+	}
+	public String getData(List list) {
+		System.out.println("*********************************************");
+		List<Integer> usingList=new ArrayList();
+		List<Integer> freeList=new ArrayList();
+		List<Integer> deadList=new ArrayList();
+		for (int i = 0; i < list.size(); i++) {
+			if(((Map) list.get(i)).get("state").equals("使用中"))
+				usingList.add(new Integer(((Map) list.get(i)).get("num").toString()));
+			else if(((Map) list.get(i)).get("state").equals("闲置"))
+				freeList.add(new Integer(((Map) list.get(i)).get("num").toString()));
+			else 
+				deadList.add(new Integer(((Map) list.get(i)).get("num").toString()));
+		}
+		List dataList=new ArrayList();
+		Map cellMap1 = new HashMap();
+		cellMap1.put("type", "column");
+		cellMap1.put("name", "使用中");
+		cellMap1.put("data",  new Object[] { 
+				usingList.get(0),
+				usingList.get(1),
+				usingList.get(2)});
+		dataList.add(cellMap1);
+		Map cellMap2 = new HashMap();
+		cellMap2.put("type", "column");
+		cellMap2.put("name", "闲置");
+		cellMap2.put("data",  new Object[] { 
+				freeList.get(0),
+				freeList.get(1),
+				freeList.get(2)});	
+		dataList.add(cellMap2);
+		Map cellMap3 = new HashMap();
+		cellMap3.put("type", "column");
+		cellMap3.put("name", "报废");
+		cellMap3.put("data",  new Object[] { 
+				deadList.get(0),
+				deadList.get(1),
+				deadList.get(2)});	
+		dataList.add(cellMap3);
+		Map cellMap4 = new HashMap();
+		cellMap4.put("type", "spline");
+		cellMap4.put("name", "平均值");
+		cellMap4.put("data",  new Object[] { 
+				(usingList.get(0)+freeList.get(0)+deadList.get(0))/3,
+				(usingList.get(1)+freeList.get(1)+deadList.get(1))/3,
+				(usingList.get(2)+freeList.get(2)+deadList.get(2))/3});	
+		dataList.add(cellMap4);
+		Map cellMap5 = new HashMap();
+		cellMap5.put("type", "pie");
+		cellMap5.put("name", "刀具状态");
+		List pieList=new ArrayList();
+		Map cell1 = new HashMap();
+		cell1.put("name", "使用中");
+		cell1.put("y", usingList.get(0)+usingList.get(1)+usingList.get(2));
+		cell1.put("color", "#4572A7");
+		pieList.add(cell1);
+		Map cell2 = new HashMap();
+		cell2.put("name", "闲置");
+		cell2.put("y", freeList.get(0)+freeList.get(1)+freeList.get(2));
+		cell2.put("color", "#AA4643");
+		pieList.add(cell2);
+		Map cell3 = new HashMap();
+		cell3.put("name", "报废");
+		cell3.put("y", deadList.get(0)+deadList.get(1)+deadList.get(2));
+		cell3.put("color", "#89A54E");
+		pieList.add(cell3);
+		cellMap5.put("data",  pieList);	
+		cellMap5.put("center", new Object[] {50,80});
+		cellMap5.put("size", 100);
+		dataList.add(cellMap5);
+		Map dataMap = new HashMap();
+		dataMap.put("data", dataList);
+		JSONObject object = new JSONObject(dataMap);
+		System.out.print(object.toString());
+		return object.toString();
+	}
+
+}

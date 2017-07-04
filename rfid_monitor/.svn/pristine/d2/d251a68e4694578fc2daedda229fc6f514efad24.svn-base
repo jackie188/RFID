@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+
+<html class=" js svg">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--<base href="http://www.highcharts.com/demo">-->
+    <base href=".">
+
+    <title>Highcharts demos | Highcharts</title>
+    <link rel="stylesheet" href="./css/font-awesome.css" type="text/css">
+    <link rel="stylesheet" href="./css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="./css/template.css" type="text/css">
+    <script src="./js/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="./js/bootstrap.js" type="text/javascript"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type="text/css">
+        #hs-component {
+            background-color: #34343e;
+            padding: 0
+        }
+
+        #hs-component>.container {
+            width: 100%;
+            padding: 0
+        }
+
+        .img-thumbnail {
+            border: 0
+        }
+
+        #hs-component .container {
+            padding: 0
+        }
+
+        #header {
+            background-color: #3A3A4F;
+            border-bottom: 10px solid #eee
+        }
+
+        #header .container {
+            background-color: #3A3A4F;
+            box-shadow: none
+        }
+
+        #header h1 {
+            text-align: left;
+            color: #eee;
+            text-transform: none;
+            font-weight: 400
+        }
+
+        .demo, h1 {
+            text-align: center
+        }
+
+        #demos {
+            background-color: #eee
+        }
+
+        #demos .container {
+            background-color: transparent;
+            box-shadow: none
+        }
+
+        #demos #secondary-mobile-menu, #secondary-mobile-menu {
+            background-color: #3A3A4F
+        }
+
+        #demos .row {
+            background-color: transparent
+        }
+
+        #demos .row:last-of-type {
+            border-bottom: 0
+        }
+
+        h1 {
+            margin-bottom: 1em;
+            font-weight: lighter
+        }
+
+        .demo {
+            margin: 20px 0
+        }
+
+        .demo-container {
+            background: #f9f9f9;
+            box-shadow: 0 3px 4px #ddd;
+            position: relative;
+            transition: transform .2s ease-in-out;
+            -webkit-transition: -webkit-transform .2s ease-in-out;
+            -moz-transition: -moz-transform .2s ease-in-out;
+            -ms-transition: -ms-transform .2s ease-in-out
+        }
+
+        .demo-container.new-demo:after {
+            content: 'New';
+            position: absolute;
+            top: 5px;
+            left: -5px;
+            background: #6B6FD0;
+            box-shadow: 0 1px 2px #bbb;
+            padding: 2px 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-size: 13px;
+            text-transform: uppercase
+        }
+
+        .demo-container:hover {
+            transform: translateY(-5px);
+            -webkit-transform: translateY(-5px);
+            -moz-transform: translateY(-5px);
+            -ms-transform: translateY(-5px)
+        }
+
+        .demo a {
+            font-weight: lighter;
+            color: #fff
+        }
+
+        .image-container {
+            height: 100%;
+            max-height: 250px;
+            padding: 0;
+            background-color: #fff;
+            font: 0/0 a
+        }
+
+        .dark-unica .image-container {
+            background-color: inherit
+        }
+
+        .sand-signika .image-container {
+            background: url(http://www.highcharts.com/samples/graphics/sand.png)
+        }
+
+        .image-container::before {
+            content: ' ';
+            display: inline-block;
+            vertical-align: middle;
+            height: 100%
+        }
+
+        .image-container img, .image-container svg {
+            display: inline-block;
+            vertical-align: middle;
+            width: 100%;
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 0;
+            padding: 0;
+            border: 0;
+            background: 0;
+            position: inherit !important;
+            border-bottom: 1px solid #EDEDED
+        }
+
+        .demo h3 {
+            text-transform: none;
+            color: #6B6FCE;
+            font-size: 16px;
+            font-weight: 700;
+            transition: color .2s ease-in-out;
+            -webkit-transition: color .2s ease-in-out;
+            -moz-transition: color .2s ease-in-out;
+            -ms-transition: color .2s ease-in-out
+        }
+
+        .demo .demo-container:hover h3 {
+            color: #58BB45
+        }
+
+        .row>.title {
+            background-color: transparent;
+            color: #3A3A4F
+        }
+
+        .row>.title>h2 {
+            margin: 20px 0 0;
+            text-transform: none;
+            font-weight: 500;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #D4D4DE
+        }
+
+        a.btn.btn-theme {
+            color: #eeeaea;
+            background-color: #565669;
+            border: 1px solid #34343e;
+            border-bottom: 0;
+            border-radius: 0;
+            font-weight: 700;
+            font-size: 13px;
+            margin: 0 2px 0 0;
+            letter-spacing: .5px;
+            line-height: 36px;
+            padding: 0 15px;
+            transition: all .2s ease-in-out;
+            -webkit-transition: all .2s ease-in-out;
+            -moz-transition: all .2s ease-in-out;
+            -ms-transition: all .2s ease-in-out
+        }
+
+        a.btn.btn-theme:hover {
+            background-color: #6A6A7E;
+            color: #90ef7f
+        }
+
+        a.btn.btn-theme.disabled {
+            background-color: #eee;
+            color: #313131;
+            opacity: 1
+        }
+
+        .select {
+            margin-bottom: 10px;
+            margin-top: 10px
+        }
+
+        .select label {
+            color: #fff
+        }
+
+        .dropdown.theme>ul {
+            border-radius: 0;
+            border: 0
+        }
+
+        @media ( max-width :400px) {
+            .demo {
+                width: 100%
+            }
+            .demo-container>div {
+                width: 50%
+            }
+            .image-container {
+                height: auto;
+                max-height: auto;
+                min-height: 100px
+            }
+            .demo h3 {
+                text-align: left
+            }
+        }
+
+        @media screen and (min-width:400px) and (max-width:768px) {
+            .image-container {
+                height: 200px
+            }
+            .image-container img, .image-container svg {
+                max-height: 200px
+            }
+            @media screen and (min-width:768px) and (max-width:992px) {
+                .demo-container {
+                    -webkit-transition-duration: .3s;
+                    transition-duration: .3s;
+                    -webkit-transition-property: transform;
+                    transition-property: transform;
+                    -webkit-transform: translateZ(0);
+                    transform: translateZ(0);
+                    box-shadow: 0 0 1px transparent
+                }
+                .demo-container:hover {
+                    -webkit-transform: scale(1.05);
+                    transform: scale(1.05)
+                }
+            }
+            @media screen and (min-width:992px) and (max-width:1200px) {
+                .demo-container {
+                    -webkit-transition-duration: .3s;
+                    transition-duration: .3s;
+                    -webkit-transition-property: transform;
+                    transition-property: transform;
+                    -webkit-transform: translateZ(0);
+                    transform: translateZ(0);
+                    box-shadow: 0 0 1px transparent
+                }
+                .demo-container:hover {
+                    -webkit-transform: scale(1.05);
+                    transform: scale(1.05)
+                }
+            }
+            @media screen and (min-width:1200px) {
+                .demo-container {
+                    -webkit-transition-duration: .3s;
+                    transition-duration: .3s;
+                    -webkit-transition-property: transform;
+                    transition-property: transform;
+                    -webkit-transform: translateZ(0);
+                    transform: translateZ(0);
+                    box-shadow: 0 0 1px transparent
+                }
+                .demo-container:hover {
+                    -webkit-transform: scale(1.05);
+                    transform: scale(1.05)
+                }
+            }
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+<div id="menu" class="nav-down">
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-toggle collapsed" data-toggle="collapse"
+                   data-target=".navbar-collapse"> <span class="sr-only">Toggle
+							navigation</span>
+                </a> <a class="navbar-brand" href="http://www.highcharts.com/"
+                        title="Highcharts"> <img
+                    src="./img/success.svg"
+                    alt="Highcharts">
+            </a>
+            </div>
+            <div class="navbar-collapse collapse" style="height: 0px;">
+                <div id="menu-container">
+                    <div id="menu-second" class="hidden-xs">
+
+                        <ul class="nav navbar-nav">
+                            <li class="item-112 deeper dropdown"><a
+                                    href="http://www.highcharts.com/demo#" class="dropdown-toggle"
+                                    data-toggle="dropdown">About Us <span class="toggle-arrow"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li class="item-260"><a
+                                            href="http://www.highcharts.com/about">About Us</a></li>
+                                    <li class="item-218"><a
+                                            href="http://www.highcharts.com/blog">Blog</a></li>
+                                    <li class="item-114"><a
+                                            href="http://www.highcharts.com/contact-email">Contact</a></li>
+                                </ul></li>
+                            <li class="item-261"><a
+                                    href="http://www.highcharts.com/plugin-registry">Plugins</a></li>
+                            <li class="item-262"><a href="http://shop.highsoft.com/">Shop</a></li>
+                        </ul>
+
+                        <div class="clearfix"></div>
+                    </div>
+                    <div id="menu-main">
+
+                        <ul class="nav navbar-nav">
+                            <li class="item-101"><a href="http://www.highcharts.com/">跟踪布局</a></li>
+                            <li class="item-103 active deeper dropdown"><a
+                                    href="http://www.highcharts.com/demo#" class="dropdown-toggle"
+                                    data-toggle="dropdown">跟踪布局 <span class="toggle-arrow"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li class="item-106 current active"><a
+                                            href="http://www.highcharts.com/demo">机床及在制品缓存布局</a></li>
+                                    <li class="item-107"><a
+                                            href="http://www.highcharts.com/stock/demo">定义跟踪零件信息</a></li>
+                                    <li class="item-205"><a
+                                            href="http://www.highcharts.com/maps/demo">你被跟踪零件工序定义</a></li>
+                                    <li class="item-267"><a
+                                            href="http://www.highcharts.com/use-cases">已定义零件信息管理</a></li>
+                                </ul></li>
+                            <li class="item-108 deeper dropdown"><a
+                                    href="http://www.highcharts.com/demo#" class="dropdown-toggle"
+                                    data-toggle="dropdown">实时布局<span class="toggle-arrow"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li class="item-128"><a
+                                            href="http://www.highcharts.com/docs">选择待跟踪工序零件</a></li>
+                                    <li class="item-124"><a
+                                            href="http://api.highcharts.com/highcharts">所选零件工序时序跟踪</a></li>
+                                    <li class="item-125"><a
+                                            href="http://api.highcharts.com/highstock">Highstock API
+                                        Reference</a></li>
+                                    <li class="item-211"><a
+                                            href="http://api.highcharts.com/highmaps">Highmaps API
+                                        Reference</a></li>
+                                    <li class="item-126"><a
+                                            href="http://www.highcharts.com/documentation/compatibility">Compatibility</a></li>
+                                    <li class="item-127"><a
+                                            href="http://www.highcharts.com/documentation/changelog">Changelog</a></li>
+                                </ul></li>
+                            <li class="item-109 deeper dropdown"><a
+                                    href="http://www.highcharts.com/demo#" class="dropdown-toggle"
+                                    data-toggle="dropdown">统计管理 <span class="toggle-arrow"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li class="item-110"><a
+                                            href="http://www.highcharts.com/support">零件单工序时序信息查询</a></li>
+                                    <li class="item-129"><a
+                                            href="http://www.highcharts.com/support/roadmap">单个机床零件时序信息统计</a></li>
+                                    <li class="item-201"><a
+                                            href="http://www.highcharts.com/download">单个零件时序信息统计</a></li>
+                                    <li class="item-208"><a
+                                            href="http://forum.highcharts.com/">Forum</a></li>
+                                </ul></li>
+                            <li class="item-254 deeper dropdown"><a
+                                    href="http://www.highcharts.com/demo#" class="dropdown-toggle"
+                                    data-toggle="dropdown">Products <span class="toggle-arrow"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li class="item-255"><a
+                                            href="http://www.highcharts.com/products/highcharts">Highcharts</a></li>
+                                    <li class="item-256"><a
+                                            href="http://www.highcharts.com/products/highstock">Highstock</a></li>
+                                    <li class="item-257"><a
+                                            href="http://www.highcharts.com/products/highmaps">Highmaps</a></li>
+                                    <li class="item-258"><a
+                                            href="http://cloud.highcharts.com/">Highcharts Cloud</a></li>
+                                </ul></li>
+                        </ul>
+
+                        <div class="clearfix"></div>
+                    </div>
+
+                    <div id="mobile-second" class="visible-xs">
+
+                        <ul class="nav navbar-nav">
+                            <li class="item-112 deeper dropdown"><a
+                                    href="http://www.highcharts.com/demo#" class="dropdown-toggle"
+                                    data-toggle="dropdown">About Us <span class="toggle-arrow"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li class="item-260"><a
+                                            href="http://www.highcharts.com/about">About Us</a></li>
+                                    <li class="item-218"><a
+                                            href="http://www.highcharts.com/blog">Blog</a></li>
+                                    <li class="item-114"><a
+                                            href="http://www.highcharts.com/contact-email">Contact</a></li>
+                                </ul></li>
+                            <li class="item-261"><a
+                                    href="http://www.highcharts.com/plugin-registry">Plugins</a></li>
+                            <li class="item-262"><a href="http://shop.highsoft.com/">Shop</a></li>
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>
+
+<div id="a" >
+    <iframe src="config.jsp" name="lock" width="100%" height="100%"
+                frameborder="0" scrolling="yes"></iframe>
+</div>
+
+
+<div id="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                <div id="zt-footer-copy">© 2016 Highcharts. All rights
+                    reserved.</div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                <div class="socials">
+                    <div>
+                        <a href="https://www.facebook.com/Highcharts" title="Facebook"
+                           class="social-icon"><i class="fa fa-facebook"></i></a> <a
+                            href="https://twitter.com/Highcharts" title="Twitter"
+                            class="social-icon"><i class="fa fa-twitter"></i></a> <a
+                            href="http://www.linkedin.com/company/highsoft-solutions-as"
+                            title="LinkedIn" class="social-icon"><i
+                            class="fa fa-linkedin"></i></a> <a
+                            href="https://github.com/highcharts/highcharts" title="Github"
+                            class="social-icon"><i class="fa fa-github"></i></a> <a
+                            href="https://www.youtube.com/channel/UCzxXofPTQ0DoT7uIy3Fxw7A"><i
+                            class="fa fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

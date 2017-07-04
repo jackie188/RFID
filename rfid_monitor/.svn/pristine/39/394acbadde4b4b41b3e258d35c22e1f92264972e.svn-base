@@ -1,0 +1,223 @@
+package RFID_java;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.*;
+
+import javax.servlet.http.HttpServletResponse;
+
+public class RFID_client {
+	/**
+	 * @param args
+	 */
+	//能够读取RFID数据
+	public static int portNo =23001; // 与 tagstreamAddress 配置端口一致 
+	static ServerSocket s;
+	static Socket socket;
+	static String test;
+	static ArrayList<String>  taglist=new ArrayList<String>();//加这个是用来清除多余的数据
+	private Timer time;
+	static String apiKey="0001";
+	static String deviceId1="1012";
+	static String deviceId2="1013";
+	static int count;
+	/// boolean flag=true; 
+	
+	
+	public static void main(String[] args)  throws IOException{
+		
+		 try {
+			s = new ServerSocket(portNo);
+			//s.setSoTimeout(10000);
+			System.out.print("\n绑定端口"+portNo+"成功！" );
+			System.out.println("The Server is start: " + s);        
+        	 socket = s.accept();            
+        	 System.out.println("answer:"+socket.getInetAddress().toString().substring(1)+ ","+socket.getPort());
+             System.out.println("Accept the Client: " + socket);                   
+             final BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);  
+             while(true){
+            	 TimerTask task= new TimerTask() {		//会有些问题的			
+					@Override
+					public void run() {
+						String str;					
+							try {
+								str = in.readLine();
+								//每次读到一个数据，就往下走一次,这是用来测试str为0的情况
+								//System.out.println("这是"+str+"读出的数据");
+								if(str == null || str == ""||str ==" "||str =="  "||str.length()<20){
+									System.out.println("天线视野中没有rfid的情况");		
+									str=" Tag:0000 0000 0000 0000 0000 0000,,Ant:3";//测试用,其实没用，进程还是死掉了
+								};
+								System.out.println("这是"+str+"读出的数据");	
+								System.out.println("str的长度为："+str.length());		
+/*		这是用来测试str为0的情况
+ 						if(str == null || str == ""||str ==" "||str =="  "){
+									System.out.println(str+"没有读到数据的情况");		
+									str="Tag:E200 3412 DC03 0118 0816 2290,,Ant:3";
+								};*/
+						        String strTag=(str.substring(str.indexOf("Tag:"))).substring(4, 33);
+								//System.out.println("测试tag："+strTag);
+								String deviceId=(str.substring(str.indexOf("Ant:"))).substring(4, 5);
+								//System.out.println("测试device："+deviceId);
+								System.out.println("进入处理的数据为："+strTag+"------------------------"+deviceId);
+								//这里的count只用于门禁系统，不用与其他地方，会重指list
+/*						        count++;							
+								if (count==10){
+												taglist.clear();//任务、时延、间隔时间
+									//大约15s
+									count=0;
+								}*/
+								
+								// response.sendRedirect("http://localhost:8080/mesTest1/servlet/db?&&uid="+uid+"&&pwd="+pwd+"&&pid="+pid+"&&url="+sourceURL);
+								if (!taglist.contains(str)) {
+									taglist.add(str);	
+									//这里每次仍然会放两个数据进来,不知道为什么.....
+								//if (!test.equals(str)) {
+										//这里只定义了第一次被特定读写器读到的标签会被显示出来，并传递出去
+										//第二次就不行了																	
+										if(deviceId.equals("0"))
+										{
+											//str=" Tag:E200 3412 DC03 0118 0816 2290,,Ant:3";
+											System.out.println("这是从deviced1传出的数据"+strTag);
+										   sentData2Api(strTag,deviceId1,apiKey);
+								             TimerTask task2 = new TimerTask() {
+								                 public void run() {
+														taglist.clear();											
+														System.out.println("10s后，清除读到的数据");
+														//这里如果长时间放置id的话，会在页面上读第二次的
+								                 }
+								               };
+								          Timer timer2 = new Timer();
+								          timer2.schedule(task2,10000);
+										   
+										}
+										   else if(deviceId.equals("1"))
+										   {
+											   
+											   System.out.println("这是从deviced1传出的数据"+strTag);
+										   sentData2Api(strTag,deviceId2,apiKey);
+								             TimerTask task3 = new TimerTask() {
+								                 public void run() {
+														taglist.clear();
+														System.out.println("10s后，清除读到的数据");
+														//这里如果长时间放置id的话，会在页面上读第二次的
+								                 }
+								               };
+								          Timer timer3 = new Timer();
+								          timer3.schedule(task3,10000);
+										   }
+										   else if(deviceId.equals("3")){
+                                                   String test="这是stf没有读到数据的情况，用来测试";
+                                                   System.out.println(test);
+          							             TimerTask task3 = new TimerTask() {
+    								                 public void run() {
+    														taglist.clear();											
+    														System.out.println("10s后，清除读到的数据");
+    														//这里如果长时间放置id的话，会在页面上读第二次的
+    								                 }
+    								               };
+    								          Timer timer3 = new Timer();
+    								          timer3.schedule(task3,10000);
+                                                   
+                                                   
+										   }
+									
+								}
+							
+							} catch (IOException e) {
+								e.printStackTrace();
+								System.out.println("错误1");
+							}   
+					}
+				};
+				Timer timer=new Timer();
+				//这里有一点线程超时的问题，怎么解决？
+				//timer.scheduleAtFixedRate(task,100,1000);
+				//这里time的时间肯定要改，但是要改成什么样子呢？
+				timer.schedule(task,100,1000);
+				//改成重复执行，可以有效避免多次读取的问题
+            	try {
+            		System.out.println("进入休眠");
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					System.out.println("错误2");
+				}           	
+            	
+             }                   
+         }catch(IOException e){
+        	 e.printStackTrace();
+        	 System.out.println("错误处");
+         }finally 
+ 		{
+             System.out.println("close the Server socket and the io.");
+             socket.close();
+             s.close();
+      }		
+        
+	} 
+	public void closed() throws IOException {
+		 socket.close();
+         try {
+			s.close();
+			System.out.println("关闭socket");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	//socket进行通信
+	 public static void sentData2Api(String str,String deviceId,String apikey) throws IOException { 
+
+		 Socket socket = null;
+			try {
+				//socket = new Socket("115.154.191.24", 9992);
+				socket = new Socket("127.0.0.1", 9992);
+				//向服务器端第一次发送字符串   
+				OutputStream netOut = socket.getOutputStream();
+				DataOutputStream doc = new DataOutputStream(netOut);
+			//	DataInputStream in = new DataInputStream(socket.getInputStream());
+				doc.writeUTF(apikey+deviceId+str);
+				doc.close();
+			//	in.close();
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (socket != null) {
+					try {
+						socket.close();
+					} catch (IOException e) {
+					}
+				}
+			}
+	    }
+	 /*
+	    public static void sentData2Api(String str) throws IOException { 
+
+	        // 拼凑get请求的URL字串，使用URLEncoder.encode对特殊和不可见字符进行编码 
+	        String getURL ="http://localhost:8080/mesTest/servlet/rfidServlet?DbPara="+str;
+	        URL getUrl = new URL(getURL); 
+	        // 根据拼凑的URL，打开连接，URL.openConnection()函数会根据 URL的类型，返回不同的URLConnection子类的对象，在这里我们的URL是一个http，因此它实际上返回的是HttpURLConnection 
+	        HttpURLConnection connection = (HttpURLConnection) getUrl.openConnection(); 
+	        // 建立与服务器的连接，并未发送数据 
+	        connection.connect(); 
+	        // 发送数据到服务器并使用Reader读取返回的数据 
+	        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream())); 
+	        // 断开连接 
+	        connection.disconnect(); 
+	    }*/
+}

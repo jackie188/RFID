@@ -1,0 +1,51 @@
+package config;
+
+import java.io.IOException;
+import java.sql.ResultSet;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import dbconn.BaseDao;
+
+public class ClearDateBase extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	
+	public void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		//@jiang这到底是要干啥啊，干嘛删除这些东西
+		System.out.println("传递删除信息成功!!!");
+		BaseDao baseDao = new BaseDao();
+		//String sql = "select rfidsystem.rfidPort,mach_rfid.machName from rfidsystem,mach_rfid where rfidsystem.rfidSysId=mach_rfid.rfidSysId";
+		String sql1 = "delete from rfid9458_taginfo";
+		String sql2 = "delete from rfid9457_taginfo";
+		String sql3 = "delete from rfid9992_taginfo";
+		String sql4 = "delete from workpieceprocesscontrol";
+		String sql5 = "delete from workpieceproecess where processId ='56128-4'";
+		String sql6 = "delete from rfid_tag where workpieceId=56128";
+		String sql7 = "delete from mach_rfid where rfidSysId=9992";
+		String sql8 = "delete from rfidsystem where rfidSysId=9992";
+		String sql9 = "delete from workpiece_process where processId='56128-4'";
+		baseDao.executeUpdate(sql1);
+		baseDao.executeUpdate(sql2);
+		baseDao.executeUpdate(sql3);
+		baseDao.executeUpdate(sql4);
+		baseDao.executeUpdate(sql5);
+		baseDao.executeUpdate(sql6);
+		baseDao.executeUpdate(sql7);
+		baseDao.executeUpdate(sql8);
+		baseDao.executeUpdate(sql9);
+		System.out.println("删除信息成功");
+
+	}
+	
+	public void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		doGet(req,resp);
+	}
+	
+}

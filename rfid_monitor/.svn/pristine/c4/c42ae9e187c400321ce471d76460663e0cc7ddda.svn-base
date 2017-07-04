@@ -1,0 +1,54 @@
+package config;
+
+import java.io.IOException;
+import java.sql.ResultSet;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import dbconn.BaseDao;
+
+public class GetrfidSystem extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	
+	public void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		//����Json����
+		JSONObject jsonObj = new JSONObject();
+		//����Json����
+		JSONArray rows = new JSONArray();
+		System.out.println("web请求rfid系统信息成功!!!");
+		BaseDao baseDao = new BaseDao();
+		String sql = "select * from rfidsystem";
+		ResultSet rs = baseDao.queryData(sql);
+
+		try {
+			while (rs.next()) {
+				JSONObject cell = new JSONObject();
+				cell.put("rfidsysid", rs.getString("rfidSysId"));
+				cell.put("rfidname", rs.getString("rfidName"));
+				//cell.put("apikey", rs.getString("rfidSysId"));
+				rows.add(cell);
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		//利用json来输出，看输出情况
+		jsonObj.put("rows", rows);
+		System.out.println(jsonObj.toString());
+		// ������ݿ������ҳ�治һ�£����б���װ��
+		resp.setCharacterEncoding("utf-8");
+		//�������
+		resp.getWriter().print(jsonObj.toString());
+	}
+	
+	public void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		doGet(req,resp);
+	}
+	
+}

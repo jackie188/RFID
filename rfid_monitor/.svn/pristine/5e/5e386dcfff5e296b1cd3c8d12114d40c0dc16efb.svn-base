@@ -1,0 +1,53 @@
+package config;
+
+import java.io.IOException;
+import java.sql.ResultSet;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import dbconn.BaseDao;
+
+public class GetTagState extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	public void doGet(HttpServletRequest req, HttpServletResponse resp)
+		throws ServletException,IOException{
+		
+		//定义json对象
+		JSONObject jsonObj = new JSONObject();
+		//定义json数组
+		JSONArray rows = new JSONArray();
+		
+		BaseDao baseDao = new BaseDao();
+		String sql = "select * from rfid_tag_state";
+		ResultSet rs = baseDao.queryData(sql);
+		try {
+			while (rs.next()) {
+				JSONObject cell = new JSONObject();
+				cell.put("stateid", rs.getString("Id"));
+				cell.put("statename", rs.getString("stateName"));
+				rows.add(cell);
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		jsonObj.put("rows", rows);
+		System.out.println(jsonObj.toString());
+
+		resp.setCharacterEncoding("utf-8");
+
+		resp.getWriter().print(jsonObj.toString());		
+		
+	}
+	
+	public void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException,IOException{
+		doGet(req,resp);
+	}
+}

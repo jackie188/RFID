@@ -1,0 +1,67 @@
+package config;
+
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import dbconn.BaseDao;
+
+/**
+ * Servlet implementation class WorkpieceConfig
+ */
+public class ProcessWrite extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public ProcessWrite() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		System.out.println("进行零件配置");
+		String workpieceProcessName = URLDecoder.decode(request.getParameter("workpieceProcessName"),"utf-8");	//获得机床名称	
+		String workpieceId = URLDecoder.decode(request.getParameter("workpieceName_process"),"utf-8");			//获得工件RFID号
+		String workpieceProcessId = URLDecoder.decode(request.getParameter("workpieceProcessId"),"utf-8");		//获得工件号
+		String data[] = new String[3];
+		
+
+		data[0] =  workpieceId;
+		data[1] =workpieceProcessId;
+		data[2] = workpieceProcessName;
+		System.out.println("插入数据库信息："+workpieceId+workpieceProcessName+workpieceProcessId);
+	//	String sql2="update workpiece_info set flag=1 where  workpieceId='"+workpieceId+"'";
+		String sql1 = "insert into workpieceproecess(workpieceId,processId,processName) values(?,?,?)";
+		//String sql2 = "insert into workpiece_process(workpieceId,name,processName,processId,machId) values(?,?,?,?,?)";
+		BaseDao dao = new BaseDao();
+		int result = dao.executeSql(sql1, data, 0);//插入零件
+		//dao.executeUpdate(sql2);//插入零件
+		//int result2 = dao.executeSql(sql2, data2, 0);//插入工件表
+		response.getWriter().print(result);
+		System.out.println("工序信息输入成功"+result);
+		//System.out.println("工件机床绑定配置结果"+result2);
+		System.out.println("添加零件信息成功");
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request,response);
+	}
+
+}

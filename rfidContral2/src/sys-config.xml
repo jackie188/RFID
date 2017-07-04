@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<db-info>
+		<Class-Name>com.mysql.jdbc.Driver</Class-Name>
+		<url>jdbc:mysql://localhost:3306/rfid_monitor?createDatabaseIfNotExist=true&amp;useUnicode=true&amp;characterEncoding=utf-8</url>
+		<user>root</user>
+		<password>xjtucad</password>
+	</db-info>
+
+
+</config>

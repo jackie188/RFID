@@ -1,0 +1,57 @@
+package xjtu.mes.manager;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import xjtu.mes.model.MachRfid;
+import xjtu.mes.model.RfidSystem;
+import xjtu.mes.util.DbUtil;
+
+/**
+* @author 姜文雷
+* @version 创建时间：2016年11月5日 下午5:00:04
+* 类说明
+*/
+public class MachRfidManager {
+	private static MachRfidManager instance=null;
+	protected MachRfidManager(){}
+	public  synchronized static MachRfidManager getInstance(){
+		if(instance==null){
+			instance= new MachRfidManager();
+		}
+		return instance;
+	}
+	/**
+	 * 获取所有绑定列表
+	 * @return List<RfidSystem>
+	 */
+	public  List<MachRfid> getMachRfids(){
+		List<MachRfid> MachrfidList = new ArrayList<MachRfid>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select * from mach_rfid ";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				MachRfid machRfid = new MachRfid();
+				machRfid.setMachId(rs.getInt(1));
+				machRfid.setMachName(rs.getString(2));
+				machRfid.setRfidSysId(rs.getInt(3));
+				MachrfidList.add(machRfid );
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return MachrfidList ;
+	}
+	
+	
+}

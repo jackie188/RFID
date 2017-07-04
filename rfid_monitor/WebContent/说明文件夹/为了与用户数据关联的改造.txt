@@ -1,0 +1,20 @@
+问题：添加新的机床或系统，模态框不能重新刷新，只能刷新主页了
+
+增加与用户有关改动的文件有
+1.jsp 获取零件的列表上以及添加零件
+工件管理类多了
+getWorkpiecesByUserId（）
+getWorkpiecesByDifferentNameAndUserId
+实体类多了userId属性
+对了构造方法
+public Workpiece(String workpieceId, String workpieceName, String workpieceRfId,String userId)
+AddWorkpieceServlet改动
+UpdataWorkpieceListServlet改动
+
+
+2.jsp获取零件的列表
+
+3.jsp改动
+
+第一获取零件下拉列表
+更新图标的servlet要改动

@@ -1,0 +1,57 @@
+package trackWorkpiece;
+
+import java.io.IOException;
+import java.sql.ResultSet;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import dbconn.BaseDao;
+
+public class GetMachPort extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	
+	public void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		//����Json����
+		JSONObject jsonObj = new JSONObject();
+		//����Json����
+		JSONArray rows = new JSONArray();
+		System.out.println("web请求机床Port信息成功!!!");
+		BaseDao baseDao = new BaseDao();
+		String sql = "select mach_rfid.machName,mach_rfid.machId,rfidsystem.rfidPort,rfidsystem.rfidModel from mach_rfid,rfidsystem where rfidsystem.rfidSysId=mach_rfid.rfidSysId";
+		//String sql = "select rfidsystem.rfidPort,mach_rfid.machName from rfidsystem,mach_rfid where rfidsystem.rfidSysId=mach_rfid.rfidSysId";
+
+		ResultSet rs = baseDao.queryData(sql);
+
+		try {
+			while (rs.next()) {
+				JSONObject cell = new JSONObject();
+				cell.put("machid", rs.getString("machId"));
+				cell.put("rfidport", rs.getString("rfidPort"));
+				cell.put("machname", rs.getString("machName"));
+				cell.put("rfidmodel", rs.getString("rfidModel"));
+				rows.add(cell);
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		//利用json来输出，看输出情况
+		jsonObj.put("rows", rows);
+		System.out.println(jsonObj.toString());
+		// ������ݿ������ҳ�治һ�£����б���װ��
+		resp.setCharacterEncoding("utf-8");
+		//�������
+		resp.getWriter().print(jsonObj.toString());
+	}
+	
+	public void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		doGet(req,resp);
+	}
+	
+}

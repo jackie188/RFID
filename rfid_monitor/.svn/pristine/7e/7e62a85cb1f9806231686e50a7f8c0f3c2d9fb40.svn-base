@@ -1,0 +1,651 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport"
+	content="width=device-width, minimum-scale=1.0, maximum-scale=1.5" />
+<title>基于RFID的零件工序时序跟踪</title>
+<link rel="stylesheet" href="js_mobile/jquery.mobile-1.3.2.css"
+	type="text/css">
+<link rel="stylesheet" type="text/css" href="css/default.css" />
+<link rel="stylesheet" type="text/css" href="css/component.css" />
+<script src="js/jquery-1.7.1.min.js"></script>
+<script src="js/jquery.lightbox_me.js"></script>
+<script src="js_mobile/jquery.mobile-1.3.2.js"></script>
+
+<!-- 这一部分是第一部分的配置功能 -->
+<script type="text/javascript">
+	var eventFlag = {
+		"event" : "xx",
+		"inFlag" : 0,
+		"outFlag" : 0
+	};
+	var count = 0;
+	var startTime = "";
+	$(document).ready(function() {
+		$("#processName_c").html("暂无数据");
+		$("#processId_c").html("暂无数据");
+		$("#workpieceName_c").html("暂无数据");
+		$("#workpieceId_c").html("暂无数据");
+		$("#processPara_info_a").hide();
+		$("#processPara_info_b").hide();
+		$("#processPara_info_c").hide();
+
+		getmachPort();
+		//  setInterval("update_workpieceInfo()", 1000);
+
+		$("#connectTest").click(function() {
+			connectTest();
+		});
+
+		$("#stopConnect").click(function() {
+			stopConnect();
+		});
+
+		$("#testConnect").click(function() {
+			testConnect();
+		});
+		$("#machPort").change(function() {
+			getworkpieceName();
+		});
+		/* 	$("#workpiece_info").click(function() {
+		 workpiece_info();
+		 }); */
+		/* 	$("#mach_workpiece").change(function() {
+		 workpiece_info();
+		 }); */
+	});
+
+	//异步获得机床名称和端口号
+	var flag1 = 1;
+	function getmachPort() {
+		$.ajax({
+			type : "POST",
+			url : 'GetMachPort',
+			success : function(data) {
+				//更新下拉框
+				//	document.getElementById("machPort").innerHTML = "";
+				var obj = document.getElementById("machPort");
+				//	obj.add(new Option("--请选择要监控的机床--", ""));
+				var result = eval("(" + data + ")"); //js中解析Json格式到result中
+				var json1 = result.rows; // rows是数组
+				for (var j = 0; j < json1.length; j++) {
+					var json = json1[j];
+					obj.add(new Option(json["machname"], json["rfidport"] + ","
+							+ json["machid"] + "," + json["rfidmodel"]),
+							undefined);
+				}
+				flag1 = 0;
+			}
+		});
+	}
+
+	//异步获得对应机床零件
+	var flag2 = 1;
+	function getworkpieceName() {
+		var machId = $("#machPort").val();
+		var ids = machId.split(",");
+		//alert("机床型号"+ids[1]); 		
+		if (ids[1] == "") {
+			alert("请先选择要监控的机床");
+		} else {
+			$.ajax({
+				type : "POST",
+				url : 'GetWorkpieceInfo',
+				data : "machId=" + ids[1],
+				success : function(data) {
+					document.getElementById("mach_workpiece").innerHTML = "";
+					var obj = document.getElementById("mach_workpiece");
+					obj.add(new Option("--该机床可选零件有--", ""));
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						obj.add(new Option(json["workpiecename"],
+								json["workpieceid"]), undefined);
+					}
+					flag2 = 0;
+				}
+			});
+		}
+	}
+
+	//获得零件的基本信息
+	function workpiece_info() {
+		var machId = $("#machPort").val();
+		var ids = machId.split(",");
+		var workpieceId = $("#mach_workpiece").val();
+		//alert("机床型号"+ids[1]); 
+		if (ids[1] == "" || workpieceId == "") {
+			alert("请先选择要跟踪的零件");
+		} else {
+			$.ajax({
+				type : "POST",
+				url : 'GetProcessInfo',
+				data : "machId=" + ids[1] + "&workpieceId=" + workpieceId,
+				success : function(data) {
+
+					//	document.getElementById("mach_workpiece").innerHTML = "";
+					//	var obj = document.getElementById("mach_workpiece");
+					//	obj.add(new Option("--该机床可选零件有--", ""));
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+
+					if (json1.length == 0) {
+						$("#processName_c").html("");
+						$("#processId_c").html("");
+						$("#workpieceName_c").html("");
+						$("#workpieceId_c").html("");
+					} else {
+						for (var j = 0; j < json1.length; j++) {
+							var json = json1[j];
+							$("#processName_c").html(json["processname"]);
+							$("#processId_c").html(json["processid"]);
+							$("#workpieceName_c").html(json["workpiecename"]);
+							$("#workpieceId_c").html(json["workpieceid"]);
+						}
+					}
+					flag2 = 1;
+				}
+			});
+		}
+		getworkpieceId();
+	}
+
+	//让点击一次有效
+	function getmach() {
+		flag2 = 1;
+		if (flag1) {
+			getmachPort();
+			flag1 = 0;
+		}
+	}
+	/* 	function getworkpiece(){
+	 if (flag2) {
+	 getworkpieceName();
+	 flag2 = 0;
+	 }
+	
+	 } */
+	 
+	/*  以上都是页面获取后台数据实时跟新页面，不用做修改 */
+	
+	/* 	点击另一个页面时获得零件的标号信息 */
+	function getworkpieceId() {
+		var tracked_mach = $("#machPort").find("option:selected").text();
+		var tracked_workpiece = $("#workpieceName_c").html();
+		var tracked_process = $("#processName_c").html();
+		var tracked_workpieceId = $("#workpieceId_c").html();
+
+		/* 	检测输出是否是正确的 */
+		console.log("跟踪机床名：" + tracked_mach);
+		console.log("跟踪工件名：" + tracked_workpiece);
+		console.log("跟踪工序名：" + tracked_process);
+		console.log("跟踪工件号名：" + tracked_workpieceId);
+
+		$("#tracked_mach").html(tracked_mach);
+		$("#tracked_workpiece").html(tracked_workpiece);
+		$("#tracked_process").html(tracked_process);
+		$("#tracked_workpieceId").val(tracked_workpieceId);
+
+	}
+</script>
+
+
+
+
+<!-- 这一部分是websocket的部分,利用服务器推送技术，以后的改进方向 -->
+<script type="text/javascript">
+console.log("开启websocket：");
+	var webSocket = new WebSocket('ws://localhost:8080/mes_online/websocket');
+	// var webSocket = new WebSocket('ws://115.154.191.228:8080/rfidApp/websocket');
+	// var webSocket = new WebSocket('ws://115.154.191.24:8099/rfidApp/websocket');
+	webSocket.onerror = function(event) {
+		onError(event);
+	};
+
+	webSocket.onopen = function(event) {
+		console.log("开启websocket：");
+		onOpen(event);
+		
+	};
+
+	webSocket.onmessage = function(event) {
+		onMessage(event);
+	};
+	webSocket.onclose = function(event) {
+		onclose(event);
+	};
+
+	var inflag = 0;
+	var outflag = 0;
+	var state_flag = 0;
+	var state_count = 0;
+	/* 这部分实现跟踪状态的跟新 */
+	function onMessage(event) {
+		/*       document.getElementById('messages').innerHTML 
+		 += '<br />' + event.data;         */
+
+		var result = eval("(" + event.data + ")"); //js中解析Json格式到result中
+		var json1 = result.rows; // rows是数组
+		for (var j = 0; j < json1.length; j++) {
+			var json = json1[j];
+			//这里通过设置状态来进行求解，不懂状态对应不同的格式，状态由java来传过来
+			/* 		$("#processtime_t").html(json["event"]);
+			 $("#processname_t").html(json["time"]);
+			 $("#state_t").html(json["state"]); */
+			var event_t = json["event"];
+			var time_t = json["time"];
+			var state_t = json["state"];
+			if (state_t == "in") {
+				var addTr = "<li><div class='cbp_tmicon cbp_tmicon-phone'></div><div class='cbp_tmlabel'><span>零件到达"
+						+ event_t
+						+ "</span><label>时间："
+						+ time_t
+						+ "</label></div></li>";
+				$(addTr).insertBefore(".firstLi");
+			}
+			if (state_t == "out") {
+				var addTr = "<li><div class='cbp_tmicon cbp_tmicon-phone'></div><div class='cbp_tmlabel'><span>零件离开"
+						+ event_t
+						+ "</span><label>时间："
+						+ time_t
+						+ "</label></div></li>";
+				$(addTr).insertBefore(".firstLi");
+			}
+			if (state_flag != state_t) {
+				state_flag = state_t;
+				state_count++;
+			}
+			//这里仅对三天线模式进行分析，有必要的加入flag对其他天线模式进行分析；
+			if ($("#mach_model").val() == "a") {
+				$("#processPara_info_a").show();
+				if (state_count == 1) {
+					startTime1();
+					startTime4();
+					document.getElementById('processStartTime_a').innerHTML = time_t;
+				} else if (state_count == 2) {
+					stopCount1();
+				} else if (state_count == 3) {
+					startTime2();
+				} else if (state_count == 4) {
+					stopCount2();
+				} else if (state_count == 5) {
+					startTime3();
+				} else if (state_count == 6) {
+					stopCount3();
+					stopCount4();
+				}
+			} else if ($("#mach_model").val() == "b") {
+				$("#processPara_info_b").show();
+				if (state_count == 1) {
+					console.log("进入第一次读取");
+					startTime1();
+					startTime4();
+					document.getElementById('processStartTime_b').innerHTML = time_t;
+				} else if (state_count == 2) {
+					console.log("进入第2次读取");
+					stopCount1();
+				} else if (state_count == 3) {
+					console.log("进入第3次读取");
+					startTime2();
+				} else if (state_count == 4) {
+					console.log("进入第4次读取");
+					stopCount2();
+					stopCount4();
+				}
+			}
+
+			else if ($("#mach_model").val() == "c") {
+				$("#processPara_info_c").show();
+				if (state_count == 1) {
+					startTime1();
+					startTime4();
+					document.getElementById('processStartTime_c').innerHTML = time_t;
+				} else if (state_count == 2) {
+					stopCount1();
+				} else if (state_count == 3) {
+					startTime3();
+				} else if (state_count == 4) {
+					stopCount3();
+					stopCount4();
+				}
+			}
+		}
+	}
+
+	//这样就达到了ajax的效果，用了json的格式
+	function onOpen(event) {
+		console.log("websocket连接开始");
+	}
+
+	function onError(event) {
+		// alert(event.data);
+		console.log("连接错误！！");
+	}
+	function onclose(event) {
+		webSocket.send("stopSocket");
+		alert("连接关闭");
+
+	}
+
+	//连通性测试，这里是让相应的机床绑定的rfid设备与web服务器进行tcp连接；（发送机床绑定rfid的端口号）
+	function connectTest() {
+		var machPort = $("#machPort").val();
+		var ids = machPort.split(",");
+		console.log("端口号" + ids[0]);
+		console.log("机床型号" + ids[1]);
+		console.log("机床的模式" + ids[2]);
+		if (machPort == "") {
+			alert("请选择要监控的机床");
+		} else {
+			$("#mach_model").val(ids[2]);
+			machPort = ids[0];
+			webSocket.send(machPort);
+			$("#isConnected").html('成功连通');
+			//显示零件
+			//getworkpiece();
+			return false;
+		}
+		//webSocket.send("start");
+	}
+
+	/* 这是修正前的结果 */
+	/* function connectTest(){
+	 $("#isConnected").html('成功连通');
+	 //显示零件
+	 getworkpiece();
+
+	 } */
+
+	function stopConnect() {
+		webSocket.send("stopSocket");
+		$("#isConnected").html('');
+
+		// return false;
+	}
+	function testConnect() {
+		webSocket.send("testSocket");
+		// return false;
+	}
+
+	//这个是重点，这里通过websocket向后台传送要监控的零件id，后台的tcp的server根据id捕获信息
+	//从页面向后台传数据：
+	$(document).ready(function() {
+		$("#mach_workpiece").change(function() {
+			workpiece_info();
+			$("#track_info").show();
+			var workpieceId = $("#mach_workpiece").val();
+			webSocket.send(workpieceId);
+			//这一个是将DEMO信息传递出去								      
+
+		});
+	});
+</script>
+
+<!-- 时间轴的程序 -->
+<script type="text/javascript">
+	function hideTimeline() {
+		$(".list").toggle("slow");
+	}
+
+	$(document).ready(function() {
+		$("#test_add").click(function() {
+			test_add();
+		});
+	});
+
+	//这是做的测试...
+	function test_add() {
+		var addTr = "<li><div class='cbp_tmicon cbp_tmicon-phone'></div><div class='cbp_tmlabel'><span>离开缓存区域</span><label>时间：18:20:15  </label></div></li>";
+		//  $("ul").append(addTr); 
+		$(addTr).insertBefore(".firstLi");
+	}
+	//这是读到程序的特点 
+	function update_workpieceInfo() {
+		var workpieceId = $("#tracked_workpieceId").val();
+		//console.log("要传给后台的工件号"+workpieceId);
+		if (workpieceId == "") {
+			//console.log("还未有工件输出");
+		} else {
+			$
+					.ajax({
+						type : "POST",
+						async : false,
+						url : "TrackWorkpiece?apiKey=0001",
+						data : "workpieceId=" + workpieceId,
+						success : function(data) { //data为返回的数据
+							if (data != 0) {
+								console.log("传递信息成功");
+								var jsonObject = JSON.parse(data);
+								var event = jsonObject.event;
+								var minTime = jsonObject.minTime;
+								var maxTime = jsonObject.maxTime;
+								if (eventFlag.event != event) {
+									eventFlag.event = event;
+									eventFlag.inFlag = 0;
+									eventFlag.outFlag = 0;
+									count += 1;
+								}
+								var time1 = new Date('2014/06/11 ' + minTime);
+								var time2 = new Date('2014/06/11 ' + maxTime);
+								var now = new Date();
+								if ((now.getTime() - time1.getTime()) / 1000 < 2) {//进入
+									if (eventFlag.inFlag == 0) {
+										var addTr = "<li><div class='cbp_tmicon cbp_tmicon-phone'></div><div class='cbp_tmlabel'><span>零件到达"
+												+ event
+												+ "</span><label>时间："
+												+ minTime
+												+ "</label></div></li>";
+										$(addTr).insertBefore(".firstLi");
+										eventFlag.inFlag = 1;
+									}
+								}
+								if ((now.getTime() - time2.getTime()) / 1000 > 2) {//离开
+									if (eventFlag.outFlag == 0) {
+										var addTr = "<li><div class='cbp_tmicon cbp_tmicon-phone'></div><div class='cbp_tmlabel'><span>零件离开"
+												+ event
+												+ "</span><label>时间："
+												+ maxTime
+												+ "</label></div></li>";
+										$(addTr).insertBefore(".firstLi");
+										eventFlag.outFlag = 1;
+									}
+								}
+								if (count == 1) {
+									$("#bufferInTime_a")
+											.html(
+													(time2.getTime() - time1
+															.getTime()) / 1000);
+									$("#processStartTime_a").html(minTime);
+									startTime = time1;
+									$("#processTimeAll_a")
+											.html(
+													(time2.getTime() - time1
+															.getTime()) / 1000);
+								} else if (count == 2) {
+									$("#processCostTime_a")
+											.html(
+													(time2.getTime() - time1
+															.getTime()) / 1000);
+									$("#processTimeAll_a").html(
+											(time2.getTime() - startTime
+													.getTime()) / 1000);
+								} else if (count == 3) {
+									$("#bufferOutTime_a")
+											.html(
+													(time2.getTime() - time1
+															.getTime()) / 1000);
+									$("#processTimeAll_a").html(
+											(time2.getTime() - startTime
+													.getTime()) / 1000);
+								}
+							}
+						}
+					});
+		}
+	}
+
+	//这一部分是计算工序时间的函数   
+	var time1 = 0;
+	var timecount1;
+	var time2 = 0;
+	var timecount2;
+	var time3 = 0;
+	var timecount3;
+	var time4 = 0;
+	var timecount4;
+	//入缓存时间计算
+	function startTime1() {
+		document.getElementById('bufferInTime_a').innerHTML = time1 + "s";
+		document.getElementById('bufferInTime_b').innerHTML = time1 + "s";
+		document.getElementById('bufferInTime_c').innerHTML = time1 + "s";
+		time1++;
+		timecount1 = setTimeout('startTime1()', 1000);
+	}
+	function stopCount1() {
+		clearTimeout(timecount1);
+	}
+	//入机床时间计算
+	function startTime2() {
+		document.getElementById('processCostTime_a').innerHTML = time2 + "s";
+		document.getElementById('processCostTime_b').innerHTML = time2 + "s";
+		time2++;
+		timecount2 = setTimeout('startTime2()', 1000);
+	}
+	function stopCount2() {
+		clearTimeout(timecount2);
+	}
+	//出缓存时间计算
+	function startTime3() {
+		document.getElementById('bufferOutTime_a').innerHTML = time3 + "s";
+		document.getElementById('bufferOutTime_c').innerHTML = time3 + "s";
+		time3++;
+		timecount3 = setTimeout('startTime3()', 1000);
+	}
+
+	function stopCount3() {
+		clearTimeout(timecount3);
+	}
+	//工序总时长计算
+	function startTime4() {
+		document.getElementById('processTimeAll_a').innerHTML = time4 + "s";
+		document.getElementById('processTimeAll_b').innerHTML = time4 + "s";
+		document.getElementById('processTimeAll_c').innerHTML = time4 + "s";
+		time4++;
+		timecount4 = setTimeout('startTime4()', 1000);
+	}
+
+	function stopCount4() {
+		clearTimeout(timecount4);
+	}
+</script>
+</head>
+<body style="font-family: 微软雅黑">
+	<div data-role="page" id="main" data-theme="c">
+
+		<div data-role="header" data-theme="b">
+			<div data-role="navbar">
+				<ul>
+					<li><a href="config.jsp" data-role="button" data-inline="true"
+						data-mini="true" rel="external"
+						style="background: #006699; color: white; font-family: 微软雅黑">跟踪布局</a>
+					<li><a href="trackWorkpiece.jsp" data-role="button"
+						data-inline="true" data-mini="true" rel="external"
+						style="background: #1A8298; color: white; font-family: 微软雅黑">实时跟踪</a>
+					<li><a href="manage.jsp" data-role="button"
+						data-inline="true" data-mini="true" data-theme="d" rel="external"
+						style="background: #006699; color: white; font-family: 微软雅黑">统计管理</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div data-role="content">
+
+
+			<div data-role="collapsible" data-collapsed="false"
+				data-inset="false" data-collapsed-icon="arrow-d"
+				data-expanded-icon="arrow-u" data-theme="b">
+				<h1>选择待跟踪工序时序零件</h1>
+
+				<select name="machPort" id="machPort">
+				<!-- 这不是全部的，其他内容被js补充了 -->
+					<option value="">请选择要监控的机床</option>
+				</select> 测试RFID系统连通性: <span id="isConnected" class="conState"></span> <br>
+				<center>
+					<button id="connectTest" data-inline="true" data-mini="true">测试监控</button>
+					&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<button id="stopConnect" data-inline="true" data-mini="true">停止监控</button>
+					<br>
+				</center>
+				<!-- <button id="testConnect" data-inline="true" data-mini="true">监控</button> -->
+				<!--   <div id="messages"></div> -->
+				<!-- 时间：<span id="processtime_t"> </span><br>
+事件：<span id="processname_t"> </span><br>
+状态：<span id="state_t"> </span><br> -->
+				<select name="mach_workpiece" id="mach_workpiece">
+					<!-- onclick="getworkpiece0()" -->
+					<option value="">请选择被跟踪零件</option>
+				</select>
+				<!-- <button id="workpiece_info" data-inline="true" data-mini="true" >零件信息</button>  -->
+				<div id="track_info" style="display: none;">
+					<span>被跟踪工序名：</span><span id="processName_c"> </span><br>
+					被跟踪工序唯一标志号：<span id="processId_c"> </span><br> 被跟踪工序所属零件名称：<span
+						id="workpieceName_c"> </span><br> 被跟踪工序所属零件的唯一标志号：<span
+						id="workpieceId_c"> </span><br>
+				</div>
+			</div>
+			<div data-role="collapsible" data-collapsed="false"
+				data-inset="false" data-collapsed-icon="arrow-d"
+				data-expanded-icon="arrow-u" data-theme="b">
+				<h1>所选零件工序时序跟踪</h1>
+				工序时序信息：
+				<!-- 隐藏获得零件号 -->
+				<input type=hidden name="tracked_workpieceId"
+					id="tracked_workpieceId" type="text" disabled="true"
+					readOnly="true" value="" />
+				<!-- 隐藏获取机床模式： -->
+				<input type=hidden name="mach_model" id="mach_model" type="text"
+					disabled="true" readOnly="true" value="" />
+				<!--  <button id="test_add" data-inline="true" data-mini="true" >零件信息</button>-->
+				<div class="container">
+					<div class="main">
+						<ul class="cbp_tmtimeline">
+							<li class="firstLi"></li>
+						</ul>
+					</div>
+				</div>
+
+				<div id="processPara_info_a">
+					<label class="processParaTitle">工序时序参数自动计算：</label><br> 工序总时长：<span
+						id="processTimeAll_a"> </span><br> 工序起始时间：<span
+						id="processStartTime_a"> </span><br> 入缓存等待时长：<span
+						id="bufferInTime_a"> </span><br> 机床加工耗时：<span
+						id="processCostTime_a"> </span><br> 出缓存等待时长：<span
+						id="bufferOutTime_a"> </span><br>
+				</div>
+
+				<div id="processPara_info_b">
+					<label class="processParaTitle">工序时序参数自动计算：</label> 工序总时长：<span
+						id="processTimeAll_b"> </span><br> 工序起始时间：<span
+						id="processStartTime_b"> </span><br> 入缓存等待时长：<span
+						id="bufferInTime_b"> </span><br> 机床加工耗时：<span
+						id="processCostTime_b"> </span><br>
+				</div>
+				<div id="processPara_info_c">
+					<label class="processParaTitle">工序时序参数自动计算：</label> 工序总时长：<span
+						id="processTimeAll_c"> </span><br> 工序起始时间：<span
+						id="processStartTime_c"> </span><br> 入缓存等待时长：<span
+						id="bufferInTime_c"> </span><br> 出缓存等待时长：<span
+						id="bufferOutTime_c"> </span><br>
+				</div>
+
+
+			</div>
+
+		</div>
+	</div>
+</body>
+</html>

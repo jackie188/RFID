@@ -1,0 +1,159 @@
+function updata(){
+//	updataMachList();//更新机床下拉框
+	updataWorkpieceList();
+	updataWorkpieceList()
+}
+
+
+/*	 更新下拉框，机床的 ，
+	function updataMachList() {
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/GetMachListServlet',
+			async : false,
+			success : function(data) {
+				
+				//更新下拉框
+				document.getElementById("selectMachId").innerHTML = "";
+				var obj = document.getElementById("selectMachId");
+				if(data == "0"){
+					obj.add(new Option("--无机床--", ""));
+					//设置提交按钮失效
+					//var machRfid = document.getElementById("machRfid");
+				//	machRfid.disabled=true; 
+					
+				}else{
+					//设置提交按钮回复正常
+					//var machRfid = document.getElementById("machRfid");
+					//machRfid.disabled=false; 
+					
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						obj.add(new Option("机床名称:"+json["machName"], json["machId"]),
+								undefined);
+					}
+					
+				}
+				
+			}
+		});
+	}*/
+		
+	
+/*	 更新下拉框，零件的 
+	function updataWorkpieceList() {
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/UpdataWorkpieceListByMachIdServlet',
+			data :  
+				"&machId="+ $("#selectMachId").val() 
+				
+				,
+			async : true,
+			success : function(data) {
+				
+				//更新下拉框
+				document.getElementById("selectWorkpieceId").innerHTML = "";
+				var obj = document.getElementById("selectWorkpieceId");
+				if(data == "0"){
+					obj.add(new Option("--无可用零件--", ""));
+					//设置提交按钮失效
+					//var workpieceProcessSubmit= document.getElementById("workpieceProcessSubmit");
+					//workpieceProcessSubmit.disabled=true; 
+					
+				}else{
+					//obj.add(new Option("--零件列表--", ""));
+					//设置提交按钮回复正常
+					//var workpieceProcessSubmit= document.getElementById("workpieceProcessSubmit");
+					//workpieceProcessSubmit.disabled=false; 
+					
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						obj.add(new Option(json["workpieceName"]+"【唯一标识号："+json["workpieceId"]+"】", json["workpieceId"]),
+								undefined);
+					}
+					
+				}
+				
+			}
+		});
+	}*/
+	/* 更新下拉框，零件的 */
+	function updataWorkpieceList() {
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/UpdataWorkpieceListServlet',
+			
+			async : true,
+			success : function(data) {
+				
+				//更新下拉框
+				document.getElementById("selectWorkpieceId").innerHTML = "";
+				var obj = document.getElementById("selectWorkpieceId");
+				if(data == "0"){
+					obj.add(new Option("--无可用零件--", ""));
+					//设置提交按钮失效
+					//var workpieceProcessSubmit= document.getElementById("workpieceProcessSubmit");
+					//workpieceProcessSubmit.disabled=true; 
+					
+				}else{
+					obj.add(new Option("--零件列表--", ""));
+					//设置提交按钮回复正常
+					//var workpieceProcessSubmit= document.getElementById("workpieceProcessSubmit");
+					//workpieceProcessSubmit.disabled=false; 
+					
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						obj.add(new Option(json["workpieceName"]+"【唯一标识号："+json["workpieceId"]+"】", json["workpieceId"]),
+								undefined);
+					}
+					
+				}
+				
+			}
+		});
+	}
+	
+	function showDetialWorkpiece(){
+		$.ajax({
+			type : "POST",
+			url : '/mes_online/DetialWorkpieceServlet',
+			data :  
+				"&WorkpieceId="+ $("#selectWorkpieceId").val() 
+				
+				,
+			async : true,
+			success : function(data) {
+				
+				//更新下拉框
+				//document.getElementById("detialWorkpiece").innerHTML = "";
+				//var obj = document.getElementById("detialWorkpiece");
+				if(data == "0"){
+					//document.getElementById("detialWorkpiece").innerHTML = "当前零件还未配置工序";
+					
+				}else{
+					
+					
+					var result = eval("(" + data + ")"); //js中解析Json格式到result中
+					var json1 = result.rows; // rows是数组
+					
+					for (var j = 0; j < json1.length; j++) {
+						var json = json1[j];
+						document.getElementById("workpieceId").innerHTML = json["workpieceId"];
+					document.getElementById("workpieceName").innerHTML = json["workpieceName"];
+					document.getElementById("workpieceRfId").innerHTML = json["workpieceRfId"];
+					document.getElementById("processInfo").innerHTML = json["processInfo"];
+						
+					}
+					
+				}
+				
+			}
+		});
+	}

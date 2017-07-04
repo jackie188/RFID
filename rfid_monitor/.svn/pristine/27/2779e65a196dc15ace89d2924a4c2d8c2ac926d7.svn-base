@@ -1,0 +1,63 @@
+package config;
+
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import dbconn.BaseDao;
+public class Device_config extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+    public Device_config() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		System.out.println("开始进行天线配置");
+		String deviceName = URLDecoder.decode(request.getParameter("deviceName"),"utf-8");	//获得天线名称	
+		String rfidSystem = request.getParameter("rfidSystem");			//获得系统标志号
+		String eventname = request.getParameter("eventname");		//获得事件名称
+		String eventstate = request.getParameter("eventstate");		//获得事件状态
+		String apikey = request.getParameter("apikey");			//APIKEY
+		System.out.println("天线名称"+deviceName);
+		System.out.println("系统标志号"+rfidSystem);
+		System.out.println("事件名称"+eventname);
+		System.out.println("开事件状态"+eventstate);
+
+		String data[] = new String[3];
+		data[0] = deviceName;
+		data[1] = rfidSystem;
+		data[2] = apikey;
+		String sql = "insert into device(deviceName,rfidSysId,apiKey) values(?,?,?)";
+		BaseDao dao = new BaseDao();
+		int deviceid = dao.executeSql(sql, data, 1);
+		System.out.println("天线标志号"+deviceid);
+		/*���봥���¼���*/
+		String event[] = new String[3];
+		event[0] = String.valueOf(deviceid);//注意这里用方法将数字转为字符
+		event[1] = eventname;
+		event[2] = eventstate;
+		String sql_event = "insert into device_state(deviceId,event,stateId) values (?,?,?)";
+		dao.executeSql(sql_event, event, 0);
+		response.getWriter().print(deviceid);
+		System.out.println("配置天线信息成功");
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request,response);
+	}
+
+}

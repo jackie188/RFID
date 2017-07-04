@@ -1,0 +1,97 @@
+package trackWorkpiece;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import json.JSONObject;
+
+import db.DBConnection;
+
+public class TrackWorkpiece extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	public TrackWorkpiece() {
+		super();
+	}
+
+	public void destroy() {
+		super.destroy(); // Just puts "destroy" string in log
+		// Put your code here
+	}
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		response.setContentType("html/txt");
+		response.setCharacterEncoding("utf-8");
+		response.setHeader("Pragma", "no-cache");
+		response.setHeader("Cache-Control", "no-cache, must-revalidate");
+		response.setHeader("Pragma", "no-cache");
+		String strReturn="";
+		DBConnection db=new DBConnection();
+		String apikey=request.getParameter("apiKey").toString();
+		String workpieceId=request.getParameter("workpieceId").toString();
+		System.out.println(workpieceId+"******************************");
+		try {
+			//db.getCurrentConnection(dbPara.getUrl(),dbPara.getUsername(),dbPara.getPassword());
+			db.getCurrentConnection("jdbc:mysql://localhost:3306/mesiot_rfid?useUnicode=true&characterEncoding=UTF-8","root","1234");//涓棿涓�儴鍒嗚鍙ョ敤浜庢暟鎹簱瑙ｇ爜
+			List deviceTagList=db.executeQueryList("select rfid_tag_trig.deviceId,rfid_tag_trig.tagId,rfid_tag_trig.time from rfid_tag_trig,rfid_tag where rfid_tag_trig.tagid=rfid_tag.id and rfid_tag.workpieceId='"+workpieceId+"' order by rfid_tag_trig.time desc");
+			String deviceId=((Map) deviceTagList.get(0)).get("deviceid").toString();
+
+
+			String tagId=((Map) deviceTagList.get(0)).get("tagid").toString();
+
+			String latestTime=((Map) deviceTagList.get(0)).get("time").toString();
+			System.out.println("设备id"+deviceId);
+			System.out.println("标签id"+tagId);
+			List processElementList=db.executeQueryList("select event ,max(rfid_tag_trig.time),min(rfid_tag_trig.time) from rfid_tag_trig,rfid_tag,device_state where device_state.deviceId=rfid_tag_trig.deviceId and rfid_tag_trig.tagid='"+tagId+"' and rfid_tag_trig.deviceId='"+deviceId+"' Group By event");
+            
+			Map map = new HashMap();
+		//	List mapList = new ArrayList();
+			map.put("event", ((Map) processElementList.get(0)).get("event").toString());
+			map.put("maxTime", ((Map) processElementList.get(0)).get("max(rfid_tag_trig.time)").toString());
+			map.put("minTime", ((Map) processElementList.get(0)).get("min(rfid_tag_trig.time)").toString());
+            //工序时序参数自动计算
+			
+			JSONObject object = new JSONObject(map);
+			strReturn=object.toString();
+			
+			System.out.println("传出数据成功");
+			System.out.println("传出数据为："+object.toString());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		db.closeCurrentConnection();
+		response.getWriter().write(strReturn);
+		response.getWriter().flush();
+		response.getWriter().close();
+        
+	}
+
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+            doGet(request, response);
+	}
+	public void init() throws ServletException {
+		// Put your code here
+	}
+
+}
+//取零件第一次和最后一次被探测时间
+//select rfid_tag_trig.id ,max(rfid_tag_trig.time),min(rfid_tag_trig.time) from rfid_tag_trig,rfid_tag where rfid_tag_trig.tagid=rfid_tag.id and rfid_tag.workpieceid='12458' and rfid_tag_trig.deviceId='1012';
+//取工件最新触发对应的天线deviceId
+//select rfid_tag_trig.deviceId,rfid_tag_trig.tagId,rfid_tag_trig.time from rfid_tag_trig,rfid_tag where rfid_tag_trig.tagid=rfid_tag.id and rfid_tag.workpieceId='12458' order by rfid_tag_trig.time desc
+//event max(time) min(time)
+//select event ,max(rfid_tag_trig.time),min(rfid_tag_trig.time) from rfid_tag_trig,rfid_tag,device_state where device_state.deviceId=rfid_tag_trig.deviceId and rfid_tag_trig.tagid='E200 3412 DC03 0118 0816 2299' and rfid_tag_trig.deviceId='1012'
+//
+//select event ,max(rfid_tag_trig.time),min(rfid_tag_trig.time) from rfid_tag_trig,rfid_tag,device_state where device_state.deviceId=rfid_tag_trig.deviceId and rfid_tag_trig.tagid='E200 3412 DC03 0118 0816 2299' group by rfid_tag_trig.deviceid

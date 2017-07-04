@@ -1,0 +1,186 @@
+package xjtu.mes.manager;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import xjtu.mes.model.RfidSystem;
+import xjtu.mes.model.Workpiece;
+import xjtu.mes.model.WorkpieceProcess;
+import xjtu.mes.util.DbUtil;
+
+/**
+* @author 姜文雷
+* @version 创建时间：2016年11月8日 下午3:24:12
+* 类说明
+*/
+public class WorkpieceProcessManager {
+	private static WorkpieceProcessManager instance=null;
+	protected WorkpieceProcessManager(){}
+	public  synchronized static WorkpieceProcessManager getInstance(){
+		if(instance==null){
+			instance= new WorkpieceProcessManager();
+		}
+		return instance;
+	}
+	
+	/**
+	 * 通过零件id获取所有的工序集合
+	 * @param workpieceId
+	 * @return
+	 */
+	public  List<WorkpieceProcess> getAllProcessByWorkpieceId( String workpieceId){
+		List<WorkpieceProcess> workpieceProcessList = new ArrayList<WorkpieceProcess>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		ResultSet rs = null;
+		String sql = "select * from workpiece_process where workpieceId ='"+workpieceId+"' order by level";
+		try{
+			rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				WorkpieceProcess workpieceProcess = new WorkpieceProcess();
+				workpieceProcess.setWorkpieceId(rs.getString(2));
+				workpieceProcess.setProcessName(rs.getString(3));
+				workpieceProcess.setProcessId(rs.getString(4));
+				workpieceProcess.setMachId(rs.getString(5));
+				workpieceProcess.setLevel(rs.getInt(6));
+				workpieceProcess.setState(rs.getInt(7));
+				workpieceProcessList.add(workpieceProcess);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(rs);
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return workpieceProcessList;
+	}
+	
+
+	/**
+	 * 通过机床id获取所有在改机床加工的工序集合
+	 * @param workpieceId
+	 * @return
+	 */
+	public  List<WorkpieceProcess> getAllProcessByMachId( int machId){
+		List<WorkpieceProcess> workpieceProcessList = new ArrayList<WorkpieceProcess>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		ResultSet rs = null;
+		String sql = "select * from workpiece_process where machId ='"+machId+"'";
+		try{
+			rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				WorkpieceProcess workpieceProcess = new WorkpieceProcess();
+				workpieceProcess.setWorkpieceId(rs.getString(2));
+				workpieceProcess.setProcessName(rs.getString(3));
+				workpieceProcess.setProcessId(rs.getString(4));
+				workpieceProcess.setMachId(rs.getString(5));
+				workpieceProcess.setLevel(rs.getInt(6));
+				workpieceProcess.setState(rs.getInt(7));
+				workpieceProcessList.add(workpieceProcess);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{
+			DbUtil.close(rs);
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return workpieceProcessList;
+	}
+	/**
+	 * 通过机床id及零件id，获取改零件所有在改机床加工的工序集合
+	 * @param workpieceId
+	 * @return
+	 */
+	public  List<WorkpieceProcess> getAllProcessByMachIdAndWorkpieceId( int machId,int workpieceId){
+		List<WorkpieceProcess> workpieceProcessList = new ArrayList<WorkpieceProcess>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		ResultSet rs = null;
+		String sql = "select * from workpiece_process where machId ='"+machId+"' and workpieceId ='"+workpieceId+"'";
+		try{
+			rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				WorkpieceProcess workpieceProcess = new WorkpieceProcess();
+				workpieceProcess.setWorkpieceId(rs.getString(2));
+				workpieceProcess.setProcessName(rs.getString(3));
+				workpieceProcess.setProcessId(rs.getString(4));
+				workpieceProcess.setMachId(rs.getString(5));
+				workpieceProcess.setLevel(rs.getInt(6));
+				workpieceProcess.setState(rs.getInt(7));
+				workpieceProcessList.add(workpieceProcess);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(rs);
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return workpieceProcessList;
+	}
+	
+	public  boolean findProcessByWId_PId(String  workpieceId, String processId){
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		ResultSet rs = null;
+		String sql = " select * from workpiece_process  where processId ='"+processId+"' and workpieceId ='"+workpieceId+"'";
+		try{
+			rs = stm.executeQuery(sql);
+			if(rs.next()){
+				return true;
+			}else{
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			System.out.println("sql error");
+		}finally{
+			DbUtil.close(rs);
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+	
+		return false;
+	}
+	
+	public boolean addWorkpieceProcess(WorkpieceProcess workpieceprocess){
+		boolean flag = false;
+		String sql1 = "insert into workpiece_process values(null,?,?,?,?,?,'0')";
+		Connection conn = DbUtil.getConnection();
+		PreparedStatement pstm = DbUtil.preparedStatement(conn,sql1);
+		try{
+			
+			pstm.setString(1,workpieceprocess.getWorkpieceId());
+			pstm.setString(2, workpieceprocess.getProcessName());
+			pstm.setString(3,workpieceprocess.getProcessId());
+			pstm.setString(4,workpieceprocess.getMachId());
+			pstm.setInt(5,workpieceprocess.getLevel());
+			
+			int rs = pstm.executeUpdate();
+			if(rs!=0){
+				System.out.println("添加工序成功");
+			}
+			flag = true;
+			
+		}catch(Exception e){
+			System.out.println("出现意外");
+			e.printStackTrace();
+			
+		}finally{
+			DbUtil.close(pstm);
+			DbUtil.close(conn);
+		}
+		return flag;
+	}
+}

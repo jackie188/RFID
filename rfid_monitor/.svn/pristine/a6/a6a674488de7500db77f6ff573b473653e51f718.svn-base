@@ -1,0 +1,1583 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+
+
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>11</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- basic styles -->
+
+<link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+
+<!--[if IE 7]>
+		  <link rel="stylesheet" href="assets/css/font-awesome-ie7.min.css" />
+		<![endif]-->
+
+<!-- page specific plugin styles -->
+
+<!-- fonts -->
+
+<link rel="stylesheet"
+	href="http://fonts.googleapis.com/css?family=Open+Sans:400,300" />
+
+<!-- ace styles -->
+
+<link rel="stylesheet" href="assets/css/ace.min.css" />
+<link rel="stylesheet" href="assets/css/ace-rtl.min.css" />
+<link rel="stylesheet" href="assets/css/ace-skins.min.css" />
+
+<!--[if lte IE 8]>
+		  <link rel="stylesheet" href="assets/css/ace-ie.min.css" />
+		<![endif]-->
+
+<!-- inline styles related to this page -->
+
+<!-- ace settings handler -->
+
+
+
+<script src="assets/js/ace-extra.min.js"></script>
+
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+
+<!--[if lt IE 9]>
+		<script src="assets/js/html5shiv.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+		<![endif]-->
+
+</head>
+
+<body onload="updata()">
+	<div class="navbar navbar-default" id="navbar">
+		<script type="text/javascript">
+			try {
+				ace.settings.check('navbar', 'fixed')
+			} catch (e) {
+			}
+		</script>
+
+		<div class="navbar-container" id="navbar-container">
+			<div class="navbar-header pull-left">
+				<a href="#" class="navbar-brand"> <small> <i
+						class="icon-leaf"></i> RFID监控
+				</small>
+				</a>
+				<!-- /.brand -->
+			</div>
+			<!-- /.navbar-header -->
+
+			<div class="navbar-header pull-right" role="navigation">
+				<ul class="nav ace-nav">
+					<li class="grey"><a data-toggle="dropdown"
+						class="dropdown-toggle" href="#"> <i class="icon-tasks"></i> <span
+							class="badge badge-grey">工序监控</span>
+					</a>
+
+						<ul
+							class="pull-right dropdown-navbar dropdown-menu dropdown-caret dropdown-close">
+							<li class="dropdown-header"><i class="icon-ok"></i> 4 Tasks
+								to complete</li>
+
+							<li><a href="#">
+									<div class="clearfix">
+										<span class="pull-left">Software Update</span> <span
+											class="pull-right">65%</span>
+									</div>
+
+									<div class="progress progress-mini ">
+										<div style="width: 65%" class="progress-bar "></div>
+									</div>
+							</a></li>
+
+							<li><a href="#">
+									<div class="clearfix">
+										<span class="pull-left">Hardware Upgrade</span> <span
+											class="pull-right">35%</span>
+									</div>
+
+									<div class="progress progress-mini ">
+										<div style="width: 35%"
+											class="progress-bar progress-bar-danger"></div>
+									</div>
+							</a></li>
+
+							<li><a href="#">
+									<div class="clearfix">
+										<span class="pull-left">Unit Testing</span> <span
+											class="pull-right">15%</span>
+									</div>
+
+									<div class="progress progress-mini ">
+										<div style="width: 15%"
+											class="progress-bar progress-bar-warning"></div>
+									</div>
+							</a></li>
+
+							<li><a href="#">
+									<div class="clearfix">
+										<span class="pull-left">Bug Fixes</span> <span
+											class="pull-right">90%</span>
+									</div>
+
+									<div class="progress progress-mini progress-striped active">
+										<div style="width: 90%"
+											class="progress-bar progress-bar-success"></div>
+									</div>
+							</a></li>
+
+							<li><a href="#"> See tasks with details <i
+									class="icon-arrow-right"></i>
+							</a></li>
+						</ul></li>
+
+					<li class="purple"><a data-toggle="dropdown"
+						class="dropdown-toggle" href="#"> <i
+							class="icon-bell-alt icon-animated-bell"></i> <span
+							class="badge badge-important">8</span>
+					</a>
+
+						<ul
+							class="pull-right dropdown-navbar navbar-pink dropdown-menu dropdown-caret dropdown-close">
+							<li class="dropdown-header"><i class="icon-warning-sign"></i>
+								8 Notifications</li>
+
+							<li><a href="#">
+									<div class="clearfix">
+										<span class="pull-left"> <i
+											class="btn btn-xs no-hover btn-pink icon-comment"></i> New
+											Comments
+										</span> <span class="pull-right badge badge-info">+12</span>
+									</div>
+							</a></li>
+
+							<li><a href="#"> <i
+									class="btn btn-xs btn-primary icon-user"></i> Bob just signed
+									up as an editor ...
+							</a></li>
+
+							<li><a href="#">
+									<div class="clearfix">
+										<span class="pull-left"> <i
+											class="btn btn-xs no-hover btn-success icon-shopping-cart"></i>
+											New Orders
+										</span> <span class="pull-right badge badge-success">+8</span>
+									</div>
+							</a></li>
+
+							<li><a href="#">
+									<div class="clearfix">
+										<span class="pull-left"> <i
+											class="btn btn-xs no-hover btn-info icon-twitter"></i>
+											Followers
+										</span> <span class="pull-right badge badge-info">+11</span>
+									</div>
+							</a></li>
+
+							<li><a href="#"> See all notifications <i
+									class="icon-arrow-right"></i>
+							</a></li>
+						</ul></li>
+
+					<li class="green"><a data-toggle="dropdown"
+						class="dropdown-toggle" href="#"> <i
+							class="icon-envelope icon-animated-vertical"></i> <span
+							class="badge badge-success">5</span>
+					</a>
+
+						<ul
+							class="pull-right dropdown-navbar dropdown-menu dropdown-caret dropdown-close">
+							<li class="dropdown-header"><i class="icon-envelope-alt"></i>
+								5 Messages</li>
+
+							<li><a href="#"> <img src="assets/avatars/avatar.png"
+									class="msg-photo" alt="Alex's Avatar" /> <span
+									class="msg-body"> <span class="msg-title"> <span
+											class="blue">Alex:</span> Ciao sociis natoque penatibus et
+											auctor ...
+									</span> <span class="msg-time"> <i class="icon-time"></i> <span>a
+												moment ago</span>
+									</span>
+								</span>
+							</a></li>
+
+							<li><a href="#"> <img src="assets/avatars/avatar3.png"
+									class="msg-photo" alt="Susan's Avatar" /> <span
+									class="msg-body"> <span class="msg-title"> <span
+											class="blue">Susan:</span> Vestibulum id ligula porta felis
+											euismod ...
+									</span> <span class="msg-time"> <i class="icon-time"></i> <span>20
+												minutes ago</span>
+									</span>
+								</span>
+							</a></li>
+
+							<li><a href="#"> <img src="assets/avatars/avatar4.png"
+									class="msg-photo" alt="Bob's Avatar" /> <span class="msg-body">
+										<span class="msg-title"> <span class="blue">Bob:</span>
+											Nullam quis risus eget urna mollis ornare ...
+									</span> <span class="msg-time"> <i class="icon-time"></i> <span>3:15
+												pm</span>
+									</span>
+								</span>
+							</a></li>
+
+							<li><a href="inbox.html"> See all messages <i
+									class="icon-arrow-right"></i>
+							</a></li>
+						</ul></li>
+
+					<li class="light-blue">
+						<!-- <a data-toggle="dropdown" href="#" class="dropdown-toggle">
+								<img class="nav-user-photo" src="assets/avatars/user.jpg" alt="Jason's Photo" />
+								<span class="user-info">
+									<small>Welcome,</small>
+									Jason
+								</span>
+
+								<i class="icon-caret-down"></i>
+							</a>
+
+							<ul class="user-menu pull-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
+								<li>
+									<a href="#">
+										<i class="icon-cog"></i>
+										Settings
+									</a>
+								</li>
+
+								<li>
+									<a href="#">
+										<i class="icon-user"></i>
+										Profile
+									</a>
+								</li>
+
+								<li class="divider"></li>
+
+								<li>
+									<a href="#">
+										<i class="icon-off"></i>
+										Logout
+									</a>
+								</li>
+							</ul> -->
+					</li>
+				</ul>
+				<!-- /.ace-nav -->
+			</div>
+			<!-- /.navbar-header -->
+		</div>
+		<!-- /.container -->
+	</div>
+
+	<div class="main-container" id="main-container">
+		<script type="text/javascript">
+			try {
+				ace.settings.check('main-container', 'fixed')
+			} catch (e) {
+			}
+		</script>
+
+		<div class="main-container-inner">
+			<a class="menu-toggler" id="menu-toggler" href="#"> <span
+				class="menu-text"></span>
+			</a>
+
+			<div class="sidebar" id="sidebar">
+				<script type="text/javascript">
+					try {
+						ace.settings.check('sidebar', 'fixed')
+					} catch (e) {
+					}
+				</script>
+
+				<div class="sidebar-shortcuts" id="sidebar-shortcuts">
+					<div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+						<button class="btn btn-success">
+							<i class="icon-signal"></i>
+						</button>
+
+						<button class="btn btn-info">
+							<i class="icon-pencil"></i>
+						</button>
+
+						<button class="btn btn-warning">
+							<i class="icon-group"></i>
+						</button>
+
+						<button class="btn btn-danger">
+							<i class="icon-cogs"></i>
+						</button>
+					</div>
+
+					<div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
+						<span class="btn btn-success"></span> <span class="btn btn-info"></span>
+
+						<span class="btn btn-warning"></span> <span class="btn btn-danger"></span>
+					</div>
+				</div>
+				<!-- #sidebar-shortcuts -->
+
+				<ul class="nav nav-list">
+					<li><a href="#"> <i class="icon-dashboard"></i> <span
+							class="menu-text"> 控制台 </span>
+					</a></li>
+
+					<li><a href="1.jsp"> <i class="icon-text-width"></i> <span
+							class="menu-text"> 跟踪布局 </span>
+					</a></li>
+
+
+
+					<li class="active"><a href="2.jsp"> <i class="icon-list"></i>
+							<span class="menu-text"> 实时跟踪</span>
+					</a></li>
+					<li><a href="3.jsp"> <i class="icon-picture"></i> <span
+							class="menu-text"> 统计管理 </span>
+					</a></li>
+
+
+
+				</ul>
+				<!-- /.nav-list -->
+
+				<div class="sidebar-collapse" id="sidebar-collapse">
+					<i class="icon-double-angle-left"
+						data-icon1="icon-double-angle-left"
+						data-icon2="icon-double-angle-right"></i>
+				</div>
+
+				<script type="text/javascript">
+					try {
+						ace.settings.check('sidebar', 'collapsed')
+					} catch (e) {
+					}
+				</script>
+			</div>
+
+			<div class="main-content">
+				<div class="breadcrumbs" id="breadcrumbs">
+					<script type="text/javascript">
+						try {
+							ace.settings.check('breadcrumbs', 'fixed')
+						} catch (e) {
+						}
+					</script>
+
+					<ul class="breadcrumb">
+						<li><i class="icon-home home-icon"></i> <a href="#">Home</a>
+						</li>
+
+						<li><a href="#">Other Pages</a></li>
+						<li class="active">Blank Page</li>
+					</ul>
+					<!-- .breadcrumb -->
+
+					<div class="nav-search" id="nav-search">
+						<form class="form-search">
+							<span class="input-icon"> <input type="text"
+								placeholder="Search ..." class="nav-search-input"
+								id="nav-search-input" autocomplete="off" /> <i
+								class="icon-search nav-search-icon"></i>
+							</span>
+						</form>
+					</div>
+					<!-- #nav-search -->
+				</div>
+
+				<div class="page-content">
+					<div class="row">
+						<div class="col-xs-10">
+							<!-- PAGE CONTENT BEGINS -->
+							<!----------------第一大部分----------------------->
+							<div class="row">
+								<p style="background: #337ab7; color: #ffffff; font-size: 18pt;">
+									选择待跟踪工序时序零件</p>
+								<!--输入机床信息-->
+								<br>
+
+
+								<!------------------第三节---1.3------------------>
+								<!--选择rfid系统-->
+								<div class="row"
+									style="width: 80%; margin-right: auto; margin-left: auto;">
+									<br>
+									<!-- <div class="col-md-4 col-md-offset-2">
+							<p>请选择机床</p>
+							<select class="form-control" name="selectMachId" id="selectMachId">
+							</select>
+
+						</div> -->
+									<!--选择rfid系统-->
+									<div class="col-md-4 col-md-offset-2">
+										<p>请选择零件</p>
+										<select class="form-control" id="selectWorkpieceId"
+											name="selectWorkpieceId">
+										</select>
+									</div>
+								</div>
+
+
+								<div class="col-md-4 col-md-offset-2">
+									<div class="widget-box">
+										<div class="widget-header">
+											<h4>零件基本信息</h4>
+
+											<span class="widget-toolbar"> <!-- <a href="#" data-action="settings">
+															<i class="icon-cog"></i>
+														</a> --> <a href="#" data-action="reload"> <i
+													class="icon-refresh"></i>
+											</a> <a href="#" data-action="collapse"> <i
+													class="icon-chevron-up"></i>
+											</a> <!-- <a href="#" data-action="close">
+															<i class="icon-remove"></i>
+														</a> -->
+											</span>
+										</div>
+
+										<div class="widget-body">
+											<div class="widget-main">
+												<div class="profile-info-row">
+													<div class="profile-info-name">零件编号</div>
+
+													<div class="profile-info-value">
+														<span id="workpieceId">请选择零件&nbsp;</span>
+													</div>
+												</div>
+
+												<div class="profile-info-row">
+													<div class="profile-info-name">零件名称</div>
+
+													<div class="profile-info-value">
+														<span id="workpieceName">请选择零件 &nbsp;</span>
+													</div>
+												</div>
+
+												<div class="profile-info-row">
+													<div class="profile-info-name">零件RFID标签号</div>
+
+													<div class="profile-info-value">
+														<span id="workpieceRfId">请选择零件&nbsp;</span>
+													</div>
+												</div>
+
+												<div class="profile-info-row">
+													<div class="profile-info-name">工艺信息</div>
+
+													<div class="profile-info-value">
+														<span id="processInfo">请选择零件 &nbsp</span> </span>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+
+
+
+								<!------------------第三节结束-1.3-------------------->
+
+							</div>
+							<!---------------第一部分结束------------------------>
+
+
+
+
+							<!---------------第二部分------------------------>
+							<div class="row">
+								<!--缓冲带-->
+								<p id="2" style="height: 50px">
+									<!--缓冲带-->
+								<p style="background: #337ab7; color: #ffffff; font-size: 18pt;">
+									零件工序时序跟踪</p>
+
+								<br> <br>
+
+								<!------------------第一节-2.1-------------------->
+								<!-- 第一道工序 -->
+								<div class="col-md-12 " id="process1" style="display: none" >
+									<div class="widget-box">
+										<div class="widget-header" >
+											<h4>第一道工序</h4>
+
+											<span class="widget-toolbar"> <!-- <a href="#" data-action="settings">
+															<i class="icon-cog"></i>
+														</a> --> <a href="#" data-action="reload"> <i
+													class="icon-refresh"></i>
+											</a> <a href="#" data-action="collapse"> <i
+													class="icon-chevron-up"></i>
+											</a> <!-- <a href="#" data-action="close">
+															<i class="icon-remove"></i>
+														</a> -->
+											</span>
+										</div>
+										
+										<div  class="widget-body"  >
+											<div class="widget-main">
+												
+												<div id="fuelux-wizard" class="row-fluid" data-target="#step-container">
+												
+														<ul class="wizard-steps">
+															<li id="11" data-target="#step1" class="active">
+																<span class="step">1</span>
+																<span class="title">进入入缓存</span>
+																<span id="time11"class="title">........</span>
+															</li>
+
+															<li id="12" data-target="#step2">
+																<span class="step">2</span>
+																<span class="title">离开入缓存</span>
+																<span id="time12"class="title">........</span>
+															</li>
+
+															<li id="13" data-target="#step3">
+																<span class="step">3</span>
+																<span class="title">进入机床</span>
+																<span id="time13"class="title">........</span>
+															</li>
+
+															<li id="14" data-target="#step4">
+																<span class="step">4</span>
+																<span class="title">离开机床</span>
+																<span id="time14"class="title">........</span>
+															</li>
+															<li id="15"  data-target="#step5">
+																<span class="step">5</span>
+																<span class="title">进入出缓存</span>
+																<span id="time15"class="title">........</span>
+															</li>
+															<li id="16" data-target="#step6" >
+																<span class="step">6</span>
+																<span class="title">离开出缓存</span>
+																<span id="time16"class="title">........</span>
+															</li>
+														</ul>
+														
+														
+													</div>
+													<hr>
+											<!-- 	//计算部分吧 -->
+													<div class ="row">
+														<div class="col-md-6 col-md-offset-3">
+												
+														<div class="profile-user-info profile-user-info-striped">
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序信息 </div>
+
+																<div class="profile-info-value">
+																	<span class="editable" id="processInfo1"> --------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床信息 </div>
+			
+																<div class="profile-info-value">
+																	<i class="icon-map-marker light-orange bigger-110"></i>
+																	<span class="editable" id="machInfo1">--------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序总时长 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="time1">38</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+															
+																<div class="profile-info-name"> 工序起始时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="startTime1">20/06/2010</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床加工耗时 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="machTime1">3 hours ago</span>
+																</div>
+															</div>
+	
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 入缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="inTime1">Editable as WYSIWYG</span>
+																</div>
+															</div>
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 出缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="outTime1">Editable as WYSIWYG</span>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!-- 	//计算部分吧 -->
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- 工序结束 -->
+								<!-- 第一道工序 -->
+								<div class="col-md-12 " id="process2" style="display: none" >
+									<div class="widget-box">
+										<div class="widget-header" >
+											<h4>第二道工序</h4>
+
+											<span class="widget-toolbar"> <!-- <a href="#" data-action="settings">
+															<i class="icon-cog"></i>
+														</a> --> <a href="#" data-action="reload"> <i
+													class="icon-refresh"></i>
+											</a> <a href="#" data-action="collapse"> <i
+													class="icon-chevron-up"></i>
+											</a> <!-- <a href="#" data-action="close">
+															<i class="icon-remove"></i>
+														</a> -->
+											</span>
+										</div>
+										
+										<div  class="widget-body"  >
+											<div class="widget-main">
+												
+												<div id="fuelux-wizard" class="row-fluid" data-target="#step-container">
+												
+														<ul class="wizard-steps">
+															<li id="21" data-target="#step1" class="active">
+																<span class="step">1</span>
+																<span class="title">进入入缓存</span>
+																<span id="time21"class="title">........</span>
+															</li>
+
+															<li id="22" data-target="#step2">
+																<span class="step">2</span>
+																<span class="title">离开入缓存</span>
+																<span id="time22"class="title">........</span>
+															</li>
+
+															<li id="23" data-target="#step3">
+																<span class="step">3</span>
+																<span class="title">进入机床</span>
+																<span id="time23"class="title">........</span>
+															</li>
+
+															<li id="24" data-target="#step4">
+																<span class="step">4</span>
+																<span class="title">离开机床</span>
+																<span id="time24"class="title">........</span>
+															</li>
+															<li id="25"  data-target="#step5">
+																<span class="step">5</span>
+																<span class="title">进入出缓存</span>
+																<span id="time25"class="title">........</span>
+															</li>
+															<li id="26" data-target="#step6" >
+																<span class="step">6</span>
+																<span class="title">离开出缓存</span>
+																<span id="time26"class="title">........</span>
+															</li>
+														</ul>
+													</div>
+													<hr>
+											<!-- 	//计算部分吧 -->
+													<div class ="row">
+														<div class="col-md-6 col-md-offset-3">
+												
+														<div class="profile-user-info profile-user-info-striped">
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序信息 </div>
+
+																<div class="profile-info-value">
+																	<span class="editable" id="processInfo2"> --------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床信息 </div>
+			
+																<div class="profile-info-value">
+																	<i class="icon-map-marker light-orange bigger-110"></i>
+																	<span class="editable" id="machInfo2">--------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序总时长 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="time2">38</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+															
+																<div class="profile-info-name"> 工序起始时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="startTime2">20/06/2010</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床加工耗时 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="machTime2">3 hours ago</span>
+																</div>
+															</div>
+	
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 入缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="inTime2">Editable as WYSIWYG</span>
+																</div>
+															</div>
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 出缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="outTime2">Editable as WYSIWYG</span>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!-- 	//计算部分吧 -->
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- 工序结束 -->	<!-- 第3道工序 -->
+								<div class="col-md-12 " id="process3" style="display: none" >
+									<div class="widget-box">
+										<div class="widget-header" >
+											<h4>第三道工序</h4>
+
+											<span class="widget-toolbar"> <!-- <a href="#" data-action="settings">
+															<i class="icon-cog"></i>
+														</a> --> <a href="#" data-action="reload"> <i
+													class="icon-refresh"></i>
+											</a> <a href="#" data-action="collapse"> <i
+													class="icon-chevron-up"></i>
+											</a> <!-- <a href="#" data-action="close">
+															<i class="icon-remove"></i>
+														</a> -->
+											</span>
+										</div>
+										
+										<div  class="widget-body"  >
+											<div class="widget-main">
+												
+												<div id="fuelux-wizard" class="row-fluid" data-target="#step-container">
+												
+														<ul class="wizard-steps">
+															<li id="31" data-target="#step1" class="active">
+																<span class="step">1</span>
+																<span class="title">进入入缓存</span>
+																<span id="time31"class="title">........</span>
+															</li>
+
+															<li id="32" data-target="#step2">
+																<span class="step">2</span>
+																<span class="title">离开入缓存</span>
+																<span id="time32"class="title">........</span>
+															</li>
+
+															<li id="33" data-target="#step3">
+																<span class="step">3</span>
+																<span class="title">进入机床</span>
+																<span id="time33"class="title">........</span>
+															</li>
+
+															<li id="34" data-target="#step4">
+																<span class="step">4</span>
+																<span class="title">离开机床</span>
+																<span id="time34"class="title">........</span>
+															</li>
+															<li id="35"  data-target="#step5">
+																<span class="step">5</span>
+																<span class="title">进入出缓存</span>
+																<span id="time35"class="title">........</span>
+															</li>
+															<li id="36" data-target="#step6" >
+																<span class="step">6</span>
+																<span class="title">离开出缓存</span>
+																<span id="time36"class="title">........</span>
+															</li>
+														</ul>
+													</div>
+														<hr>
+											<!-- 	//计算部分吧 -->
+													<div class ="row">
+														<div class="col-md-6 col-md-offset-3">
+												
+														<div class="profile-user-info profile-user-info-striped">
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序信息 </div>
+
+																<div class="profile-info-value">
+																	<span class="editable" id="processInfo3"> --------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床信息 </div>
+			
+																<div class="profile-info-value">
+																	<i class="icon-map-marker light-orange bigger-110"></i>
+																	<span class="editable" id="machInfo3">--------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序总时长 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="time3">38</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+															
+																<div class="profile-info-name"> 工序起始时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="startTime3">20/06/2010</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床加工耗时 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="machTime3">3 hours ago</span>
+																</div>
+															</div>
+	
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 入缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="inTime3">Editable as WYSIWYG</span>
+																</div>
+															</div>
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 出缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="outTime3">Editable as WYSIWYG</span>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!-- 	//计算部分吧 -->
+												
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- 工序结束 -->	<!-- 第4道工序 -->
+								<div class="col-md-12 " id="process4" style="display: none" >
+									<div class="widget-box">
+										<div class="widget-header" >
+											<h4>第四道工序</h4>
+
+											<span class="widget-toolbar"> <!-- <a href="#" data-action="settings">
+															<i class="icon-cog"></i>
+														</a> --> <a href="#" data-action="reload"> <i
+													class="icon-refresh"></i>
+											</a> <a href="#" data-action="collapse"> <i
+													class="icon-chevron-up"></i>
+											</a> <!-- <a href="#" data-action="close">
+															<i class="icon-remove"></i>
+														</a> -->
+											</span>
+										</div>
+										
+										<div  class="widget-body"  >
+											<div class="widget-main">
+												
+												<div id="fuelux-wizard" class="row-fluid" data-target="#step-container">
+												
+														<ul class="wizard-steps">
+															<li id="41" data-target="#step1" class="active">
+																<span class="step">1</span>
+																<span class="title">进入入缓存</span>
+																<span id="time41"class="title">........</span>
+															</li>
+
+															<li id="42" data-target="#step2">
+																<span class="step">2</span>
+																<span class="title">离开入缓存</span>
+																<span id="time42"class="title">........</span>
+															</li>
+
+															<li id="43" data-target="#step3">
+																<span class="step">3</span>
+																<span class="title">进入机床</span>
+																<span id="time43"class="title">........</span>
+															</li>
+
+															<li id="44" data-target="#step4">
+																<span class="step">4</span>
+																<span class="title">离开机床</span>
+																<span id="time44"class="title">........</span>
+															</li>
+															<li id="45"  data-target="#step5">
+																<span class="step">5</span>
+																<span class="title">进入出缓存</span>
+																<span id="time45"class="title">........</span>
+															</li>
+															<li id="46" data-target="#step6" >
+																<span class="step">6</span>
+																<span class="title">离开出缓存</span>
+																<span id="time46"class="title">........</span>
+															</li>
+														</ul>
+													</div>
+														<hr>
+											<!-- 	//计算部分吧 -->
+													<div class ="row">
+														<div class="col-md-6 col-md-offset-3">
+												
+														<div class="profile-user-info profile-user-info-striped">
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序信息 </div>
+
+																<div class="profile-info-value">
+																	<span class="editable" id="processInfo4"> --------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床信息 </div>
+			
+																<div class="profile-info-value">
+																	<i class="icon-map-marker light-orange bigger-110"></i>
+																	<span class="editable" id="machInfo4">--------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序总时长 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="time4">38</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+															
+																<div class="profile-info-name"> 工序起始时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="startTime4">20/06/2010</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床加工耗时 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="machTime4">3 hours ago</span>
+																</div>
+															</div>
+	
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 入缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="inTime4">Editable as WYSIWYG</span>
+																</div>
+															</div>
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 出缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="outTime4">Editable as WYSIWYG</span>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!-- 	//计算部分吧 -->
+												
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- 工序结束 -->	<!-- 第5道工序 -->
+								<div class="col-md-12 " id="process5" style="display: none" >
+									<div class="widget-box">
+										<div class="widget-header" >
+											<h4>第五道工序</h4>
+
+											<span class="widget-toolbar"> <!-- <a href="#" data-action="settings">
+															<i class="icon-cog"></i>
+														</a> --> <a href="#" data-action="reload"> <i
+													class="icon-refresh"></i>
+											</a> <a href="#" data-action="collapse"> <i
+													class="icon-chevron-up"></i>
+											</a> <!-- <a href="#" data-action="close">
+															<i class="icon-remove"></i>
+														</a> -->
+											</span>
+										</div>
+										
+										<div  class="widget-body"  >
+											<div class="widget-main">
+												
+												<div id="fuelux-wizard" class="row-fluid" data-target="#step-container">
+											
+														<ul class="wizard-steps">
+															<li id="51" data-target="#step1" class="active">
+																<span class="step">1</span>
+																<span class="title">进入入缓存</span>
+																<span id="time51"class="title">........</span>
+															</li>
+
+															<li id="52" data-target="#step2">
+																<span class="step">2</span>
+																<span class="title">离开入缓存</span>
+																<span id="time52"class="title">........</span>
+															</li>
+
+															<li id="53" data-target="#step3">
+																<span class="step">3</span>
+																<span class="title">进入机床</span>
+																<span id="time53"class="title">........</span>
+															</li>
+
+															<li id="54" data-target="#step4">
+																<span class="step">4</span>
+																<span class="title">离开机床</span>
+																<span id="time54"class="title">........</span>
+															</li>
+															<li id="55"  data-target="#step5">
+																<span class="step">5</span>
+																<span class="title">进入出缓存</span>
+																<span id="time55"class="title">........</span>
+															</li>
+															<li id="56" data-target="#step6" >
+																<span class="step">6</span>
+																<span class="title">离开出缓存</span>
+																<span id="time56"class="title">........</span>
+															</li>
+														</ul>
+													</div>
+														<hr>
+											<!-- 	//计算部分吧 -->
+													<div class ="row">
+														<div class="col-md-6 col-md-offset-3">
+												
+														<div class="profile-user-info profile-user-info-striped">
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序信息 </div>
+
+																<div class="profile-info-value">
+																	<span class="editable" id="processInfo5"> --------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床信息 </div>
+			
+																<div class="profile-info-value">
+																	<i class="icon-map-marker light-orange bigger-110"></i>
+																	<span class="editable" id="machInfo5">--------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序总时长 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="time5">38</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+															
+																<div class="profile-info-name"> 工序起始时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="startTime5">20/06/2010</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床加工耗时 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="machTime5">3 hours ago</span>
+																</div>
+															</div>
+	
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 入缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="inTime5">Editable as WYSIWYG</span>
+																</div>
+															</div>
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 出缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="outTime5">Editable as WYSIWYG</span>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!-- 	//计算部分吧 -->
+												
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- 工序结束 -->	<!-- 第6道工序 -->
+								<div class="col-md-12 " id="process6" style="display: none" >
+									<div class="widget-box">
+										<div class="widget-header" >
+											<h4>第六道工序</h4>
+
+											<span class="widget-toolbar"> <!-- <a href="#" data-action="settings">
+															<i class="icon-cog"></i>
+														</a> --> <a href="#" data-action="reload"> <i
+													class="icon-refresh"></i>
+											</a> <a href="#" data-action="collapse"> <i
+													class="icon-chevron-up"></i>
+											</a> <!-- <a href="#" data-action="close">
+															<i class="icon-remove"></i>
+														</a> -->
+											</span>
+										</div>
+										
+										<div  class="widget-body"  >
+											<div class="widget-main">
+												
+												<div id="fuelux-wizard" class="row-fluid" data-target="#step-container">
+												
+														<ul class="wizard-steps">
+															<li id="61" data-target="#step1" class="active">
+																<span class="step">1</span>
+																<span class="title">进入入缓存</span>
+																<span id="time61"class="title">........</span>
+															</li>
+
+															<li id="62" data-target="#step2">
+																<span class="step">2</span>
+																<span class="title">离开入缓存</span>
+																<span id="time62"class="title">........</span>
+															</li>
+
+															<li id="63" data-target="#step3">
+																<span class="step">3</span>
+																<span class="title">进入机床</span>
+																<span id="time63"class="title">........</span>
+															</li>
+
+															<li id="64" data-target="#step4">
+																<span class="step">4</span>
+																<span class="title">离开机床</span>
+																<span id="time64"class="title">........</span>
+															</li>
+															<li id="65"  data-target="#step5">
+																<span class="step">5</span>
+																<span class="title">进入出缓存</span>
+																<span id="time65"class="title">........</span>
+															</li>
+															<li id="66" data-target="#step6" >
+																<span class="step">6</span>
+																<span class="title">离开出缓存</span>
+																<span id="time66"class="title">........</span>
+															</li>
+														</ul>
+													</div>
+														<hr>
+											<!-- 	//计算部分吧 -->
+													<div class ="row">
+														<div class="col-md-6 col-md-offset-3">
+												
+														<div class="profile-user-info profile-user-info-striped">
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序信息 </div>
+
+																<div class="profile-info-value">
+																	<span class="editable" id="processInfo6"> --------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床信息 </div>
+			
+																<div class="profile-info-value">
+																	<i class="icon-map-marker light-orange bigger-110"></i>
+																	<span class="editable" id="machInfo6">--------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序总时长 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="time6">38</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+															
+																<div class="profile-info-name"> 工序起始时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="startTime6">20/06/2010</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床加工耗时 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="machTime6">3 hours ago</span>
+																</div>
+															</div>
+	
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 入缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="inTime6">Editable as WYSIWYG</span>
+																</div>
+															</div>
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 出缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="outTime6">Editable as WYSIWYG</span>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!-- 	//计算部分吧 -->
+												
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- 工序结束 -->
+									<!-- 第一道工序 -->
+								<div class="col-md-12 " id="process7" style="display: none" >
+									<div class="widget-box">
+										<div class="widget-header" >
+											<h4>第七道工序</h4>
+
+											<span class="widget-toolbar"> <!-- <a href="#" data-action="settings">
+															<i class="icon-cog"></i>
+														</a> --> <a href="#" data-action="reload"> <i
+													class="icon-refresh"></i>
+											</a> <a href="#" data-action="collapse"> <i
+													class="icon-chevron-up"></i>
+											</a> <!-- <a href="#" data-action="close">
+															<i class="icon-remove"></i>
+														</a> -->
+											</span>
+										</div>
+										
+										<div  class="widget-body"  >
+											<div class="widget-main">
+												
+												<div id="fuelux-wizard" class="row-fluid" data-target="#step-container">
+												
+														<ul class="wizard-steps">
+															<li id="71" data-target="#step1" class="active">
+																<span class="step">1</span>
+																<span class="title">进入入缓存</span>
+																<span id="time71"class="title">........</span>
+															</li>
+
+															<li id="72" data-target="#step2">
+																<span class="step">2</span>
+																<span class="title">离开入缓存</span>
+																<span id="time72"class="title">........</span>
+															</li>
+
+															<li id="73" data-target="#step3">
+																<span class="step">3</span>
+																<span class="title">进入机床</span>
+																<span id="time73"class="title">........</span>
+															</li>
+
+															<li id="74" data-target="#step4">
+																<span class="step">4</span>
+																<span class="title">离开机床</span>
+																<span id="time74"class="title">........</span>
+															</li>
+															<li id="75"  data-target="#step5">
+																<span class="step">5</span>
+																<span class="title">进入出缓存</span>
+																<span id="time75"class="title">........</span>
+															</li>
+															<li id="76" data-target="#step6" >
+																<span class="step">6</span>
+																<span class="title">离开出缓存</span>
+																<span id="time76"class="title">........</span>
+															</li>
+														</ul>
+													</div>
+														<hr>
+											<!-- 	//计算部分吧 -->
+													<div class ="row">
+														<div class="col-md-6 col-md-offset-3">
+												
+														<div class="profile-user-info profile-user-info-striped">
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序信息 </div>
+
+																<div class="profile-info-value">
+																	<span class="editable" id="processInfo7"> --------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床信息 </div>
+			
+																<div class="profile-info-value">
+																	<i class="icon-map-marker light-orange bigger-110"></i>
+																	<span class="editable" id="machInfo7">--------编号：</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 工序总时长 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="time7">38</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+															
+																<div class="profile-info-name"> 工序起始时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="startTime7">20/06/2010</span>
+																</div>
+															</div>
+
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 机床加工耗时 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="machTime7">3 hours ago</span>
+																</div>
+															</div>
+	
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 入缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="inTime7">Editable as WYSIWYG</span>
+																</div>
+															</div>
+															<div class="profile-info-row">
+																<div class="profile-info-name"> 出缓存等待时间 </div>
+			
+																<div class="profile-info-value">
+																	<span class="editable" id="outTime7">Editable as WYSIWYG</span>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!-- 	//计算部分吧 -->
+												
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- 工序结束 -->
+									
+							
+								
+							</div>
+						
+
+							</div>
+							<!---------------第二部分结束------------------------>
+
+
+
+							<!-- PAGE CONTENT ENDS -->
+						</div>
+						
+					</div>
+					<!-- /.row -->
+				</div>
+				<!-- /.page-content -->
+			</div>
+			<!-- /.main-content -->
+
+			<div class="ace-settings-container" id="ace-settings-container">
+				<div class="btn btn-app btn-xs btn-warning ace-settings-btn"
+					id="ace-settings-btn">
+					<i class="icon-cog bigger-150"></i>
+				</div>
+
+				<div class="ace-settings-box" id="ace-settings-box">
+					<div>
+						<div class="pull-left">
+							<select id="skin-colorpicker" class="hide">
+								<option data-skin="default" value="#438EB9">#438EB9</option>
+								<option data-skin="skin-1" value="#222A2D">#222A2D</option>
+								<option data-skin="skin-2" value="#C6487E">#C6487E</option>
+								<option data-skin="skin-3" value="#D0D0D0">#D0D0D0</option>
+							</select>
+						</div>
+						<span>&nbsp; Choose Skin</span>
+					</div>
+
+					<div>
+						<input type="checkbox" class="ace ace-checkbox-2"
+							id="ace-settings-navbar" /> <label class="lbl"
+							for="ace-settings-navbar"> Fixed Navbar</label>
+					</div>
+
+					<div>
+						<input type="checkbox" class="ace ace-checkbox-2"
+							id="ace-settings-sidebar" /> <label class="lbl"
+							for="ace-settings-sidebar"> Fixed Sidebar</label>
+					</div>
+
+					<div>
+						<input type="checkbox" class="ace ace-checkbox-2"
+							id="ace-settings-breadcrumbs" /> <label class="lbl"
+							for="ace-settings-breadcrumbs"> Fixed Breadcrumbs</label>
+					</div>
+
+					<div>
+						<input type="checkbox" class="ace ace-checkbox-2"
+							id="ace-settings-rtl" /> <label class="lbl"
+							for="ace-settings-rtl"> Right To Left (rtl)</label>
+					</div>
+
+					<div>
+						<input type="checkbox" class="ace ace-checkbox-2"
+							id="ace-settings-add-container" /> <label class="lbl"
+							for="ace-settings-add-container"> Inside <b>.container</b>
+						</label>
+					</div>
+				</div>
+			</div>
+			<!-- /#ace-settings-container -->
+		</div>
+		<!-- /.main-container-inner -->
+
+		<a href="#" id="btn-scroll-up"
+			class="btn-scroll-up btn btn-sm btn-inverse"> <i
+			class="icon-double-angle-up icon-only bigger-110"></i>
+		</a>
+	</div>
+	<!-- /.main-container -->
+
+	<!-- basic scripts -->
+
+	<!--[if !IE]> -->
+
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
+
+	<!-- <![endif]-->
+
+	<!--[if IE]>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<![endif]-->
+
+	<!--[if !IE]> -->
+
+	<script type="text/javascript">
+		window.jQuery
+				|| document
+						.write("<script src='assets/js/jquery-2.0.3.min.js'>"
+								+ "<"+"/script>");
+	</script>
+
+	<!-- <![endif]-->
+
+	<!--[if IE]>
+<script type="text/javascript">
+ window.jQuery || document.write("<script src='assets/js/jquery-1.10.2.min.js'>"+"<"+"/script>");
+</script>
+<![endif]-->
+
+	<script type="text/javascript">
+		if ("ontouchend" in document)
+			document
+					.write("<script src='assets/js/jquery.mobile.custom.min.js'>"
+							+ "<"+"/script>");
+	</script>
+	<script src="assets/js/bootstrap.min.js"></script>
+	<script src="assets/js/typeahead-bs2.min.js"></script>
+
+	<!-- page specific plugin scripts -->
+
+	<!-- ace scripts -->
+
+	<script src="assets/js/ace-elements.min.js"></script>
+	<script src="assets/js/ace.min.js"></script>
+
+	<!-- inline scripts related to this page -->
+	<div style="display: none">
+		<script src='http://v7.cnzz.com/stat.php?id=155540&web_id=155540'
+			language='JavaScript' charset='gb2312'></script>
+	</div>
+	<script src="js/validate.js" type="text/javascript"></script>
+	<script src="js/second.js" type="text/javascript"></script>
+
+	<script language="javascript" type="text/javascript">
+		/* 这里是导航定位用的 */
+		function go(num) {
+			var oDiv = document.getElementById(num);
+			oDiv.scrollIntoView();
+		}
+
+		$(document).ready(function() {
+			//这部分全是添加单击事件响应的
+
+			//切换零件程序	
+			/* $("#selectMachId").change(function() {
+				updataWorkpieceList();
+			}); */
+			$("#selectWorkpieceId").change(function() {
+				showDetialWorkpiece();
+				getInfo($("#selectWorkpieceId").val());
+				//showDetialWorkpieceProcess();
+				
+			});
+
+		});
+
+		/////////////////////////////////////////////////
+	</script>
+
+
+	<script src="js/jquery.dataTables.min.js"></script>
+	<script src="js/jquery.dataTables.bootstrap.js"></script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+package manage;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import dbconn.BaseDao;
+
+public class GetProcessTime extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		System.out.println("web请求单个零件的工序信息成功!!!");
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		String tagId = URLDecoder.decode(request.getParameter("tagId"),"utf-8");	//获得rfid系统的标识号	
+		String workpieceId= URLDecoder.decode(request.getParameter("workpieceId"),"utf-8");	//获得rfid系统的标识号	
+		System.out.println("零件标志号"+tagId);
+		//����Json����
+		String rfidmodel =null;
+		String rfidPort =null;
+		String processId =null;
+		String processName =null;
+		String inbufferIntime =null;
+		String inbufferOuttime =null;
+		String machIntime =null;
+		String machOuttime =null;
+		String outbufferIntime =null;
+		String outbufferOuttime =null;
+		long inbufferCost=0;
+		long machCost=0;
+		long outbufferCost=0;
+		long totalCost=0;
+		long otherCost=0;
+		long roadCost1=0;
+		long roadCost2=0;
+		SimpleDateFormat timeformat =   new SimpleDateFormat( "HH:mm:ss" );
+		JSONObject jsonObj = new JSONObject();
+		//����Json����
+		JSONObject cell = new JSONObject();
+		JSONArray rows = new JSONArray();
+		BaseDao baseDao = new BaseDao();
+		String sql_rfidPort="select workpieceprocesscontrol.rfidPort,mach_rfid.machName,mach_rfid.machId from workpieceprocesscontrol,mach_rfid where workpieceprocesscontrol.tagId='"+tagId+"' and mach_rfid.rfidSysId=workpieceprocesscontrol.rfidPort ORDER BY time ASC";
+		ResultSet rs_rfidPort_Name=baseDao.queryData(sql_rfidPort);
+		try {
+			while (rs_rfidPort_Name.next()){
+				String sql_processInfo="select processName,processId from workpiece_process where workpieceId='"+workpieceId+"' and machId='"+rs_rfidPort_Name.getString("machId")+"'";
+				ResultSet rs_processInfo=baseDao.queryData(sql_processInfo);
+				try {
+					while (rs_processInfo.next()){
+	cell.put("processId", rs_processInfo.getString("processId"));	
+	cell.put("processName", rs_processInfo.getString("processName"));					
+					}
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				
+
+				cell.put("machName", rs_rfidPort_Name.getString("machName"));	
+				cell.put("rfidPort", rs_rfidPort_Name.getString("rfidPort"));
+			rfidPort=rs_rfidPort_Name.getString("rfidPort");	
+			String sql_rfidModel="select rfidModel from rfidsystem where rfidPort='"+rfidPort+"'";
+			ResultSet rs_rfidModel=baseDao.queryData(sql_rfidModel);
+			try {
+				while (rs_rfidModel.next()){
+				rfidmodel=rs_rfidModel.getString("rfidModel");				
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			//System.out.println("机床的模式为："+rfidmodel);
+			if(rfidmodel.equals("a")){
+				String sql_1 = "select deviceId,tagId,rfidPort,min(time),max(time) from rfid"+rfidPort+"_tagInfo where tagId='"+tagId+"' group by deviceId LIMIT 0,1";	
+				ResultSet rs_1 = baseDao.queryData(sql_1);
+				try {
+					while (rs_1.next()) {
+						inbufferIntime=rs_1.getString("min(time)");
+						inbufferOuttime=rs_1.getString("max(time)");
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				String sql_2 = "select deviceId,tagId,rfidPort,min(time),max(time) from rfid"+rfidPort+"_tagInfo where tagId='"+tagId+"' group by deviceId LIMIT 1,1";
+				ResultSet rs_2 = baseDao.queryData(sql_2);
+
+				try {
+					while (rs_2.next()) {
+						machIntime=rs_2.getString("min(time)");
+						machOuttime=rs_2.getString("max(time)");
+						System.out.println("最大时间"+machIntime);
+						System.out.println("最小时间"+machOuttime);
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				String sql_3 = "select deviceId,tagId,rfidPort,min(time),max(time) from rfid"+rfidPort+"_tagInfo where tagId='"+tagId+"'  group by deviceId LIMIT 2,2";
+				ResultSet rs_3 = baseDao.queryData(sql_3);
+
+				try {
+					while (rs_3.next()) {
+						outbufferIntime=rs_3.getString("min(time)");
+						outbufferOuttime=rs_3.getString("max(time)");
+
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}	
+				
+				try {
+					Date date1 = timeformat.parse(inbufferIntime);
+					Date date2 = timeformat.parse(inbufferOuttime);
+					inbufferCost=(date2.getTime()-date1.getTime())/1000;
+					Date date3 = timeformat.parse(machIntime);
+					Date date4 = timeformat.parse(machOuttime);
+					machCost=(date4.getTime()-date3.getTime())/1000;
+					Date date5 = timeformat.parse(outbufferIntime);
+					Date date6 = timeformat.parse(outbufferOuttime);
+					outbufferCost=(date6.getTime()-date5.getTime())/1000;
+					totalCost=(date6.getTime()-date1.getTime())/1000;
+					roadCost1=(date3.getTime()-date2.getTime())/1000;
+					roadCost2=(date5.getTime()-date4.getTime())/1000;
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				cell.put("rfidmodel", rfidmodel);
+				cell.put("inbufferCost", inbufferCost);
+				cell.put("roadCost1", roadCost1);
+				cell.put("machCost", machCost);
+				cell.put("roadCost2", roadCost2);
+				cell.put("outbufferCost", outbufferCost);
+				cell.put("totalCost", totalCost);		
+				
+			}
+			else if(rfidmodel.equals("b")){
+				
+				String sql_1 = "select deviceId,tagId,rfidPort,min(time),max(time) from rfid"+rfidPort+"_tagInfo where tagId='"+tagId+"' group by deviceId LIMIT 0,1";
+				ResultSet rs_1 = baseDao.queryData(sql_1);
+
+				try {
+					while (rs_1.next()) {
+						inbufferIntime=rs_1.getString("min(time)");
+						inbufferOuttime=rs_1.getString("max(time)");
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				String sql_2 = "select deviceId,tagId,rfidPort,min(time),max(time) from rfid"+rfidPort+"_tagInfo where tagId='"+tagId+"' group by deviceId LIMIT 1,1";
+				ResultSet rs_2 = baseDao.queryData(sql_2);
+
+				try {
+					while (rs_2.next()) {
+						machIntime=rs_2.getString("min(time)");
+						machOuttime=rs_2.getString("max(time)");
+						System.out.println("最大时间"+machIntime);
+						System.out.println("最小时间"+machOuttime);
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				try {
+					Date date1 = timeformat.parse(inbufferIntime);
+					Date date2 = timeformat.parse(inbufferOuttime);
+					inbufferCost=(date2.getTime()-date1.getTime())/1000;
+					Date date3 = timeformat.parse(machIntime);
+					Date date4 = timeformat.parse(machOuttime);
+					machCost=(date4.getTime()-date3.getTime())/1000;
+					totalCost=(date4.getTime()-date1.getTime())/1000;
+					roadCost1=(date3.getTime()-date2.getTime())/1000;
+					roadCost2=0;
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+				cell.put("rfidmodel", rfidmodel);
+				cell.put("inbufferCost", inbufferCost);
+				cell.put("roadCost1", roadCost1);
+				cell.put("machCost", machCost);
+				cell.put("roadCost2", roadCost2);
+				cell.put("outbufferCost", 0);
+				cell.put("totalCost", totalCost);
+				
+				
+			}
+				else if(rfidmodel.equals("c")){
+				
+				String sql_1 = "select deviceId,tagId,rfidPort,min(time),max(time) from rfid"+rfidPort+"_tagInfo where tagId='"+tagId+"' group by deviceId LIMIT 0,1";
+				ResultSet rs_1 = baseDao.queryData(sql_1);
+
+				try {
+					while (rs_1.next()) {
+						inbufferIntime=rs_1.getString("min(time)");
+						inbufferOuttime=rs_1.getString("max(time)");
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				String sql_2 = "select deviceId,tagId,rfidPort,min(time),max(time) from rfid"+rfidPort+"_tagInfo where tagId='"+tagId+"' group by deviceId LIMIT 1,1";
+				ResultSet rs_2 = baseDao.queryData(sql_2);
+
+				try {
+					while (rs_2.next()) {
+						outbufferIntime=rs_2.getString("min(time)");
+						outbufferOuttime=rs_2.getString("max(time)");
+						System.out.println("最大时间"+outbufferIntime);
+						System.out.println("最小时间"+outbufferOuttime);
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				try {
+					Date date1 = timeformat.parse(inbufferIntime);
+					Date date2 = timeformat.parse(inbufferOuttime);
+					inbufferCost=(date2.getTime()-date1.getTime())/1000;
+					Date date3 = timeformat.parse(outbufferIntime);
+					Date date4 = timeformat.parse(outbufferOuttime);
+					outbufferCost=(date4.getTime()-date3.getTime())/1000;
+					totalCost=(date4.getTime()-date1.getTime())/1000;
+					roadCost2=(date3.getTime()-date2.getTime())/1000;//对于模式3这里的时间要为road+mach的时间
+					roadCost1=0;
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				cell.put("rfidmodel", rfidmodel);
+				cell.put("inbufferCost", inbufferCost);
+				cell.put("roadCost1", roadCost1);
+				cell.put("machCost", 0);
+				cell.put("roadCost2", roadCost2);
+				cell.put("outbufferCost", outbufferCost);
+				cell.put("totalCost", totalCost);
+				
+			}
+			rows.add(cell);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+
+			//利用json来输出，看输出情况
+			jsonObj.put("rows", rows);
+			System.out.println(jsonObj.toString());
+			response.setCharacterEncoding("utf-8");
+			response.getWriter().print(jsonObj.toString());		
+		}
+
+	
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doGet(request,response);
+	}
+	
+}

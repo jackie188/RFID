@@ -1,0 +1,95 @@
+package api_servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URLDecoder;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import db.DBConnection;
+
+public class measureServlet extends HttpServlet {
+
+	/**
+	 * Constructor of the object.
+	 */
+	public measureServlet() {
+		super();
+	}
+
+	/**
+	 * Destruction of the servlet. <br>
+	 */
+	public void destroy() {
+		super.destroy(); // Just puts "destroy" string in log
+		// Put your code here
+	}
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		response.setContentType("html/txt");
+		response.setCharacterEncoding("utf-8");
+		response.setHeader("Pragma", "no-cache");
+		response.setHeader("Cache-Control", "no-cache, must-revalidate");
+		response.setHeader("Pragma", "no-cache");
+		DBConnection db=new DBConnection();
+		String apiKey=request.getParameter("apiKey").toString();
+		String deviceId=request.getParameter("deviceId").toString();
+		String meaName=URLDecoder.decode(request.getParameter("meaName"),"utf-8");
+		String meaUnit=URLDecoder.decode(request.getParameter("meaUnit"),"utf-8");
+		String data=request.getParameter("data").toString();
+		String[] values=data.split(",");
+		System.out.println("******************************");
+		try {
+			//db.getCurrentConnection(dbPara.getUrl(),dbPara.getUsername(),dbPara.getPassword());
+			db.getCurrentConnection("jdbc:mysql://localhost:3306/mesiot?useUnicode=true&characterEncoding=UTF-8","root","12345678");
+			String[] paraDb=new String[4];
+			paraDb[0]=meaName;
+			paraDb[1]=meaUnit;
+			paraDb[2]=apiKey;
+			paraDb[3]=deviceId;
+			db.executeUpdate("insert into measurename(meaName,meaUnit,apiKey,deviceId) values(?,?,?,?)",paraDb);
+			List appIdList=db.executeQueryList("select Id from measurename order by Id desc");
+			Integer meaId=new Integer(((Map) appIdList.get(0)).get("id").toString());
+			for (int i = 0; i < values.length; i++) {
+				String[] paraDb2=new String[3];
+				paraDb2[0]=meaId.toString();
+				paraDb2[1]=values[i];
+				SimpleDateFormat df = new SimpleDateFormat("yyyy--MM-dd HH:mm:ss");//设置日期格式
+				paraDb2[2]=df.format(new Date());
+				db.executeUpdate("insert into measureValue(meaId,meaValue,meaTime) values(?,?,?)",paraDb2);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		db.closeCurrentConnection();
+		response.getWriter().write("");
+		response.getWriter().flush();
+		response.getWriter().close();
+        
+	}
+
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+            doGet(request, response);
+	}
+	/**
+	 * Initialization of the servlet. <br>
+	 *
+	 * @throws ServletException if an error occurs
+	 */
+	public void init() throws ServletException {
+		// Put your code here
+	}
+
+}

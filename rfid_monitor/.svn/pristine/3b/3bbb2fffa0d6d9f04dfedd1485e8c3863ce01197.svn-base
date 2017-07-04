@@ -1,0 +1,135 @@
+package xjtu.mes.manager;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import xjtu.mes.model.Machine;
+import xjtu.mes.model.RfidSystem;
+import xjtu.mes.util.DbUtil;
+
+/**
+* @author 姜文雷
+* @version 创建时间：2016年11月5日 下午12:41:55
+* 类说明
+* 机床管理类
+* 采用单利模式
+*/
+public class MachManager {
+	
+	private static MachManager instance=null;
+	protected MachManager(){}
+	public  synchronized static MachManager getInstance(){
+		if(instance==null){
+			instance= new MachManager();
+		}
+		return instance;
+	}
+	
+	public  boolean findMachByMachId(String MachId){
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		ResultSet rs = null;
+		String sql = " select * from machine  where machId ="+MachId;
+		try{
+			rs = stm.executeQuery(sql);
+			if(rs.next()){
+				return true;
+			}else{
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			System.out.println("sql error");
+		}finally{
+			DbUtil.close(rs);
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+	
+		return false;
+	}
+	
+	/**
+	 * 获取所有未绑定的机床
+	 * @return
+	 */
+	public  List<Machine> getMachines(){
+		List<Machine> MachineList = new ArrayList<Machine>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select * from machine";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				Machine machine = new Machine();
+				machine.setMachName(rs.getString(1));
+				machine.setMachId(rs.getInt(3));
+				MachineList.add(machine);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return MachineList;
+	}
+	/**
+	 * 获取所有未绑定的机床
+	 * @return
+	 */
+	public  List<Machine> getAvalbMachines(){
+		List<Machine> MachineList = new ArrayList<Machine>();
+		Connection conn = DbUtil.getConnection();
+		Statement stm = DbUtil.createStatemnt(conn);
+		String sql = "select * from machine where flag ='0' ";
+		try{
+			ResultSet rs = DbUtil.executeQuery(stm, sql);
+			while( rs.next()){
+				Machine machine = new Machine();
+				machine.setMachName(rs.getString(1));
+				machine.setMachId(rs.getInt(3));
+				MachineList.add(machine);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		finally{	
+			DbUtil.close(stm);
+			DbUtil.close(conn);
+		}
+		return MachineList;
+	}
+	public boolean addMach(Machine machine){
+		boolean flag = false;
+		String sql1 = "insert into machine(machName,machId) values(?,?)";
+		Connection conn = DbUtil.getConnection();
+		PreparedStatement pstm = DbUtil.preparedStatement(conn,sql1);
+		try{
+			
+			pstm.setString(1,machine.getMachName() );
+			pstm.setInt(2, machine.getMachId());
+			int rs = pstm.executeUpdate();
+			if(rs!=0){
+				System.out.println("添加机床成功");
+			}
+			flag = true;
+			
+		}catch(Exception e){
+			System.out.println("出现意外");
+			e.printStackTrace();
+			
+		}finally{
+			DbUtil.close(pstm);
+			DbUtil.close(conn);
+		}
+		return flag;
+	}
+
+}

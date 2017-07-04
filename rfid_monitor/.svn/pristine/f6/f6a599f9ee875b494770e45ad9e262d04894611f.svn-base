@@ -1,0 +1,286 @@
+package RFID_java;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
+
+import com.byteslounge.websockets.WebSocketTest;
+
+
+import dbconn.BaseDao;
+
+public class RFID_server1 extends Thread{
+	private ArrayList<String>  taglist=new ArrayList<String>();//加这个是用来清除多余的数据
+	private ArrayList<String>  taglist3=new ArrayList<String>();//加这个是用来放置非工序的标签读入数据库中
+	//这里如果不加private好像就不好用
+	int workpieceId;
+	int workpieceIdDemo;
+	String machId;
+	String Port;
+	String test_rfid;
+	String state;
+	String deviceId;
+	String apiKey;
+	String name;
+	String event;
+	int countDemo=0;
+	int countDemo2=0;
+	int countback=0;
+	int countback2=0;
+	int inflag=1;
+	int  outflag=1;
+	long in_time;
+	long out_time;
+	String[] insert_time=new String[5];
+	
+	public void getPort(String Port){
+		this.Port=Port;		
+	}
+
+    private boolean flag= true;
+    private	 ArrayList<String>  taglist2=new ArrayList<String>();//加这个是用来清除多余的数据
+   // private ArrayList<String>  taglist=new ArrayList<String>();//加这个是用来清除多余的数据
+	WebSocketTest send=new WebSocketTest();
+	ServerSocket serverSocket;
+	Socket client;
+	public void run() {
+		DataInputStream input;
+		try {
+			int SocketPort=Integer.valueOf(Port);
+			//serverSocket=new ServerSocket(SocketPort);
+			serverSocket=new ServerSocket(9457);
+			Socket client = null;
+			while(flag){
+				client=serverSocket.accept();
+				System.out.println("有人连接进来！！！");
+				input = new DataInputStream(client.getInputStream());
+				String listMsg = input.readUTF();
+			    System.out.println("获取到rfid系统的给的信息了：" + listMsg);
+				
+/*					count++;
+					System.out.println("count的数值"+count);
+					这里的count自加运算没有运行.....为什么？*/
+				apiKey=listMsg.substring(0, 4);
+				deviceId=listMsg.substring(4, 8);
+			
+/*					if (!taglist.contains(deviceId)) {
+						System.out.println("进入清零阶段");
+						taglist.add(deviceId);
+						countback=0;
+						countback2=0;
+					}*/
+
+				String tagId=listMsg.substring(8,37);
+				//workpieceId=Integer.valueOf(listMsg.substring(37,42));
+				
+				if(tagId.equals("E200 3412 DC03 0118 0816 DEMO")){
+					//这一个标签号是一个有意义的数字，主要用来获取前台的工件号，做DEMO显示用，用workpieceId来区分从前台传来的数据和从后天传来的数据区别
+					workpieceIdDemo=Integer.valueOf(listMsg.substring(37,42));			 
+					System.out.println("工件号为"+workpieceIdDemo);
+				}
+				else{
+					if(!tagId.equals("0000 0000 0000 0000 0000 0000")){
+						BaseDao baseDao = new BaseDao();
+						workpieceId=Integer.valueOf(listMsg.substring(37,42));
+						String sql_workpice=("select workpieceId from rfid_tag where Id='"+tagId+"'");
+						ResultSet rs = baseDao.queryData(sql_workpice);			
+						while (rs.next()) {
+							workpieceId=rs.getInt("workpieceId");				
+						}
+
+					}
+				}
+				//这一步很重要，因为端口开始后，只有用senddata才能传送数据
+				String Port=listMsg.substring(42,46);//demo的port用于开启tcp链接，后台的port用于定位rfid系统；
+				String flag_test=listMsg.substring(46);
+				flag=Boolean.valueOf(flag_test);
+				test_rfid=tagId;
+			
+				//这是按师兄思路的模式二
+				if(workpieceId>10000){
+					
+					//这里workpieceId是从后台传来的用于插入数据库
+					//这里最主要的特点是直接对数据库操作，不必要例会send.broadcast函数
+					if(!test_rfid.equals("0000 0000 0000 0000 0000 0000")){
+						//这里做一个判定，没有绑定工序的零件，不会被识别	
+						BaseDao baseDao = new BaseDao();
+						System.out.println("进入触发区域");
+						//这里对数据库进行操作	
+						System.out.println("Recive:------号码" + apiKey+":------设备号码"+ deviceId+":------RFID"+ tagId+":------工件"+ workpieceId+"------端口"+ Port+":------标志"+flag);
+						String sql_machId="select machId from mach_rfid where rfidSysId='"+Port+"'";
+						ResultSet rs_machId=baseDao.queryData(sql_machId);
+						while (rs_machId.next()){
+							machId=rs_machId.getString("machId");	
+						}
+						String sql_proceeId="select rfid_tag.Id from rfid_tag, workpiece_process where workpiece_process.machId='"+machId+"' and workpiece_process.workpieceId=rfid_tag.workpieceId";
+						ResultSet rs_proceeId=baseDao.queryData(sql_proceeId);
+						while (rs_proceeId.next()){
+							taglist3.add(rs_proceeId.getString("Id"));
+						}
+						//如果在数据库中查询到和rifd设备返回的标签一直的工件就
+						if(taglist3.contains(tagId)){
+							String[] paraDb=new String[6];
+							String[] wokpiece_process=new String[4];
+							paraDb[0]="0";//这里的ID是递增的没有实际意义
+							paraDb[1]=deviceId;
+							paraDb[2]=tagId;
+							paraDb[3]=apiKey;
+							paraDb[4]=Port;
+							SimpleDateFormat df = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+							//这里设置什么时候清除呢？，这里tagliset的选择肯定要该......
+							if (!taglist.contains(tagId)) {
+								//这里用count可以加入排重的问题，但是图省事就省略了
+								//这里第二次读就不行了，显然是有问题的....但是怎么改正问题更大....改正的问题就是涉及到控制的问题了								
+								System.out.println("插入工序控制表");
+								taglist.add(tagId);
+								wokpiece_process[0]=tagId;
+								wokpiece_process[1]=Port;
+								wokpiece_process[2]=apiKey;
+								wokpiece_process[3]=df.format(new Date());	
+								String sql_process = ("insert into workpieceprocesscontrol(tagId,rfidPort,apiKey,time) values(?,?,?,?)");
+								baseDao.executeSql(sql_process, wokpiece_process, 0);								
+							}
+							paraDb[5]=df.format(new Date());	
+							//System.out.println("时间为："+df.format(new Date()));
+							String sql1 = ("insert into rfid"+Port+"_tagInfo(Id,deviceId,tagId,apiKey,rfidPort,time) values(?,?,?,?,?,?)");
+							baseDao.executeSql(sql1, paraDb, 0);
+							//String sql2 = ("update RFID_tag set stateId=(select stateId from rfid_event where deviceId='"+deviceId+"') , time='"+df.format(new Date())+"' where Id='"+tagId+"'");
+							//baseDao.executeUpdate(sql2);								
+							System.out.println("插入信息成功");
+						}
+					}
+				}
+				if(workpieceIdDemo==workpieceId||workpieceId==10000){
+					System.out.println("进入DEMO的模块");
+					//这里workpieceIdDemo是从前台传来的DEMo,这里也要设定机床的id要大于1000
+					if (!taglist2.contains(deviceId)) {
+						System.out.println("进入DEMO清零阶段");
+						taglist2.add(deviceId);
+						countDemo=0;
+						countDemo2=0;
+					}
+					if(test_rfid.contains("E200")){
+						countDemo++;
+						countDemo2=0;
+						System.out.println("读到次数"+countDemo);
+					}	
+					JSONObject jsonObj = new JSONObject();
+					JSONArray rows = new JSONArray();
+					if(countDemo==5){	
+						System.out.println("进入DEMO触发区");
+						System.out.println("Recive:------号码" + apiKey+":------设备号码"+ deviceId+":------RFID"+ tagId+":------工件"+ workpieceId+"------端口"+ Port+":------标志"+flag);
+						BaseDao baseDao = new BaseDao();
+						SimpleDateFormat df = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");//	
+						System.out.println("时间为："+df.format(new Date()));
+						String sql2 = ("update RFID_tag set stateId=(select stateId from rfid_event where deviceId='"+deviceId+"') , time='"+df.format(new Date())+"' where Id='"+tagId+"'");
+						baseDao.executeUpdate(sql2);
+						String sql3=("select device_state.event,rfid_tag.name from device_state,rfid_tag where device_state.deviceId='"+deviceId+"' and rfid_tag.workpieceId='"+workpieceIdDemo+"'");
+						state="in";
+						ResultSet rs = baseDao.queryData(sql3);		
+						try {
+							while (rs.next()) {
+								event=rs.getString("event");
+								name=rs.getString("name");
+								JSONObject cell = new JSONObject();
+								cell.put("name", name);
+								cell.put("event", event);
+								cell.put("time",df.format(new Date()));
+								cell.put("state", state);
+								//cell.put("apikey", rs.getString("rfidSysId"));
+								rows.add(cell);
+							}
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+						//@jiang 这里才正式把 web与RFID的通讯结果，返回到websocket，从而发送给客户端
+						//利用json来输出，看输出情况
+						jsonObj.put("rows", rows);
+						System.out.println(jsonObj.toString());
+						send.broadcast(jsonObj.toString());	
+					}	
+					if(test_rfid.equals("0000 0000 0000 0000 0000 0000")){
+						countDemo2++;	
+					}
+					if(countDemo>=5&&countDemo2==5){
+						//这里重复的代码可以修改
+						System.out.println("离开DEMO触发区");
+						state="out";
+						SimpleDateFormat df = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");//
+						String leavetime=df.format(new Date());	
+						try {
+							JSONObject cell = new JSONObject();
+							cell.put("name", name);
+							cell.put("event", event);
+							cell.put("time", leavetime);
+							cell.put("state", state);
+							//cell.put("apikey", rs.getString("rfidSysId"));
+							rows.add(cell);
+						
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+						//@jiang 这里才正式把 web与RFID的通讯结果，返回到websocket，从而发送给客户端
+						//利用json来输出，看输出情况
+						jsonObj.put("rows", rows);
+						System.out.println(jsonObj.toString());
+						send.broadcast(jsonObj.toString());	
+						taglist2.clear();
+					}
+				}			
+			//send.broadcast(tagId);
+		} 
+		//循环读取结束
+		serverSocket.close();
+		client.close();
+		System.out.println("TCP连接结束");
+		}catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}			
+	public static void  main(String[] args) throws Exception{
+		BufferedReader in = null; 
+		ServerSocket serverSocket=new ServerSocket(19000);
+		Socket client = null;
+		while(true){
+			client=serverSocket.accept();
+            try{
+            	Thread.sleep(1000);
+       			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+                String msg = in.readLine(); 
+             // 处理方法
+                System.out.println("新数据--CODE:"+msg);
+       			// Thread.sleep(1000);     		
+                in.close();
+                client.close();
+            }
+            catch(IOException  e)
+            {
+                System.out.println(e);
+            } catch (JSONException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		} 
+                   			
+		}
+	}
+}
+
